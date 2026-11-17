@@ -3591,7 +3591,9 @@
       "models.place.cloud": "256bce3dc914a749b55369f9e9adad9be2e7cac464093ae03a95db5bfe39ae9c",
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
-      "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da"
+      "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
+      "server.outside.preferenceTitle": "7f55fcc3bf70e8b880f68ec0cf802b69727bc3360bfb3aa68f4efc937533386a",
+      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273"
     },
     "es": {
       "settings.sidebarRoles.title": "8bf74476d372a4efadb9fbcb87602ad535fcc5af186b66d47b395ff76c32f473",
@@ -9434,7 +9436,10 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
+      "server.outside.save": "1509f561f2416598629b886ad7d3c05a7e221e4e0675c84bbff4ee6d9e03913d",
+      "server.outside.preferenceTitle": "7f55fcc3bf70e8b880f68ec0cf802b69727bc3360bfb3aa68f4efc937533386a",
+      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273"
     },
     "fr": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",

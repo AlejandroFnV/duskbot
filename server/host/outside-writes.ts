@@ -1,11 +1,12 @@
 // Security invariant: a room's bulletin and a bot's memory load into later turns at their own level, as instructions. What
 // work from outside asks to write there waits on a person's card, whatever the bot's level, and nothing is written until
-// they say yes.
+// they say yes. A preference for About me, which every bot reads, waits on the person it is about, and only until its card
+// expires.
 import { randomUUID } from "node:crypto";
 
 import type { DecisionRow } from "../decision-log.ts";
 import { buildNotification, type Notification } from "../notify.ts";
-import { serverLine } from "../server-lines.ts";
+import { serverLine, type ServerLineKey } from "../server-lines.ts";
 import type { BotRecord, GroupRecord, Message, Store } from "../store.ts";
 import { OUTSIDE_STAYS_HERE } from "./outside-lineage.ts";
 
@@ -15,12 +16,16 @@ const MEMORY_ACTIONS: ReadonlySet<string> = new Set(["append", "replace", "remov
 const SHOWN_CHARS = 2_000;
 const OPEN_CARDS = 5;
 const TOOL = "outside_write";
+const PREFERENCE_TTL_MS = 24 * 60 * 60 * 1000;
 
 export interface OutsideWriteDeps {
   store: Pick<Store, "appendMessage" | "messagesFor" | "patchMessage" | "botByThread" | "bot" | "group" | "patchGroup">;
   language(threadId: string): string | undefined;
   /** The error in words when it could not be written, or null. */
   writeMemory(botId: string, threadId: string, change: { action: string; text?: string; oldText?: string; until?: string }): string | null;
+  /** Saves a preference the person confirmed, the way prefer saves one; the error in words, or null. */
+  savePreference(write: Extract<Write, { kind: "preference" }>): { error: string } | { known: boolean };
+  now?(): number;
   decide(row: Omit<DecisionRow, "at">): void;
   notify(notification: Notification | null): void;
 }
@@ -30,23 +35,28 @@ const speaker = (bot: Pick<BotRecord, "id" | "name" | "color">) => ({ botId: bot
 export function createOutsideWrites(deps: OutsideWriteDeps) {
   const { store } = deps;
 
-  function apply(write: Write, threadId: string, botId: string | undefined): string | null {
-    if (write.kind === "room-bulletin") return store.group(write.roomId) && store.patchGroup(write.roomId, { bulletin: write.bulletin }) ? null : "The room no longer exists.";
-    if (!botId) return "The bot no longer exists.";
+  /** The error in words, or null; `known` when a confirmed preference was already in About me. */
+  function apply(write: Write, threadId: string, botId: string | undefined): { problem: string | null; known?: true } {
+    if (write.kind === "room-bulletin") return { problem: store.group(write.roomId) && store.patchGroup(write.roomId, { bulletin: write.bulletin }) ? null : "The room no longer exists." };
+    if (write.kind === "preference") { const saved = deps.savePreference(write); return "error" in saved ? { problem: saved.error } : saved.known ? { problem: null, known: true } : { problem: null }; }
+    if (!botId) return { problem: "The bot no longer exists." };
     const { kind: _kind, ...change } = write;
-    return deps.writeMemory(botId, threadId, change);
+    return { problem: deps.writeMemory(botId, threadId, change) };
   }
 
-  function propose(from: Pick<BotRecord, "id" | "name" | "color">, threadId: string, title: string, subtitle: string, write: Write) {
+  const now = () => deps.now?.() ?? Date.now();
+  const expiredPreference = (write: Write) => write.kind === "preference" && Date.parse(write.expiresAt) <= now();
+
+  function propose(from: Pick<BotRecord, "id" | "name" | "color">, threadId: string, title: string, subtitle: string, write: Write, skip: ServerLineKey = "server.outside.skip") {
     if (subtitle.length > SHOWN_CHARS) return { status: 400, body: { error: `This is too long for a person to review on a card: keep it under ${SHOWN_CHARS} characters.` } };
-    if (store.messagesFor(threadId).filter((line) => line.card?.outsideWrite && !line.card.answered).length >= OPEN_CARDS) {
+    if (store.messagesFor(threadId).filter((line) => line.card?.outsideWrite && !line.card.answered && !expiredPreference(line.card.outsideWrite)).length >= OPEN_CARDS) {
       return { status: 429, body: { error: "A person already has several of these to look at from this conversation. Finish without saving more." } };
     }
     const requestId = `outside-write-${randomUUID()}`;
     const language = deps.language(threadId);
     const message = store.appendMessage(threadId, {
       role: "bot", kind: "options", from: speaker(from),
-      card: { title, subtitle, options: [serverLine(language, "server.outside.save"), serverLine(language, "server.outside.skip")], requestId, tool: TOOL, outsideWrite: write },
+      card: { title, subtitle, options: [serverLine(language, "server.outside.save"), serverLine(language, skip)], requestId, tool: TOOL, outsideWrite: write },
     });
     deps.decide({ threadId, requestId, botId: from.id, botName: from.name, tool: TOOL, summary: title, decision: "card-shown", source: "outside-write" });
     deps.notify(buildNotification("approval", { id: from.id, name: from.name }, threadId, title));
@@ -66,8 +76,20 @@ export function createOutsideWrites(deps: OutsideWriteDeps) {
       return propose(from, threadId, title, [change.oldText, change.text].filter(Boolean).join(" → ") || action, { kind: "memory", ...change });
     },
 
+    /** A preference from a turn that read outside content: the person it is about saves it with a tap, or nothing is saved. */
+    submitPreference(from: Pick<BotRecord, "id" | "name" | "color">, threadId: string, preference: { text: string; replaces: readonly string[]; owner?: { botId: string; botName: string }; person?: string; personKey?: string }):
+      { ok: true; preference: "pending_confirmation"; requestId: string; message: string } | { ok: false; code: "invalid"; error: string } {
+      if (!preference.owner) return { ok: false, code: "invalid", error: "Only work one person began with their own words can save their preference: ask them to say it in their own chat with you." };
+      const write: Write = { kind: "preference", text: preference.text, ...(preference.replaces.length ? { replaces: [...preference.replaces] } : {}), owner: preference.owner,
+        ...(preference.person ? { person: preference.person } : {}), ...(preference.personKey ? { personKey: preference.personKey } : {}), expiresAt: new Date(now() + PREFERENCE_TTL_MS).toISOString() };
+      const proposed = propose(from, threadId, serverLine(deps.language(threadId), "server.outside.preferenceTitle"), `«${preference.text}»`, write, "server.outside.discard");
+      if (proposed.status !== 201) return { ok: false, code: "invalid", error: (proposed.body as { error: string }).error };
+      return { ok: true, preference: "pending_confirmation", requestId: (proposed.body as { requestId: string }).requestId,
+        message: "This turn read content from outside, so it is not saved yet: the person sees a card with these exact words and only their tap saves it. Do not wait for it, do not ask them to tap it and do not try another way." };
+    },
+
     /** A person's answer to the card; null when the request is not one of these cards. */
-    resolve(threadId: string, requestId: string, behavior: string): { ok: true; outcome: string; alreadySettled?: true } | null {
+    resolve(threadId: string, requestId: string, behavior: string): { ok: true; outcome: string; alreadySettled?: true; known?: true } | null {
       const message = store.messagesFor(threadId).find((line) => line.card?.requestId === requestId && line.card.outsideWrite);
       const card = message?.card;
       const write = card?.outsideWrite;
@@ -76,10 +98,17 @@ export function createOutsideWrites(deps: OutsideWriteDeps) {
       const botId = message.from?.botId ?? store.botByThread(threadId)?.id;
       const bot = botId ? store.bot(botId) : undefined;
       const allowed = behavior === "allow";
-      const problem = allowed ? apply(write, threadId, botId) : null;
+      const expired = write.kind === "preference" && Date.parse(write.expiresAt) <= now();
+      if (expired) {
+        store.patchMessage(threadId, message.id, { card: { ...card, answered: "unavailable", expired: true } });
+        deps.decide({ threadId, requestId, botId, botName: bot?.name, tool: TOOL, summary: card.title, decision: "user-denied", source: "user" });
+        return { ok: true, outcome: "unavailable" };
+      }
+      const { problem, known } = allowed ? apply(write, threadId, botId) : { problem: null, known: undefined };
       store.patchMessage(threadId, message.id, { card: { ...card, answered: !allowed ? "deny" : problem ? "unavailable" : "allow", ...(problem ? { dismissed: true } : {}) } });
-      deps.decide({ threadId, requestId, botId, botName: bot?.name, tool: TOOL, summary: card.title, decision: allowed && !problem ? "user-approved" : "user-denied", source: "user" });
-      return { ok: true, outcome: !allowed ? "rejected" : problem ? "unavailable" : "allowed-once" };
+      // Already in About me: still the person's yes, but the decision says nothing new was written.
+      deps.decide({ threadId, requestId, botId, botName: bot?.name, tool: TOOL, summary: known ? `${card.title} (already in About me)` : card.title, decision: allowed && !problem ? "user-approved" : "user-denied", source: "user" });
+      return { ok: true, outcome: !allowed ? "rejected" : problem ? "unavailable" : "allowed-once", ...(known ? { known } : {}) };
     },
   };
 }

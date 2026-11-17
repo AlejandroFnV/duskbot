@@ -360,6 +360,8 @@
   "server.outside.memoryChangeTitle": "Change or remove this in the bot's memory?",
   "server.outside.save": "Save",
   "server.outside.skip": "Skip",
+  "server.outside.preferenceTitle": "Save to about me for all your bots?",
+  "server.outside.discard": "Discard",
   "server.rooms.postedIn": "Posted in {room}",
   "server.rooms.openedThread": "Opened thread #{title}",
   "server.rooms.held": "{bot} is held (stopped by you): @mention it or say resume",

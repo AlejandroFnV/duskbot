@@ -310,6 +310,13 @@ describe("memory_update", () => {
     expect(profile.aboutMe).not.toContain("German");
   });
 
+  it("tells the bot a preference waiting on the person's card is not saved, never that it already was", async () => {
+    const client: ToolCallContext["client"] = { ...harness("bot-prefer-pending"),
+      apiResponse: async () => ({ ok: true, status: 200, body: { ok: true, preference: "pending_confirmation", requestId: "outside-write-1", message: "Not saved yet: the person decides on a card." } }) };
+    expect(await callTool("memory_update", { action: "prefer", text: "Replies in German" }, context({ botId: "bot-prefer-pending", client })))
+      .toEqual({ text: "Not saved yet: the person decides on a card." });
+  });
+
   it("forgets a fact everywhere it was kept, says so without naming a file, and keeps it from being learned again", async () => {
     const bot = "bot-memory-forget";
     const ctx = context({ botId: bot, client: harness(bot) });

@@ -9443,7 +9443,10 @@
       "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273",
       "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
       "chat.event.handoffsWaiting.one": "c73c2c6fd46f81d27a99c9a06a4852fbb74113977f5beba2bbb4b8b7a541cf4f",
-      "chat.event.handoffsWaiting.many": "3aa0e108ce066c33acff6e26adce14284aefecd66a46a422c773894d9b812205"
+      "chat.event.handoffsWaiting.many": "3aa0e108ce066c33acff6e26adce14284aefecd66a46a422c773894d9b812205",
+      "botPanel.coding.title": "d7d0521f9e53ac9e57e6aa1719dabf3b419167b075fc1a77b06ece1d57e1c157",
+      "botPanel.coding.state.working": "a92f0449a9f7235bf69dc2e8ff7070bfae3f00ec8f8f26e5457a9beac53466ac",
+      "botPanel.coding.state.done": "11a6767d5674c7e45f7e00dc525762275b3a48491ad6045427d2609cc496c516"
     },
     "fr": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",

@@ -117,22 +117,50 @@ export function UsageMeterRow({ engine }: { engine: string | undefined }) {
   );
 }
 
-const dismissed = new Set<string>();
-const dismissKey = (limit: EngineLimit) => `${limit.engine}:${limit.resetsAt ?? ""}`;
+/** Where a closed usage warning is remembered, so it stays closed across reloads until its window resets. */
+export const DISMISSED_USAGE_KEY = "dusk-usage-banner-dismissed";
+/** How long a warning with no known reset stays closed. */
+const UNKNOWN_RESET_MS = 5 * HOUR;
+
+type UsageLevel = "near" | "out";
+/** Closed warnings by `engine:level`, each until the reset it was closed for. The level is in the key so running
+ * out after closing the "near" warning shows again; the reset is not, because polls can move it by seconds. */
+type Dismissals = Record<string, number>;
+
+function readDismissals(now: number): Dismissals {
+  try {
+    const saved: unknown = JSON.parse(localStorage.getItem(DISMISSED_USAGE_KEY) ?? "{}");
+    if (!saved || typeof saved !== "object") return {};
+    return Object.fromEntries(Object.entries(saved).filter((entry): entry is [string, number] => typeof entry[1] === "number" && entry[1] > now));
+  } catch { return {}; }
+}
+
+export function usageDismissed(engine: string, level: UsageLevel, now = Date.now()): boolean {
+  return readDismissals(now)[`${engine}:${level}`] !== undefined;
+}
+
+export function dismissUsage(engine: string, level: UsageLevel, resetsAt: number | null, now = Date.now()): void {
+  const until = resetsAt !== null && resetsAt > now ? resetsAt : now + UNKNOWN_RESET_MS;
+  try { localStorage.setItem(DISMISSED_USAGE_KEY, JSON.stringify({ ...readDismissals(now), [`${engine}:${level}`]: until })); } catch { /* storage off: closes for this view only */ }
+}
 
 /** Grok's composer-dock usage warning, shown near or at the engine's limit until dismissed for that reset. */
 export function UsageBanner({ engine, onSeeUsage }: { engine: string | undefined; onSeeUsage: () => void }) {
   const limit = useEngineLimits().find((candidate) => candidate.engine === engine);
-  const [, setHidden] = useState(0);
-  if (!reportsUsage(limit) || dismissed.has(dismissKey(limit))) return null;
+  const [hidden, setHidden] = useState<string | null>(null);
+  if (!reportsUsage(limit)) return null;
   const used = Math.round(limit.usedPercent ?? 0);
   if (!limit.blocked && used < NEAR_LIMIT_PERCENT) return null;
   const now = Date.now();
   const out = limit.blocked || used >= 100;
+  const level: UsageLevel = out ? "out" : "near";
+  if (hidden === `${limit.engine}:${level}` || usageDismissed(limit.engine, level, now)) return null;
   const reset = limit.resetsAt !== null && limit.resetsAt > now ? resetsIn(limit.resetsAt, now) : null;
   return (
     <div role="status" data-usage-banner={out ? "danger" : "warning"}
-      className={cn("flex items-center gap-2.5 rounded-[14px] py-2 pe-2 ps-3", out ? "bg-danger/[0.07]" : "bg-ink/[0.04]")}>
+      className={cn("flex items-center gap-2.5 rounded-[14px] py-2 pe-2 ps-3",
+        // Opaque: the chat scrolls under the composer dock, so a see-through tint let messages show through the text.
+        out ? "bg-[color-mix(in_srgb,var(--color-danger)_7%,var(--color-menu))]" : "bg-[color-mix(in_srgb,var(--color-ink)_4%,var(--color-menu))]")}>
       <PixelIcon name={out ? "batteryFull" : "battery"} />
       <div className="min-w-0 flex-1">
         <div className="text-[13px] leading-[18px] tracking-[-0.08px] text-ink">
@@ -145,7 +173,7 @@ export function UsageBanner({ engine, onSeeUsage }: { engine: string | undefined
         {t("nativeUsage.banner.see")}
       </button>
       <button type="button" aria-label={t("nativeUsage.banner.dismiss")} title={t("nativeUsage.banner.dismiss")}
-        onClick={() => { dismissed.add(dismissKey(limit)); setHidden((count) => count + 1); }}
+        onClick={() => { dismissUsage(limit.engine, level, limit.resetsAt); setHidden(`${limit.engine}:${level}`); }}
         className="inline-flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink/[0.56] transition-colors duration-[120ms] ease-out hover:bg-ink/[0.06] hover:text-ink-secondary focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-focus">
         <Icon name="close" size={12} />
       </button>

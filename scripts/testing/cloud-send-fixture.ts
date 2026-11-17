@@ -291,7 +291,9 @@ await import(${JSON.stringify(pathToFileURL(join(SERVER_DIR, "testing", "fake-cl
       mkdirSync(join(root, "team", ".duskbot"), { recursive: true });
       writeFileSync(join(root, "team", ".duskbot", "config.json"), JSON.stringify({ instances: Object.fromEntries(["claude", "codex", "cursor", "githubCopilot", "openaiCompat", "qwen", "hermes", "pi", "grok"].map((id) => [id, { driver: "not-a-real-driver" }])) }));
     }
-    const startTeam = (more: NodeJS.ProcessEnv = {}) => start("team", { DUSK_CLOUD_ROLE: "team", DUSK_CLOUD_TEAM_ID: team.id, DUSK_CLOUD_TEAM_NAME: team.name,
+    // On Linux with bubblewrap a Team Cloud boxes each turn in its engine home, which hides the server's HOME where this
+    // fixture keeps the synthetic CLI and its plan, so no turn would run. The box side has its own Linux tests.
+    const startTeam = (more: NodeJS.ProcessEnv = {}) => start("team", { DUSK_BOT_BOX: "0", DUSK_CLOUD_ROLE: "team", DUSK_CLOUD_TEAM_ID: team.id, DUSK_CLOUD_TEAM_NAME: team.name,
       DUSK_CLOUD_MACHINE_ID: "0d9e8f7a-6b5c-4d3e-9f8a-7b6c5d4e3f2a", DUSK_CLOUD_ADMIN_URL: "https://cloud.example.test", DUSK_CLOUD_BOOTSTRAP_SECRET: secret,
       DUSK_PUBLIC_URL: `https://${CLOUD_HOST}`, DUSK_TEST_INTERNAL_CAPABILITY_KEY: CAPABILITY_KEY, ...(broker ? { DUSK_COMPOSIO_BROKER_URL: broker.url } : {}), ...team.env, ...more },
       teamPort, stopOverIpc ? ["--import", stopOnMessage] : [], stopOverIpc, onePasswordToken, 0, team.engine ?? "", true);
@@ -589,7 +591,6 @@ await import(${JSON.stringify(pathToFileURL(join(SERVER_DIR, "testing", "fake-cl
       main.close();
       for (const desk of desks) desk.close();
       for (const child of children) await waitForExit(child, { signal: "SIGTERM" });
-      if (process.env.DUSK_FIXTURE_DUMP) console.error(`FIXTURE-LOGS-BEGIN\n${logs}\nFIXTURE-LOGS-END`);
       await removeTempDir(root);
     },
   };

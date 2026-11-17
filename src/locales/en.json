@@ -7126,6 +7126,8 @@
   "settings.accent.title": "Your message color",
   "settings.accent.bot": "Bot color",
   "settings.accent.neutral": "Neutral",
+  "settings.sidebarRoles.title": "Show roles in the sidebar",
+  "settings.sidebarRoles.hint": "Each bot's role beside its name, such as Tech Lead or QA",
   "settings.notificationSound.playTitle": "Play sound for notifications",
   "settings.notificationSound.title": "Notification sound",
   "settings.notificationSound.subtitle": "Pick the sound that plays when a bot sends you a message",

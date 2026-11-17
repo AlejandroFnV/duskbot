@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { initialState, type AppState, type Bot, type Group } from "@/state/store";
 import type { SidebarDensity } from "@/lib/sidebar-preferences";
+import { setSidebarBotRoles } from "@/lib/sidebar-role-preference";
 
 const fixture = vi.hoisted(() => ({ advanced: false, admin: true as boolean | null, state: {} as Partial<AppState>, dispatch: vi.fn() }));
 
@@ -231,13 +232,33 @@ describe("bot-first sidebar", () => {
     expect(renderToStaticMarkup(createElement(GroupListItem, { group, density: "comfortable", onMenu: vi.fn() }))).not.toContain("data-provider-mark");
   });
 
+  it("shows the bot's role dimmed beside its name, leaving the second line to its activity", () => {
+    const candidate = { ...bot, title: "  Tech Lead ", tasks: [], projects: [], messages: [{ id: "m", role: "bot", kind: "text", text: "Done.", at: 1 }] } as Bot;
+    const markup = renderToStaticMarkup(createElement(BotListItem, rowProps("comfortable", candidate)));
+    const nameLine = markup.slice(markup.indexOf("data-row-words"), markup.indexOf("</div>", markup.indexOf("data-row-words")));
+    expect(nameLine).toContain('data-testid="bot-role"');
+    expect(nameLine).toContain('title="Tech Lead"');
+    expect(nameLine).toMatch(/class="block truncate [^"]*text-ink-secondary/);
+    expect(nameLine).not.toContain("Done.");
+    expect(markup).toMatch(new RegExp(`<span class="truncate max-w-\\[70%\\] shrink-0">${candidate.name}</span>`));
+    expect(markup).toContain("Done.");
+  });
+
+  it("draws no role for a bot without one", () => {
+    const plain = renderToStaticMarkup(createElement(BotListItem, rowProps("comfortable", { ...bot, title: " ", tasks: [], projects: [] } as Bot)));
+    expect(plain).not.toContain('data-testid="bot-role"');
+    expect(plain).toMatch(new RegExp(`<span class="truncate">${bot.name}</span>`));
+  });
+
   it("keeps a Simple row to its name and preview, with grok's main-bot star and no tooltip", () => {
     const instances = [{ instanceId: "fake", driverKind: "claude", displayName: "Claude", models: { options: [{ id: "test", label: "Sonnet" }] } }] as unknown as AppState["instances"];
     fixture.state = { ...fixture.state, instances, selectedId: bot.id };
     const candidate = { ...bot, title: "Research", chiefOfStaff: true, pinned: true, tasks: [], projects: [], messages: [{ id: "m", role: "bot", kind: "text", text: "Done.", at: 1 }] } as Bot;
     let tree: ReactNode;
     function Capture() { tree = botRow({ ...rowProps("comfortable", candidate), main: true }); return tree; }
-    const markup = renderToStaticMarkup(createElement(Capture));
+    setSidebarBotRoles(false);
+    let markup: string;
+    try { markup = renderToStaticMarkup(createElement(Capture)); } finally { setSidebarBotRoles(true); }
     expect(markup).not.toContain('data-testid="bot-role"');
     expect(markup).not.toContain('data-testid="model-badge"');
     expect(markup).not.toContain("data-provider-mark=");

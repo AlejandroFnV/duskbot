@@ -11,6 +11,7 @@ import { skillsLibraryEnabled } from "@/lib/feature-flags";
 import { setColorUserBubbles, useColorUserBubbles } from "@/lib/user-bubble-preference";
 import { resolveSkin } from "@/lib/skins";
 import { setDressUp, useDressUp } from "@/lib/halloween-dress";
+import { setSidebarBotRoles, useSidebarBotRoles } from "@/lib/sidebar-role-preference";
 import type { LocaleKey } from "@/locales";
 import { productName } from "../lib/brand";
 import { AccountsSheet, useAccounts } from "./AccountMenu";
@@ -182,6 +183,11 @@ function DressUpRow() {
   return <SwitchRow title={t("settings.skin.dressUp.title")} checked={dressed} onChange={() => setDressUp(!dressed)} />;
 }
 
+function SidebarRolesRow() {
+  const shown = useSidebarBotRoles();
+  return <SwitchRow title={t("settings.sidebarRoles.title")} hint={t("settings.sidebarRoles.hint")} checked={shown} onChange={() => setSidebarBotRoles(!shown)} />;
+}
+
 export function GeneralPane({ has, remoteActive }: { has: Has; remoteActive: boolean }) {
   const { at } = useSubPage();
   const { state } = useStore();
@@ -207,6 +213,7 @@ export function GeneralPane({ has, remoteActive }: { has: Has; remoteActive: boo
           <ThemeRow />
           <DressUpRow />
           <AccentRow />
+          <SidebarRolesRow />
           <TalkingStyleRow />
           <LanguageRow simple />
           <AmbientRows />

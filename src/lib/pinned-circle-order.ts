@@ -1,5 +1,10 @@
 export const PINNED_CIRCLE_DRAG_TYPE = "application/x-dusk-pinned-circle";
 
+/** The pinned bot a drag carries, or null when it carries something else. */
+export function draggedPinnedCircle(data: Pick<DataTransfer, "types" | "getData">): string | null {
+  return data.types.includes(PINNED_CIRCLE_DRAG_TYPE) ? data.getData(PINNED_CIRCLE_DRAG_TYPE) || null : null;
+}
+
 export type PinnedCircleDropPlace = "before" | "after";
 export type PinnedCircleDrop = { id: string; place: PinnedCircleDropPlace; axis: "x" | "y" };
 

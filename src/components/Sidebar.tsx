@@ -38,7 +38,8 @@ import { BOT_CHATS_SECTION_ID, BOTS_SECTION_ID, CHANNELS_SECTION_ID, PINNED_SECT
 import { stepKey } from "@/lib/sidebar-bot-drop";
 import { botRowDropClass, useSidebarBotDrag, type BotRowDrag } from "./SidebarBotDrag";
 import { useSidebarSections } from "./SidebarSections";
-import { departmentNames } from "./bot-sections";
+import { departmentNames, setBotPinned } from "./bot-sections";
+import { draggedPinnedCircle, PINNED_CIRCLE_DRAG_TYPE } from "@/lib/pinned-circle-order";
 import { sidebarSectionAttention } from "@/lib/sidebar-attention";
 import { botListItemPointerIntent } from "@/lib/sidebar-selection";
 import { SidebarFooter } from "./SidebarFooter";
@@ -1151,6 +1152,15 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
 
       <GlassScroller className={rail ? "[scrollbar-gutter:stable_both-edges]" : simpleDesk ? "px-3" : "px-2"}>
         <div className={cn("flex flex-col", simpleDesk ? "gap-2.5 pb-6 pt-1" : "gap-1 pb-2 pt-2")} onKeyDown={walkRows}
+          onDragOver={remoteClient ? undefined : (event) => { if (event.dataTransfer.types.includes(PINNED_CIRCLE_DRAG_TYPE)) { event.preventDefault(); event.dataTransfer.dropEffect = "move"; } }}
+          onDrop={remoteClient ? undefined : (event) => {
+            const botId = draggedPinnedCircle(event.dataTransfer);
+            if (!botId) return;
+            event.preventDefault();
+            setBotPinned(dispatch, botId, false);
+            const name = state.bots.find((candidate) => candidate.id === botId)?.name ?? "";
+            sections.announce(`${name}: ${t("sidebar.bot.unpin")}`);
+          }}
           onFocus={simpleDesk ? (event) => { const id = event.target instanceof HTMLElement ? event.target.dataset.sidebarBotRow : undefined; if (id) setRowStop(id); } : undefined}>
           {matchingBots.length === 0 && visibleGroups.length === 0 && q && q.length < MIN_QUERY && (
             <div className="px-3 py-6 text-center text-[13px] text-ink-secondary">{t("sidebar.noMatch", { query })}</div>

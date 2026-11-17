@@ -916,9 +916,15 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
   const viewerEmail = useViewerEmail();
   const parts = partitionSidebarBots(botDrag.preview(matchingBots), { universalPins, viewerEmail, welcoming: useWelcomingBot() });
   const mainBotId = myDefaultBot(state.bots, viewerEmail)?.id ?? parts.unsectionedChief?.id ?? parts.sectionChiefs[0]?.id;
-  // grok keeps its main bot a row like any other, in its own section, marked with a star
+  // grok keeps its main bot a row like any other, in its own section, marked with a star; once pinned it joins the
+  // pinned tiles at the top like any other pinned bot
+  const chief = simpleDesk ? parts.unsectionedChief : null;
   const saved = simpleDesk
-    ? { ...parts, primary: null, unsectionedChief: null, unsectionedBots: parts.unsectionedChief ? [parts.unsectionedChief, ...parts.unsectionedBots] : parts.unsectionedBots }
+    ? {
+      ...parts, primary: null, unsectionedChief: null,
+      pinnedBots: chief?.pinned ? [chief, ...parts.pinnedBots] : parts.pinnedBots,
+      unsectionedBots: chief && !chief.pinned ? [chief, ...parts.unsectionedBots] : parts.unsectionedBots,
+    }
     : { ...parts, primary: null };
   // The lists a bot is dragged in show the saved order, as Discord's channels do: a bot stays where it was put, busy or
   // not. Pins, which are not dragged, still put working bots first.

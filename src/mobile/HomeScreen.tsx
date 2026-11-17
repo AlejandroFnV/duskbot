@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import { motion, useTransform, type MotionValue } from "motion/react";
-import { BellDot, Check, MonitorSmartphone, Pin, PinOff, Plus, RotateCcw, Search, Star, UserRound } from "../icons";
+import { BellDot, Check, ChevronDown, ChevronRight, MonitorSmartphone, Pin, PinOff, Plus, RotateCcw, Search, Star, UserRound } from "../icons";
 import { api, retryLoad, useStore, type Bot, type Group } from "@/state/store";
 import { BotAvatar, MausAvatar } from "@/components/Avatar";
 import { GroupAvatar, useGroupYou } from "@/components/GroupAvatar";
@@ -9,6 +9,8 @@ import { useMobileAccount } from "./account/AccountGate";
 import { botPreview, groupPreview, lastPreviewable, sidebarPreviewMessages } from "@/components/sidebar-preview";
 import { WorkingDots } from "@/components/WorkingIndicator";
 import { partitionSidebarBots, withPrimaryTile } from "@/lib/sidebar-layout";
+import { loadCollapsedSections, saveCollapsedSections, toggleCollapsedSection } from "@/lib/sidebar-preferences";
+import { homeSections } from "./home-sections";
 import { botShowsUnread } from "@/lib/bot-unread";
 import { botUnreadThreadIds, markBotRead } from "@/lib/folder-read";
 import { stateForBot } from "@/lib/mascot";
@@ -38,8 +40,8 @@ export function releasePressed() {
 }
 
 type Entry =
-  | { kind: "bot"; id: string; bot: Bot; at: number; preview: string; unread: boolean }
-  | { kind: "group"; id: string; group: Group; members: Bot[]; at: number; preview: string; unread: boolean };
+  | { kind: "bot"; id: string; bot: Bot; at: number; preview: string; unread: boolean; section?: string }
+  | { kind: "group"; id: string; group: Group; members: Bot[]; at: number; preview: string; unread: boolean; section?: string };
 
 const BAR_TOP = "calc(var(--m-safe-top) + 6px)";
 const LIST_TOP = "calc(var(--m-safe-top) + 64px)";
@@ -63,24 +65,31 @@ export function HomeScreen({ onOpenChat, onOpenSheet }: { onOpenChat: (id: strin
   const [scrolled, setScrolled] = useState(false);
   const [menu, setMenu] = useState<{ entry: Entry; rect: DOMRect; pinnedTile: boolean; source: HTMLElement | null } | null>(null);
 
-  const { pinned, entries } = useMemo(() => {
+  const { pinned, entries, sections } = useMemo(() => {
     const parts = partitionSidebarBots(state.bots);
     const { primary } = withPrimaryTile(parts, state.bots.find((bot) => bot.defaultBot && !bot.hidden)?.id);
     const top = [...(primary ? [primary] : []), ...parts.pinnedBots.filter((bot) => bot.id !== primary?.id)];
     const topIds = new Set(top.map((bot) => bot.id));
     const visible = state.bots.filter((bot) => !bot.hidden && !topIds.has(bot.id) && (parts.unsectionedBots.includes(bot) || parts.sectionedBots.includes(bot) || parts.sectionChiefs.includes(bot)));
     const rows: Entry[] = [
-      ...visible.map((bot): Entry => ({ kind: "bot", id: bot.id, bot, at: lastAt(bot), preview: botPreview(bot, sidebarPreviewMessages(bot), state.instances), unread: botShowsUnread(bot) })),
+      ...visible.map((bot): Entry => ({ kind: "bot", id: bot.id, bot, at: lastAt(bot), preview: botPreview(bot, sidebarPreviewMessages(bot), state.instances), unread: botShowsUnread(bot), section: bot.section })),
       ...state.groups.map((group): Entry => {
         const members = state.bots.filter((bot) => group.memberIds.includes(bot.id));
-        return { kind: "group", id: group.id, group, members, at: lastAt(group), preview: groupPreview(group, state.bots, state.instances), unread: Boolean(group.unread) };
+        return { kind: "group", id: group.id, group, members, at: lastAt(group), preview: groupPreview(group, state.bots, state.instances), unread: Boolean(group.unread), section: group.dm ? undefined : group.section };
       }),
     ];
-    rows.sort((a, b) => b.at - a.at);
-    return { pinned: top, entries: rows };
-  }, [state.bots, state.groups, state.instances]);
+    return { pinned: top, entries: rows, sections: homeSections(rows, state.sections ?? []) };
+  }, [state.bots, state.groups, state.instances, state.sections]);
+  // the same collapsed list the desktop sidebar keeps, so a department folded there by name folds here too
+  const [collapsedIds, setCollapsedIds] = useState<string[]>(() => loadCollapsedSections());
+  const toggleSection = useCallback((id: string) => setCollapsedIds((current) => {
+    const next = toggleCollapsedSection(current, id);
+    saveCollapsedSections(next);
+    return next;
+  }), []);
+  const headed = sections.length > 1 || pinned.length > 0;
 
-  useListFlip(listRef, `${pinned.length}|${entries.map((entry) => entry.id).join(",")}`);
+  useListFlip(listRef, `${pinned.length}|${collapsedIds.join(",")}|${sections.map((section) => section.items.map((entry) => entry.id).join(",")).join("|")}`);
   const sawSkeleton = useRef(!state.hydrated);
   const reveal = useCallback((el: HTMLDivElement | null) => {
     if (el && sawSkeleton.current) { sawSkeleton.current = false; revealOnce(el); }
@@ -134,26 +143,42 @@ export function HomeScreen({ onOpenChat, onOpenSheet }: { onOpenChat: (id: strin
               <div ref={reveal}>
                 {pinned.length > 0 && (
                   <section aria-labelledby="home-pinned" data-no-swipe>
-                  <h2 id="home-pinned" className="px-5 pb-1 text-[13px] font-semibold text-ink-secondary">{t("sidebar.section.pinned")}</h2>
-                  <div className="no-scrollbar flex gap-3 overflow-x-auto px-3 pb-2 pt-1">
+                  <h2 id="home-pinned" className="sr-only">{t("sidebar.section.pinned")}</h2>
+                  <div className="grid grid-cols-3 gap-y-3 px-5 pb-2 pt-1">
                     {pinned.map((bot) => (
                       <PinnedTile key={bot.id} bot={bot} onOpen={onOpenChat} onMenu={(rect, source) => openMenu(botEntry(bot, state), rect, source, true)} />
                     ))}
                   </div>
                   </section>
                 )}
-                {entries.length > 0 ? (
-                  <>
-                  {pinned.length > 0 && <h2 className="px-5 pb-1 pt-3 text-[13px] font-semibold text-ink-secondary">{t("mobile.home.chats")}</h2>}
-                  <ul role="list" aria-label={t("mobile.home.chats")} className="px-2">
-                    {entries.map((entry) => (
-                      <li key={entry.id} data-flip-key={entry.id}>
-                        <HomeRow entry={entry} onOpen={onOpenChat} onMenu={openMenu} />
-                      </li>
-                    ))}
-                  </ul>
-                  </>
-                ) : (
+                {entries.length > 0 ? sections.map((section) => {
+                  const name = section.name ?? t("mobile.home.chats");
+                  const collapsed = headed && collapsedIds.includes(section.id);
+                  const listId = `home-section-${section.id}`;
+                  return (
+                    <section key={section.id} data-section={section.id}>
+                      {headed && (
+                        <h2>
+                          <button type="button" onClick={() => toggleSection(section.id)} aria-expanded={!collapsed} aria-controls={listId}
+                            aria-label={t(collapsed ? "sidebar.section.expand" : "sidebar.section.collapse", { name })}
+                            className="mobile-press flex min-h-11 w-full items-center gap-1 px-5 pt-2 text-left text-[17px] leading-[22px] text-ink-secondary">
+                            <span className="min-w-0 truncate">{name}</span>
+                            {collapsed ? <ChevronRight size={17} aria-hidden className="shrink-0" /> : <ChevronDown size={17} aria-hidden className="shrink-0" />}
+                          </button>
+                        </h2>
+                      )}
+                      {!collapsed && (
+                        <ul id={listId} role="list" aria-label={name}>
+                          {section.items.map((entry) => (
+                            <li key={entry.id} data-flip-key={entry.id}>
+                              <HomeRow entry={entry} onOpen={onOpenChat} onMenu={openMenu} />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </section>
+                  );
+                }) : (
                   <div className="mx-4 mt-4 flex flex-col items-start gap-3 rounded-[20px] bg-ink/[0.04] px-5 py-5">
                     <p className="text-[16px] font-semibold text-ink">{t("mobile.home.onlyPinnedTitle")}</p>
                     <p className="text-[15px] leading-[22px] text-ink-secondary">{t("mobile.home.onlyPinnedBody")}</p>
@@ -167,7 +192,7 @@ export function HomeScreen({ onOpenChat, onOpenSheet }: { onOpenChat: (id: strin
       </div>
 
       <div aria-hidden className={cn("pointer-events-none absolute inset-x-0 top-0 z-[5] h-[calc(var(--m-safe-top)+72px)] bg-gradient-to-b from-app from-60% to-transparent transition-opacity duration-150", scrolled ? "opacity-100" : "opacity-0")} />
-      <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center gap-2 px-3" style={{ paddingTop: BAR_TOP }}>
+      <header className="pointer-events-none absolute inset-x-0 top-0 z-10 flex items-center gap-2 px-5" style={{ paddingTop: BAR_TOP }}>
         <RoundButton floating label={unreadNotes ? t("mobile.home.youWithNotifications", { count: unreadNotes }) : t("mobile.home.you")} onClick={() => onOpenSheet({ kind: "settings" })} className="pointer-events-auto overflow-visible">
           {face
             ? <UserFace account={face} size={40} className="size-full" />
@@ -213,7 +238,7 @@ const PinnedTile = memo(function PinnedTile({ bot, onOpen, onMenu }: { bot: Bot;
   const ref = useRef<HTMLButtonElement>(null);
   useLongPress(ref, (rect) => onMenu(rect, ref.current));
   return (
-    <button ref={ref} type="button" onClick={(event) => { holdPressed(event.currentTarget); onOpen(bot.id); }} className="mobile-press flex w-[84px] shrink-0 flex-col items-center gap-1.5 rounded-[20px] py-1" aria-label={botShowsUnread(bot) ? t("mobile.home.unreadChat", { name: bot.name }) : bot.name}>
+    <button ref={ref} type="button" onClick={(event) => { holdPressed(event.currentTarget); onOpen(bot.id); }} className="mobile-press flex min-w-0 flex-col items-center rounded-[20px]" aria-label={botShowsUnread(bot) ? t("mobile.home.unreadChat", { name: bot.name }) : bot.name}>
       <PinnedTileFace bot={bot} />
     </button>
   );
@@ -222,17 +247,19 @@ const PinnedTile = memo(function PinnedTile({ bot, onOpen, onMenu }: { bot: Bot;
 function PinnedTileFace({ bot }: { bot: Bot }) {
   const unread = botShowsUnread(bot);
   return (
-    <span className="flex w-[84px] flex-col items-center gap-1.5 py-1">
+    <span className="flex w-full min-w-0 flex-col items-center gap-2 py-1">
       <span className="relative">
-        <BotAvatar bot={bot} size={76} state={bot.busy ? "working" : "idle"} animated={bot.busy} label="" />
+        <BotAvatar bot={bot} size={88} state={bot.busy ? "working" : "idle"} animated={bot.busy} label="" />
         {bot.chiefOfStaff && (
           <span aria-hidden className="absolute -bottom-0.5 -right-0.5 flex size-6 items-center justify-center rounded-full bg-[var(--identity-orange)] text-white ring-[3px] ring-app">
             <Star size={12} fill="currentColor" strokeWidth={0} />
           </span>
         )}
-        {unread && <span aria-hidden className="absolute right-0.5 top-0.5 size-3 rounded-full bg-ink ring-[3px] ring-app" />}
       </span>
-      <span className={cn("line-clamp-2 w-full break-words text-center text-[13px] leading-4", unread ? "font-semibold text-ink" : "font-medium text-ink-secondary")}>{bot.name}</span>
+      <span className="flex w-full min-w-0 items-center justify-center gap-1.5 px-1">
+        <span className={cn("min-w-0 truncate text-center text-[16px] leading-5", unread ? "font-semibold text-ink" : "text-ink")}>{bot.name}</span>
+        {unread && <span aria-hidden className="size-2 shrink-0 rounded-full bg-accent" />}
+      </span>
     </span>
   );
 }
@@ -247,7 +274,7 @@ const HomeRow = memo(function HomeRow({ entry, onOpen, onMenu }: { entry: Entry;
       type="button"
       onClick={(event) => { holdPressed(event.currentTarget); onOpen(entry.id); }}
       aria-label={entry.unread ? t("mobile.home.unreadChat", { name }) : undefined}
-      className="mobile-row block w-full rounded-[18px] text-left"
+      className="mobile-row block w-full text-left"
     >
       <RowFace entry={entry} />
     </button>
@@ -258,19 +285,20 @@ function RowFace({ entry }: { entry: Entry }) {
   const name = entry.kind === "bot" ? entry.bot.name : entry.group.name;
   const working = entry.kind === "bot" ? Boolean(entry.bot.busy) : Boolean(entry.group.working);
   const avatar: ReactNode = entry.kind === "bot"
-    ? <BotAvatar bot={entry.bot} size={52} state={working ? "working" : stateForBot(entry.bot) === "failed" ? "failed" : "idle"} animated={working} label="" />
-    : <GroupAvatar members={entry.members} size={52} />;
+    ? <BotAvatar bot={entry.bot} size={44} state={working ? "working" : stateForBot(entry.bot) === "failed" ? "failed" : "idle"} animated={working} label="" />
+    : <GroupAvatar members={entry.members} size={44} />;
   return (
-    <span className="flex min-h-[76px] items-center gap-3.5 px-2.5 py-3">
+    <span className="flex min-h-20 items-center gap-[18px] px-5 py-2.5">
       <span className="shrink-0">{avatar}</span>
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline gap-2">
-          <span className="min-w-0 flex-1 truncate text-[16px] font-semibold leading-5 text-ink">{name}</span>
-          {entry.at > 0 && <span className={cn("shrink-0 text-[13px] tabular-nums leading-5", entry.unread ? "font-semibold text-ink" : "text-ink-secondary")}>{listTime(entry.at)}</span>}
-          {entry.unread && <span aria-hidden className="size-2.5 shrink-0 self-center rounded-full bg-ink" />}
+          <span className={cn("min-w-0 truncate text-[17px] leading-[22px] text-ink", entry.unread && "font-semibold")}>{name}</span>
+          {entry.unread && <span aria-hidden className="size-2 shrink-0 self-center rounded-full bg-accent" />}
+          <span className="flex-1" />
+          {entry.at > 0 && <span className="shrink-0 text-[15px] tabular-nums leading-5 text-ink-secondary">{listTime(entry.at)}</span>}
         </span>
         <span className="mt-0.5 flex items-center gap-2">
-          <span className={cn("min-w-0 flex-1 truncate text-[14px] leading-5", entry.unread ? "text-ink" : "text-ink-secondary")}>
+          <span className={cn("min-w-0 flex-1 truncate text-[17px] leading-[22px]", entry.unread ? "text-ink" : "text-ink-secondary")}>
             {working && <WorkingDots size={3} className="me-1.5 inline-flex align-middle" />}
             {entry.preview || " "}
           </span>
@@ -282,13 +310,13 @@ function RowFace({ entry }: { entry: Entry }) {
 
 function HomeSkeleton() {
   return (
-    <div aria-hidden className="px-4">
-      <div className="flex gap-4 pb-4 pt-1">
-        {[0, 1, 2, 3].map((i) => <div key={i} className="flex w-[84px] flex-col items-center gap-2"><div className="size-[76px] rounded-full bg-ink/[0.06]" /><div className="h-3 w-12 rounded-full bg-ink/[0.06]" /></div>)}
+    <div aria-hidden className="px-5">
+      <div className="grid grid-cols-3 pb-4 pt-1">
+        {[0, 1, 2].map((i) => <div key={i} className="flex flex-col items-center gap-2"><div className="size-[88px] rounded-full bg-ink/[0.06]" /><div className="h-3 w-12 rounded-full bg-ink/[0.06]" /></div>)}
       </div>
       {[0, 1, 2, 3, 4, 5].map((i) => (
-        <div key={i} className="flex min-h-[76px] items-center gap-3.5 px-0.5">
-          <div className="size-[52px] shrink-0 rounded-full bg-ink/[0.06]" />
+        <div key={i} className="flex min-h-20 items-center gap-[18px]">
+          <div className="size-11 shrink-0 rounded-full bg-ink/[0.06]" />
           <div className="flex-1 space-y-2"><div className="h-3.5 w-1/3 rounded-full bg-ink/[0.07]" /><div className="h-3 w-2/3 rounded-full bg-ink/[0.05]" /></div>
         </div>
       ))}

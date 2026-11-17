@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Message } from "@/state/store";
-import { exchangeEntries, exchangeRuns, exchangeSummary } from "./peer-exchange";
+import { exchangeEntries, exchangeRuns, exchangeSummary, peerConversation } from "./peer-exchange";
 
 const msg = (id: string, fields: Partial<Message>): Message => ({ id, role: "bot", kind: "text", at: 1, ...fields } as Message);
 const ghosty = { id: "ghosty", name: "Ghosty" };
@@ -98,5 +98,40 @@ describe("exchangeRuns", () => {
       { kind: "single", direction: "inbound", peer: { id: "dusk", name: "dusk bot", color: "blue" } },
       { kind: "single", direction: "outbound", peer: { id: "dusk", name: "dusk bot", color: "blue" } },
     ]);
+  });
+});
+
+describe("peerConversation", () => {
+  const rows = [
+    msg("you", { role: "user", text: "how is it going?", at: 1 }),
+    msg("answer", { text: "fine", requestMessageId: "you", at: 2 }),
+    msg("asked", { role: "user", text: "[From @Ghosty (bot) · message · reply expected] status?", peerAsk: { botId: "ghosty", name: "Ghosty" }, at: 3 }),
+    msg("reply", { text: "all good", requestMessageId: "asked", at: 4 }),
+    msg("amyAsk", { role: "user", text: "[From @Amy (bot) · message · reply expected] ping", peerAsk: { botId: "amy", name: "Amy" }, at: 5 }),
+    msg("amyReply", { text: "pong", requestMessageId: "amyAsk", at: 6 }),
+    msg("later", { role: "user", text: "thanks", at: 7 }),
+  ];
+  const entries = exchangeEntries(rows, "me");
+
+  it("keeps only the lines traded with the chosen bot, oldest first, without the provenance note", () => {
+    expect(peerConversation(rows, entries, [ghosty])).toEqual([
+      { id: "asked", at: 3, direction: "inbound", peer: ghosty, text: "status?" },
+      { id: "reply", at: 4, direction: "outbound", peer: ghosty, text: "all good" },
+    ]);
+  });
+
+  it("never shows the person's own lines, and takes several bots at once", () => {
+    const ids = peerConversation(rows, entries, [ghosty, amy]).map((line) => line.id);
+    expect(ids).toEqual(["asked", "reply", "amyAsk", "amyReply"]);
+    expect(ids).not.toContain("you");
+    expect(ids).not.toContain("later");
+  });
+
+  it("leaves out steps and rows with nothing to read", () => {
+    const steps = new Map(entries);
+    steps.set("reply", { direction: "outbound", peer: ghosty, step: true });
+    const blank = [...rows, msg("empty", { kind: "activity", at: 8 })];
+    steps.set("empty", { direction: "outbound", peer: ghosty });
+    expect(peerConversation(blank, steps, [ghosty]).map((line) => line.id)).toEqual(["asked"]);
   });
 });

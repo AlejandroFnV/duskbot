@@ -164,3 +164,33 @@ export function exchangeRuns<T>(
   close();
   return runs;
 }
+
+export interface PeerConversationLine { id: string; at: number; direction: "inbound" | "outbound"; peer: PeerRef; text: string }
+
+/** What a row said to or from another bot, without the provenance note a peer's line opens with. */
+function exchangeText(m: Message): string {
+  const peer = peerLine(m);
+  if (peer) return peer.body.trim();
+  return (m.handoff?.text ?? m.text ?? m.tool?.summary ?? m.tool?.output ?? "").trim();
+}
+
+/** Only the messages this chat's bot traded with `peers`, oldest first, for the bot-to-bot view: steps of a reply and
+ * empty rows stay out, and nothing from the person's own thread with the bot ever shows. */
+export function peerConversation(
+  messages: readonly Message[],
+  entries: ReadonlyMap<string, PeerEntry>,
+  peers: readonly PeerRef[],
+): PeerConversationLine[] {
+  const wanted = new Set(peers.map(peerKey));
+  const names = new Set(peers.map((peer) => `name:${peer.name}`));
+  const lines: PeerConversationLine[] = [];
+  for (const m of messages) {
+    const entry = entries.get(m.id);
+    if (!entry || entry.step) continue;
+    if (!wanted.has(peerKey(entry.peer)) && !names.has(`name:${entry.peer.name}`)) continue;
+    const text = exchangeText(m);
+    if (!text) continue;
+    lines.push({ id: m.id, at: m.at, direction: entry.direction, peer: entry.peer, text });
+  }
+  return lines.sort((a, b) => a.at - b.at);
+}

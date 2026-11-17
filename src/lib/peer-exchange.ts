@@ -165,13 +165,6 @@ export function exchangeRuns<T>(
   return runs;
 }
 
-/** A run that only hands work out: what went to the other bots, never an answer this bot wrote them. The chat draws no
- * line for it, since the tray under the chat already says who has the work and the bot says so in its own words. */
-export function sendsOnly<T>(run: ExchangeRun<T>, rowsOf: (item: T) => readonly Message[]): boolean {
-  return run.entries.every((entry) => entry.direction === "outbound")
-    && run.items.every((item) => rowsOf(item).every((row) => row.kind === "activity"));
-}
-
 export interface PeerConversationLine { id: string; at: number; direction: "inbound" | "outbound"; peer: PeerRef; text: string }
 
 /** What a row said to or from another bot, without the provenance note a peer's line opens with. */

@@ -530,7 +530,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
   // grok's expanded row shows no corner dot while working: the mascot works and the preview says what it does
   const rowActivity = working ? (simpleRow ? null : "working") : teammateWait ? "teammate" : queued && !waiting ? "queued" : null;
   const { unread } = useBotUnread(bot);
-  const markState = useBotMarkState(bot);
+  const markState = useBotMarkState(bot, working);
   const workingLabel = useWorkingLabel(bot, simpleRow && working);
   // grok: hold ⌘ (⌃ elsewhere) and each row shows the number that opens it, where its dot sits
   const preview = waiting ? simpleRow ? grokWaiting(waitingLine(bot, visible, instances)) : t("sidebar.preview.waiting") : teammateWait ? t("sidebar.preview.waitingOnTeammate") : queued ? t("task.queued") : simpleRow && working ? workingLabel ?? lastLine(bot, visible, instances) : botPreview(bot, visible, instances);

@@ -34,6 +34,7 @@ import { RenameTitle } from "./RenameTitle";
 import { navigateThreadMenu } from "./BotProjects";
 import { useOwnerOrAdmin } from "@/lib/use-owner-or-admin";
 import { setSidebarDensity, useSidebarDensity, usePinnedCircles, useUniversalPins, type SidebarDensity } from "@/lib/sidebar-preferences";
+import { useSidebarBotRoles } from "@/lib/sidebar-role-preference";
 import { BOT_CHATS_SECTION_ID, BOTS_SECTION_ID, CHANNELS_SECTION_ID, PINNED_SECTION_ID, activeBotsFirst, partitionSidebarBots, partitionSidebarGroups, pinnedCircleThreadListVisible, sidebarSectionLabel, userSectionId, userSectionName } from "@/lib/sidebar-layout";
 import { stepKey } from "@/lib/sidebar-bot-drop";
 import { botRowDropClass, useSidebarBotDrag, type BotRowDrag } from "./SidebarBotDrag";
@@ -529,6 +530,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
   const visible = useVisibleMessages(bot);
   const last = lastNonReceipt(visible);
   const title = bot.title.trim();
+  const showRole = useSidebarBotRoles() && Boolean(title);
   const rowClass = cn(
     "flex w-full items-center rounded-xl text-left", SIMPLE_ROW_FOCUS,
     iconOnly ? "h-[54px] justify-center" : cn("gap-2.5 rounded-[12px] p-2 leading-[normal] tracking-[0.24px] md:h-[54px]", ROW_PRESS),
@@ -605,7 +607,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
         <div className={cn("flex items-baseline justify-between gap-2", simpleRow && (unread || waiting ? "pr-7" : "group-has-[:focus-visible]:pr-7 touch:pr-7"))}>
           <span className={cn("flex min-w-0 grow items-center gap-1.5 truncate text-ink", simpleRow ? "text-[14px] font-medium leading-5 tracking-[0.01em]" : "text-[15px] font-semibold leading-5")}>
             {!simpleRow && bot.pinned && <Pin size={12} className="shrink-0 text-ink-secondary" />}
-            {simpleRow && !nameField ? <span className="truncate">{bot.name}</span> : <RenameTitle
+            {simpleRow && !nameField ? <span className={cn("truncate", showRole && "max-w-[70%] shrink-0")}>{bot.name}</span> : <RenameTitle
               key={iconOnly ? "icons" : "expanded"}
               value={bot.name}
               editRequest={simpleRow ? nameEdit : renameRequest}
@@ -632,7 +634,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
                 <title>{t("call.live.badge")}</title>
               </Phone>
             )}
-            {!simpleRow && title && !renaming && <SidebarBotRole role={title} />}
+            {showRole && !renaming && !nameField && <SidebarBotRole role={title} />}
           </span>
           {last && !renaming && (
             <span className={cn(

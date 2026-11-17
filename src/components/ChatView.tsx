@@ -140,6 +140,7 @@ import { PeerExchangeView } from "./PeerExchangeView";
 import { exchangeEntries, peerConversation, type PeerRef } from "@/lib/peer-exchange";
 import { QueuedHandoffsLine } from "./QueuedHandoffsLine";
 import { useExchangeRows } from "@/hooks/use-exchange-runs";
+import { useLingering } from "@/hooks/use-lingering";
 import { unreadMessageIds } from "@/lib/unread-divider";
 import { useReplyDraft } from "@/lib/drafts";
 import { REPLY_SOURCE } from "@/lib/replies";
@@ -736,18 +737,6 @@ export function personStoppedLast(messages: readonly Message[]): boolean {
     if (message.kind === "activity" && message.tool?.name === PERSON_STOPPED_TURN_NAME) return true;
   }
   return false;
-}
-
-export function useLingering(on: boolean, ms: number, key = ""): boolean {
-  const [held, setHeld] = useState({ key, on });
-  if (held.key !== key || (on && !held.on)) setHeld({ key, on });
-  const lingering = held.key === key && held.on;
-  useEffect(() => {
-    if (on || !lingering) return;
-    const timer = setTimeout(() => setHeld({ key, on: false }), ms);
-    return () => clearTimeout(timer);
-  }, [on, lingering, ms, key]);
-  return on || lingering;
 }
 
 /** Simple mode's room under the last row, above the composer's own clearance: the last bubble ends 64px over the composer,

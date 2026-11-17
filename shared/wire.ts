@@ -32,6 +32,7 @@ import type { WebhookAttempt, WebhookTrigger } from "./webhooks.ts";
 import type { PublishedPageCard } from "./published-page.ts";
 import type { InboxItem, InboxTask } from "./inbox.ts";
 import type { LiveCallRecord, LiveCallState } from "./live-call-wire.ts";
+import type { WireCodeRepo, WireTeammateWork } from "./wire-work.ts";
 /** What a team bot's main chat is called, beside each person's own chats. */
 export const SHARED_CHAT_TITLE = "Shared chat";
 
@@ -129,23 +130,6 @@ export interface BotMovedTo {
   team: { id: string; name: string };
   state: "moving" | "moved";
   at: number;
-}
-
-/** A teammate's open assignment from the thread waiting on it; threadId is the teammate's own thread. */
-export interface WireTeammateWork {
-  botId: string;
-  threadId: string;
-  /** First line of the brief. */
-  summary: string;
-  /** waiting: parked on a question. */
-  status: "queued" | "running" | "waiting";
-}
-
-/** A thread's git repo: its top folder, the checked-out branch (null when detached) and whether it is a linked worktree. */
-export interface WireCodeRepo {
-  root: string;
-  branch: string | null;
-  worktree?: true;
 }
 
 /** One task = one conversation with its own context, thread and provider

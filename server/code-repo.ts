@@ -2,7 +2,8 @@ import { execFile } from "node:child_process";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, resolve } from "node:path";
 
-import type { WireCodeRepo, WireMessage } from "../shared/wire.ts";
+import type { WireMessage } from "../shared/wire.ts";
+import type { WireCodeRepo } from "../shared/wire-work.ts";
 
 const EDIT_TOOLS = new Set(["Edit", "Write", "MultiEdit", "NotebookEdit", "edit", "write", "apply_patch"]);
 const SHELL_TOOLS = new Set(["Bash", "bash", "shell", "exec_command"]);

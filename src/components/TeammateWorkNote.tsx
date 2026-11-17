@@ -1,5 +1,5 @@
 import { useId, useState, type Dispatch } from "react";
-import type { WireTeammateWork } from "../../shared/wire";
+import type { WireTeammateWork } from "../../shared/wire-work";
 import { ChevronRight } from "../icons";
 import type { Action, Bot } from "@/state/store";
 import { useTurnLive } from "@/state/turn-status";

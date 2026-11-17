@@ -5,7 +5,7 @@ import { expect, it, vi } from "vitest";
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 vi.stubGlobal("localStorage", { getItem: () => null, setItem: () => {} });
-const { useLingering } = await import("./ChatView");
+const { useLingering } = await import("@/hooks/use-lingering");
 
 function render(seen: boolean[]) {
   function Probe({ on, chat }: { on: boolean; chat: string }) {

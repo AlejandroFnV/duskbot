@@ -1,4 +1,4 @@
-import type { WireTeammateWork } from "../shared/wire.ts";
+import type { WireTeammateWork } from "../shared/wire-work.ts";
 import type { HandoffView } from "./coordinator.ts";
 
 const SUMMARY_MAX = 80;

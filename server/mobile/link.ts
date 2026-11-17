@@ -80,6 +80,8 @@ export interface MobileLinkDeps {
   push?: PushSender;
   /** whether the person already read this notification (on any device) */
   isRead?: (notificationId: string) => boolean;
+  /** the push title in the language of the person this phone is signed in as; else the notification's own title */
+  titleFor?: (notification: NotificationLogEntry, session: ReturnType<MobileLinkDeps["sessions"]["list"]>[number]) => string;
   fetch?: typeof fetch;
   now?: () => number;
   log?: (line: string) => void;
@@ -355,7 +357,8 @@ export function createMobileLink(deps: MobileLinkDeps) {
     await Promise.all(targets.map((device) => {
       const session = sessions.get(device.sessionId);
       if (!session || (options.adminOnly && !session.scopes.includes("admin")) || !device.push) return;
-      return presence.route(device.id, message) === "push" ? deliver(device, message) : undefined;
+      const own = deps.titleFor ? { ...message, title: deps.titleFor(notification, session) } : message;
+      return presence.route(device.id, own) === "push" ? deliver(device, own) : undefined;
     }));
   }
 

@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { deviceWord, documentLanguage, resolveLocale, setLocale, t, tFromServer } from "./i18n";
+import { deviceWord, documentLanguage, resolveLocale, setLocale, t, tFromServer, tFromServerLine } from "./i18n";
 import { en, localeChoices, locales } from "@/locales";
 
 afterEach(() => {
@@ -122,6 +122,27 @@ describe("t", () => {
       name in { name: "Maus" } ? String({ name: "Maus" }[name as "name"]) : match,
     );
     expect(rendered).toBe("Hello Maus, {missing}!");
+  });
+});
+
+describe("tFromServerLine", () => {
+  it("shows a notification's title in the app's language, a room inside it too", () => {
+    locales["zz"] = { "server.notify.done": "{who} terminó", "server.notify.inRoom": "{bot} en {room}" };
+    try {
+      setLocale("zz");
+      expect(tFromServerLine({ key: "server.notify.done", params: { who: "Basil" } }, "Basil finished")).toBe("Basil terminó");
+      expect(tFromServerLine({ key: "server.notify.done", params: { who: { key: "server.notify.inRoom", params: { bot: "Basil", room: "Launch" } } } }, "x"))
+        .toBe("Basil en Launch terminó");
+    } finally {
+      delete locales["zz"];
+      setLocale("en");
+    }
+  });
+
+  it("keeps the server's title for a line this app does not know", () => {
+    expect(tFromServerLine(undefined, "Basil")).toBe("Basil");
+    expect(tFromServerLine({ key: "server.notify.newer" }, "Basil did something new")).toBe("Basil did something new");
+    expect(tFromServerLine({ key: "server.notify.done", params: { who: { key: "server.notify.newer" } } }, "kept")).toBe("kept");
   });
 });
 

@@ -50,6 +50,7 @@ import type { MarkState } from "./mascot-engine";
 import { turnMarkState } from "./mascot-presence";
 import type { LiveStatus } from "@/state/turn-status";
 import { TurnPresence, TYPING_PHASE } from "./TurnPresence";
+import { OtherThreadsWork } from "./OtherThreadsWork";
 import { BrowserPartLine } from "./BrowserPartLine";
 import { browserPartFor } from "@/lib/browser-part";
 import { MarkCrossfade } from "./MarkCrossfade";
@@ -1479,6 +1480,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
             </div>
           )}
           </div>
+          <OtherThreadsWork bot={bot} dispatch={dispatch} />
         </div>
         </div>
       </div>

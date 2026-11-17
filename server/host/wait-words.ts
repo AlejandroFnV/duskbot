@@ -62,9 +62,12 @@ export function createQueuedNotes(deps: QueuedNotesDeps) {
     if (!line) return;
     for (const id of noted) if (!deps.live(id)) noted.delete(id);
     noted.add(node.id);
+    for (const [held, entry] of groups) {
+      for (const id of entry.ids) if (!deps.live(id)) entry.ids.delete(id);
+      if (entry.ids.size === 0) groups.delete(held);
+    }
     const key = `${parent.threadId}\u0000${node.botId}`, group = groups.get(key);
-    if (group) for (const id of group.ids) if (!deps.live(id)) group.ids.delete(id);
-    if (group && group.ids.size > 0) {
+    if (group) {
       group.ids.add(node.id);
       deps.regroup(parent, group.messageId, node, serverLine(language, "server.teammates.queued.grouped", { bot, count: group.ids.size }), group.ids.size);
       return;

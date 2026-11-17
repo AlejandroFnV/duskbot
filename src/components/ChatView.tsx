@@ -851,7 +851,7 @@ const MessagesList = memo(function MessagesList({
     const at = items.findIndex((item) => item.kind === "message" && item.message.id === seamId);
     return at < 0 ? layout.joins : layout.joins.map((join, index) => index === at ? { ...join, below: true } : join);
   }, [layout, items, seamId]);
-  const exchanges = useExchangeRows(messages, items, transcriptRows, showToolCalls ? noneTransparent : hiddenSteps, botId);
+  const exchanges = useExchangeRows(transcript, items, transcriptRows, showToolCalls ? noneTransparent : hiddenSteps, botId);
   const rowJoins = useMemo(() => joins.map((join, index) => exchanges.closedBelow(index) || exchanges.closedAbove(index)
     ? { ...join, ...(exchanges.closedBelow(index) ? { below: false } : {}), ...(exchanges.closedAbove(index) ? { above: false } : {}) } : join), [joins, exchanges]);
   const dividerAbove = (rows: readonly Message[]) => {

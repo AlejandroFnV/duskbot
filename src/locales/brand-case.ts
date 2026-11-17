@@ -79,7 +79,7 @@ export function brandCaseEntry(key: string, value: string): string {
 const FRAGMENT_KEYS = new RegExp(`^(${[
   "chat\\.event\\.(and|andMore|for)", "approval\\.voice\\.action\\w+", "helperIntro\\.followup\\.(botsNone|botOne|bots|routinesNone|routineOne|routines|more)",
   "call\\.live\\.device\\.\\w+", "vm\\.confirm\\.orphanVps", "vm\\.idle\\.minutes", "mcp\\.state\\.(on|off)", "sidebar\\.preview\\.aBot",
-  "vpsLink\\.yourServer", "mobile\\.connection\\.your(Cloud|Computer)", "remote\\.client\\.fallbackName", "remote\\.time\\.justNow", "app\\.sentFrom", "botAccess\\.(theAdmins|folder\\.home)",
+  "vpsLink\\.yourServer", "mobile\\.connection\\.your(Cloud|Computer)", "mobile\\.entry\\.legalAnd", "remote\\.client\\.fallbackName", "remote\\.time\\.justNow", "app\\.sentFrom", "botAccess\\.(theAdmins|folder\\.home)",
   "browser\\.panel\\.tab", "cloudBuy\\.team\\.unnamed", "bring\\.topic\\w+", "cloudTrial\\.yourPlan",
   "room\\.(hint|responder)\\.leadFallback", "call\\.questionOptions", "inbox\\.recommendedInline", "activity\\.(approvalIn|to)", "files\\.countMore", "voice\\.provider",
   "botMove\\.memory", "teamShare\\.skip\\.\\w+", "inbox\\.(in|via)", "model\\.variant\\.(unverified|unavailable)", "vpsLink\\.device\\.\\w+",

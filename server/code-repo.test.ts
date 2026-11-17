@@ -50,16 +50,38 @@ describe("parseRevParse", () => {
 });
 
 describe("createCodeRepos", () => {
-  it("runs git once per folder within a minute and rereads messages only when the thread changes", () => {
+  const output = "/r\nmain\n/r/.git\n.git\n";
+  const flush = () => new Promise((done) => setTimeout(done, 0));
+
+  it("never waits on git: the first answer is empty, the resolved repo comes with the next one", async () => {
+    let release: (value: string | null) => void = () => {};
+    const changed: string[] = [];
+    let calls = 0;
+    const repos = createCodeRepos({ git: () => { calls++; return new Promise((done) => { release = done; }); }, changed: (id) => changed.push(id) });
+    const messages = () => [activity("Bash", { command: "cd /r && ls" })];
+    expect(repos.of("t1", messages, null, 1)).toBeNull();
+    expect(repos.of("t1", messages, null, 1)).toBeNull();
+    expect(calls).toBe(1);
+    release(output);
+    await flush();
+    expect(changed).toEqual(["t1"]);
+    expect(repos.of("t1", messages, null, 1)).toEqual({ root: "/r", branch: "main" });
+  });
+
+  it("reads messages only when the thread's version moves, and asks git again after a minute", async () => {
     let calls = 0, reads = 0, clock = 0;
-    const repos = createCodeRepos((folder) => { calls++; return folder === "/r" ? "/r\nmain\n/r/.git\n.git\n" : null; }, () => clock);
+    const repos = createCodeRepos({ git: async (folder) => { calls++; return folder === "/r" ? output : null; }, now: () => clock, changed: () => {} });
     const messages = () => { reads++; return [activity("Bash", { command: "cd /r && ls" })]; };
-    expect(repos.of("t1", messages, null, "m1")).toEqual({ root: "/r", branch: "main" });
-    expect(repos.of("t1", messages, null, "m1")).toEqual({ root: "/r", branch: "main" });
+    repos.of("t1", messages, null, 1);
+    await flush();
+    for (let i = 0; i < 3; i++) expect(repos.of("t1", messages, null, 1)).toEqual({ root: "/r", branch: "main" });
     expect([calls, reads]).toEqual([1, 1]);
     clock = 61_000;
-    repos.of("t1", messages, null, "m2");
+    repos.of("t1", messages, null, 2);
+    await flush();
     expect([calls, reads]).toEqual([2, 2]);
+    repos.of("t2", () => [], "/not-a-repo", undefined);
+    await flush();
     expect(repos.of("t2", () => [], "/not-a-repo", undefined)).toBeNull();
   });
 });

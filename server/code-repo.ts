@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import { homedir } from "node:os";
 import { dirname, isAbsolute, resolve } from "node:path";
 
@@ -43,14 +43,12 @@ export function threadFolder(messages: readonly WireMessage[], pinnedCwd: string
   return pinnedCwd ?? null;
 }
 
-type GitRun = (folder: string) => string | null;
+type GitRun = (folder: string) => Promise<string | null>;
 
-const runGit: GitRun = (folder) => {
-  try {
-    return execFileSync("git", ["-C", folder, "rev-parse", "--show-toplevel", "--abbrev-ref", "HEAD", "--absolute-git-dir", "--git-common-dir"],
-      { encoding: "utf8", timeout: 1500, stdio: ["ignore", "pipe", "ignore"] });
-  } catch { return null; }
-};
+const runGit: GitRun = (folder) => new Promise((done) => {
+  execFile("git", ["-C", folder, "rev-parse", "--show-toplevel", "--abbrev-ref", "HEAD", "--absolute-git-dir", "--git-common-dir"],
+    { encoding: "utf8", timeout: 5000 }, (error, stdout) => done(error ? null : stdout));
+});
 
 /** Parses `git rev-parse --show-toplevel --abbrev-ref HEAD --absolute-git-dir --git-common-dir` run in `folder`. */
 export function parseRevParse(folder: string, output: string): WireCodeRepo | null {
@@ -61,28 +59,38 @@ export function parseRevParse(folder: string, output: string): WireCodeRepo | nu
   return { root, branch: branch === "HEAD" ? null : branch, ...(worktree ? { worktree: true as const } : {}) };
 }
 
-/** Repo, branch and worktree of each thread, resolved on the server and cached: by folder for a minute, by thread until
- * its newest message changes. */
-export function createCodeRepos(git: GitRun = runGit, now: () => number = Date.now) {
+const sameRepo = (a: WireCodeRepo | null | undefined, b: WireCodeRepo | null | undefined): boolean =>
+  (a?.root ?? null) === (b?.root ?? null) && (a?.branch ?? null) === (b?.branch ?? null) && a?.worktree === b?.worktree;
+
+/** Repo, branch and worktree of each thread. `of` never waits on git: it answers from the cache and starts at most one
+ * background `git` per folder, then calls `changed` for each thread whose answer moved, so the next projection carries it.
+ * Messages are read only when the thread's `version` (its newest message time) changes. */
+export function createCodeRepos({ git = runGit, now = Date.now, changed }: { git?: GitRun; now?: () => number; changed: (threadId: string) => void }) {
   const byFolder = new Map<string, { repo: WireCodeRepo | null; at: number }>();
+  const inFlight = new Set<string>();
   const byThread = new Map<string, { key: string; folder: string | null }>();
-  const repoAt = (folder: string): WireCodeRepo | null => {
-    const hit = byFolder.get(folder);
-    if (hit && now() - hit.at < REPO_TTL_MS) return hit.repo;
-    const output = git(folder);
-    const repo = output ? parseRevParse(folder, output) : null;
-    byFolder.set(folder, { repo, at: now() });
-    return repo;
+  const refresh = (folder: string) => {
+    if (inFlight.has(folder)) return;
+    inFlight.add(folder);
+    void git(folder).then((output) => {
+      const before = byFolder.get(folder)?.repo;
+      const repo = output ? parseRevParse(folder, output) : null;
+      byFolder.set(folder, { repo, at: now() });
+      if (!sameRepo(before, repo)) for (const [threadId, entry] of byThread) if (entry.folder === folder) changed(threadId);
+    }, () => undefined).finally(() => inFlight.delete(folder));
   };
   return {
-    of(threadId: string, messages: () => readonly WireMessage[], pinnedCwd: string | null | undefined, lastMessageId: string | undefined): WireCodeRepo | null {
-      const key = `${lastMessageId ?? ""}|${pinnedCwd ?? ""}`;
+    of(threadId: string, messages: () => readonly WireMessage[], pinnedCwd: string | null | undefined, version: number | undefined): WireCodeRepo | null {
+      const key = `${version ?? ""}|${pinnedCwd ?? ""}`;
       let entry = byThread.get(threadId);
       if (!entry || entry.key !== key) {
         entry = { key, folder: threadFolder(messages(), pinnedCwd) };
         byThread.set(threadId, entry);
       }
-      return entry.folder ? repoAt(entry.folder) : null;
+      if (!entry.folder) return null;
+      const hit = byFolder.get(entry.folder);
+      if (!hit || now() - hit.at >= REPO_TTL_MS) refresh(entry.folder);
+      return hit?.repo ?? null;
     },
   };
 }

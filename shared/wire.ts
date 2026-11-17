@@ -131,8 +131,6 @@ export interface BotMovedTo {
   at: number;
 }
 
-/** One task = one conversation with its own context, thread and provider
- * session. */
 /** A thread's git repo: its top folder, the checked-out branch (null when detached) and whether it is a linked worktree. */
 export interface WireCodeRepo {
   root: string;
@@ -140,6 +138,8 @@ export interface WireCodeRepo {
   worktree?: true;
 }
 
+/** One task = one conversation with its own context, thread and provider
+ * session. */
 export interface WireTask extends InboxTask {
   /** Outstanding handoffs, not an active provider turn. */
   waitingForTeammates?: boolean;

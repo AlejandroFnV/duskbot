@@ -293,10 +293,14 @@ export function useConnectors(): Connectors {
     await run(slug, reserveConnectionPage(), alias, replacing);
   };
 
-  const flowOf = (slug: string, next: ViaFlow | null) => setViaFlow((current) => {
-    const rest = Object.fromEntries(Object.entries(current).filter(([key]) => key !== slug));
-    return next ? { ...rest, [slug]: next } : rest;
-  });
+  const checked = (slug: string) => setViaChecked((current) => current[slug] ? current : { ...current, [slug]: true });
+  const flowOf = (slug: string, next: ViaFlow | null) => {
+    checked(slug);
+    setViaFlow((current) => {
+      const rest = Object.fromEntries(Object.entries(current).filter(([key]) => key !== slug));
+      return next ? { ...rest, [slug]: next } : rest;
+    });
+  };
 
   const markVia = (slug: string, connected: boolean) => {
     setViaApps((current) => {
@@ -566,7 +570,6 @@ export function useConnectors(): Connectors {
     });
   };
 
-  const checked = (slug: string) => setViaChecked((current) => current[slug] ? current : { ...current, [slug]: true });
   const checkVia = (slug: string) => {
     if (!viaNow.current?.signedIn) return;
     if (viaFlow[slug] || viaPolls.current.has(slug)) { checked(slug); return; }

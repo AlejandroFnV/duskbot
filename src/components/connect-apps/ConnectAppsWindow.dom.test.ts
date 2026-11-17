@@ -485,6 +485,20 @@ describe("the Connect Apps window", () => {
       }
     });
 
+    it("an app the broker cannot sign in to, sent to Composio Connect and then cancelled, is Connect again, never stuck on Checking…", async () => {
+      await remount({ kind: "detail", id: "attio" }, "managed");
+      viaApi({ signedIn: true }, (method) => method === "POST" ? { status: "started", url: "https://connect.composio.dev/link/ln_attio" } : { status: "none" });
+      await remountAt(9);
+      expect(shownLabel()).toBe("Connect Attio");
+      await act(async () => { primary()!.click(); });
+      await flush();
+      expect(fixture.opened).toEqual(["https://connect.composio.dev/link/ln_attio"]);
+      await act(async () => { button("Cancel")!.click(); });
+      await flush();
+      expect(shownLabel()).toBe("Connect Attio");
+      expect(primary()?.disabled).toBe(false);
+    });
+
     it("a row's Connect clicked before Composio Connect is read still opens the app's sign-in, never the app's page", async () => {
       await remount({ kind: "home" }, "unavailable");
       viaApi({ signedIn: true }, (method) => method === "POST" ? { status: "started", url: "https://connect.composio.dev/link/ln_attio" } : { status: "none" });

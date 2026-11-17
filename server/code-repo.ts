@@ -8,6 +8,8 @@ import type { WireCodeRepo } from "../shared/wire-work.ts";
 const EDIT_TOOLS = new Set(["Edit", "Write", "MultiEdit", "NotebookEdit", "edit", "write", "apply_patch"]);
 /** Notes and prose: writing one (a vault note, a report) is not programming, so it never makes a code project. */
 const PROSE_FILE = /\.(md|markdown|txt)$/i;
+/** Alejandro's notes vault: a git repo, but never a code project, whatever file in it a thread touches. */
+const NOT_CODE_ROOTS = [resolve(homedir(), "AIOS")];
 const REPO_TTL_MS = 60_000;
 /** Past this without activity an idle thread is no longer shown as a coding task, so it is not resolved at all. */
 const IDLE_CUTOFF_MS = 24 * 60 * 60_000;
@@ -18,12 +20,18 @@ const expandHome = (path: string): string => path === "~" ? homedir() : path.sta
  * edits to notes never count: only a real change to code tells that the thread is programming. */
 export function toolFolder(name: string, input: string | undefined): string | null {
   if (!input || !EDIT_TOOLS.has(name)) return null;
-  let parsed: Record<string, unknown>;
-  try { parsed = JSON.parse(input) as Record<string, unknown>; } catch { return null; }
-  const file = parsed.file_path ?? parsed.notebook_path ?? parsed.path;
-  if (typeof file !== "string" || PROSE_FILE.test(file)) return null;
-  const path = expandHome(file);
-  return isAbsolute(path) ? dirname(path) : null;
+  let parsed: Record<string, unknown> | unknown[];
+  try { parsed = JSON.parse(input) as Record<string, unknown> | unknown[]; } catch { return null; }
+  // Claude Code names one file; Codex records its edit as a list of changes, `[{ path, kind, diff }]`.
+  const files = Array.isArray(parsed)
+    ? parsed.map((change) => (change && typeof change === "object" ? (change as Record<string, unknown>).path : undefined))
+    : [parsed.file_path ?? parsed.notebook_path ?? parsed.path];
+  for (const file of files) {
+    if (typeof file !== "string" || PROSE_FILE.test(file)) continue;
+    const path = expandHome(file);
+    if (isAbsolute(path)) return dirname(path);
+  }
+  return null;
 }
 
 /** The folder of the newest code file edited in these messages; none when the thread never edited code. */
@@ -44,11 +52,13 @@ const runGit: GitRun = (folder) => new Promise((done) => {
     { encoding: "utf8", timeout: 5000 }, (error, stdout) => done(error ? null : stdout));
 });
 
-/** Parses `git rev-parse --show-toplevel --abbrev-ref HEAD --absolute-git-dir --git-common-dir` run in `folder`. */
-export function parseRevParse(folder: string, output: string): WireCodeRepo | null {
+/** Parses `git rev-parse --show-toplevel --abbrev-ref HEAD --absolute-git-dir --git-common-dir` run in `folder`.
+ * A repo under a notes root (or a worktree of one) is not a code project, so it answers none. */
+export function parseRevParse(folder: string, output: string, notCode: readonly string[] = NOT_CODE_ROOTS): WireCodeRepo | null {
   const [root, branch, gitDir, commonDir] = output.split("\n").map((line) => line.trim());
   if (!root || !branch || !gitDir || !commonDir) return null;
   const common = resolve(isAbsolute(commonDir) ? commonDir : resolve(folder, commonDir));
+  if (notCode.some((skip) => resolve(root) === skip || dirname(common) === skip)) return null;
   const worktree = resolve(gitDir) !== common;
   const project = basename(dirname(common));
   return { root, branch: branch === "HEAD" ? null : branch, ...(worktree ? { worktree: true as const, ...(project ? { project } : {}) } : {}) };

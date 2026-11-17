@@ -19,6 +19,14 @@ describe("toolFolder", () => {
     expect(toolFolder("Edit", JSON.stringify({ file_path: "src/a.ts" }))).toBeNull();
     expect(toolFolder("Edit", undefined)).toBeNull();
   });
+
+  it("reads Codex's list of changes, skipping the notes in it", () => {
+    const changes = (paths: string[]) => JSON.stringify(paths.map((path) => ({ path, kind: { type: "update" }, diff: "+x" })));
+    expect(toolFolder("edit", changes(["/repo/web/index.html"]))).toBe("/repo/web");
+    expect(toolFolder("edit", changes(["/repo/README.md", "/repo/src/a.ts"]))).toBe("/repo/src");
+    expect(toolFolder("edit", changes(["/vault/a.md", "/vault/b.txt"]))).toBeNull();
+    expect(toolFolder("edit", JSON.stringify([]))).toBeNull();
+  });
 });
 
 describe("threadFolder", () => {
@@ -36,6 +44,13 @@ describe("parseRevParse", () => {
     expect(parseRevParse("/wt", "/wt\nfeat/x\n/r/.git/worktrees/wt\n/r/.git\n")).toEqual({ root: "/wt", branch: "feat/x", worktree: true, project: "r" });
     expect(parseRevParse("/r", "/r\nHEAD\n/r/.git\n/r/.git\n")).toEqual({ root: "/r", branch: null });
     expect(parseRevParse("/r", "")).toBeNull();
+  });
+
+  it("never makes a code project of the notes vault, whatever file in it was touched, nor of a worktree of it", () => {
+    const vault = `${homedir()}/AIOS`;
+    expect(parseRevParse(`${vault}/scripts`, `${vault}\nmain\n${vault}/.git\n${vault}/.git\n`)).toBeNull();
+    expect(parseRevParse("/wt", `/wt\nx\n${vault}/.git/worktrees/wt\n${vault}/.git\n`)).toBeNull();
+    expect(parseRevParse("/n", "/n\nmain\n/n/.git\n.git\n", ["/n"])).toBeNull();
   });
 });
 

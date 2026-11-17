@@ -46,7 +46,6 @@ export type ReplyTarget = Message & {
   quote?: string;
 };
 
-/** A selected quote is the person's own pick from the message, bounded like any excerpt; blank means the whole message. */
 export function parseReplyQuote(value: unknown): string | undefined {
   if (value === undefined || value === null) return undefined;
   if (typeof value !== "string") throw Object.assign(new Error("replyQuote must be text"), { status: 400 });

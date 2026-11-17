@@ -145,7 +145,6 @@ export function Composer({
   members?: Bot[];
   onEditLast?: () => void;
   replyTo?: Message | null;
-  /** The selected words of `replyTo` this reply answers; absent answers the whole message. */
   replyQuote?: string;
   onClearReply?: () => void;
   onConsumeReply?: () => void;

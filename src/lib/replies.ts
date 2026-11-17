@@ -32,7 +32,6 @@ export function escapeCancelsReply(
 
 export const REPLY_SOURCE = "data-reply-source";
 
-/** The one message a text selection sits inside and its words, or null when it is empty or spans more than one message. */
 export function selectionReply(
   selection: { isCollapsed: boolean; toString(): string; anchorNode: Node | null; focusNode: Node | null } | null,
 ): { messageId: string; quote: string } | null {

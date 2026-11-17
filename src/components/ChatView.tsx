@@ -736,14 +736,15 @@ export function personStoppedLast(messages: readonly Message[]): boolean {
   return false;
 }
 
-export function useLingering(on: boolean, ms: number): boolean {
-  const [lingering, setLingering] = useState(on);
-  if (on && !lingering) setLingering(true);
+export function useLingering(on: boolean, ms: number, key = ""): boolean {
+  const [held, setHeld] = useState({ key, on });
+  if (held.key !== key || (on && !held.on)) setHeld({ key, on });
+  const lingering = held.key === key && held.on;
   useEffect(() => {
     if (on || !lingering) return;
-    const timer = setTimeout(() => setLingering(false), ms);
+    const timer = setTimeout(() => setHeld({ key, on: false }), ms);
     return () => clearTimeout(timer);
-  }, [on, lingering, ms]);
+  }, [on, lingering, ms, key]);
   return on || lingering;
 }
 
@@ -858,7 +859,7 @@ const MessagesList = memo(function MessagesList({
     const at = items.findIndex((item) => item.kind === "message" && item.message.id === seamId);
     return at < 0 ? layout.joins : layout.joins.map((join, index) => index === at ? { ...join, below: true } : join);
   }, [layout, items, seamId]);
-  const exchanges = useExchangeRows(messages, items, transcriptRows, showToolCalls ? noneTransparent : hiddenSteps, botId);
+  const exchanges = useExchangeRows(transcript, items, transcriptRows, showToolCalls ? noneTransparent : hiddenSteps, botId);
   // a chip opens the bot-to-bot conversation on its own sheet, apart from the person's thread with the bot
   const [exchangePeers, setExchangePeers] = useState<PeerRef[] | null>(null);
   const exchangeLines = useMemo(() => exchangePeers ? peerConversation(messages, exchangeEntries(messages, botId), exchangePeers) : [],
@@ -1171,7 +1172,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
   const importing = useNotesWork(bot.id);
   const presenceVisible = !stopCut && (hold.typing || (waiting && mountDue) || Boolean(importing));
   // the bubble the line hangs under keeps its pinched corner until the line has finished leaving, as grok's does
-  const presenceShown = useLingering(presenceVisible, 140);
+  const presenceShown = useLingering(presenceVisible, 140, `${bot.id}:${bot.threadId ?? ""}`);
   const paintedMessages = useFirstPaintRows(transcriptKey, windowedMessages, Boolean(focus && !focus.consumed) || laterCount > 0, scrollRef, following);
   const lastShownRow = windowedMessages.findLast((message) => !quietRow(message, showToolCalls));
   const lastRowIsBubble = Boolean(lastShownRow && isBotTextRow(lastShownRow, bot.id));

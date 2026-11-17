@@ -351,7 +351,7 @@ export const Transcript = memo(function Transcript({
   const focus = state.focusMessage;
   const focusedId = focus && !focus.consumed && focus.threadId === group.threadId ? focus.messageId : null;
   const unreadIds = useMemo(() => unreadMessageIds(messages, unreadDividerId), [messages, unreadDividerId]);
-  const exchanges = useExchangeRows(messages, items, roomItemRows, showToolCalls ? noneTransparent : hiddenRuns);
+  const exchanges = useExchangeRows(transcript, items, roomItemRows, showToolCalls ? noneTransparent : hiddenRuns);
   let dividerPlaced = false;
   const dividerAbove = (rows: readonly Message[]) => {
     if (!unreadIds || dividerPlaced || !rows.some((row) => unreadIds.has(row.id))) return null;

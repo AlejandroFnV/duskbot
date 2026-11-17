@@ -77,6 +77,7 @@ export function ownersOwnAsk(path: ReadonlyArray<{ role: string; kind?: string; 
 
 export type BotMemoryResult = MemoryUpdateResult | { ok: true; forgotten: string[]; aboutMe: string[] }
   | { ok: true; preference: "saved" | "known"; person?: string }
+  | { ok: true; preference: "pending_confirmation"; requestId: string; message: string }
   | { ok: true; unverified: true; entry: string; note: string }
   | { ok: false; code: "ambiguous"; error: string; candidates: Array<{ id: string; text: string }> };
 
@@ -121,9 +122,18 @@ export const PREFERENCE_CHARS = 300;
 export interface PreferenceTarget {
   /** Their name on a Team Cloud, for the bot's words; none for the one person of a desktop or My Cloud. */
   person?: string;
+  /** The layer About me finds the person by, kept on a card the person confirms later. */
+  owner?: { botId: string; botName: string };
   /** Adds the line; 0 when it was there already or the person removed it before. `replaces`: an older learned line it
    * changes, which leaves About me (the newer fact wins). */
   save(text: string, replaces?: readonly string[]): number;
+}
+
+/** Saves a preference the person stated, in their own words or by their tap on a card. */
+export function savePreference(target: PreferenceTarget, text: string, replaces: readonly string[]): BotMemoryResult {
+  // Said again now, it holds again, even after the person had it forgotten.
+  clearForgotten(text);
+  return { ok: true, preference: target.save(text, replaces) > 0 ? "saved" : "known", ...(target.person ? { person: target.person } : {}) };
 }
 
 /** memory_update from a bot's turn. forget takes ids or a passage in oldText; `aboutMe` is null when this conversation may
@@ -133,7 +143,10 @@ export interface PreferenceTarget {
 export function botMemoryUpdate(
   layer: string,
   body: { action?: unknown; text?: unknown; oldText?: unknown; until?: unknown; ids?: unknown },
-  opts: { source: string; aboutMe: Pick<AboutMe, "forget"> | null; prefer?: PreferenceTarget | null; trust?: WriteTrust; about?: { owner: string; text: string } },
+  opts: { source: string; aboutMe: Pick<AboutMe, "forget"> | null; prefer?: PreferenceTarget | null; trust?: WriteTrust; about?: { owner: string; text: string };
+    /** Security invariant: a preference from a turn that read outside content is only offered to the person on a card;
+     * nothing reachable from the bot saves it. */
+    confirmPreference?: (target: PreferenceTarget, text: string, replaces: string[]) => BotMemoryResult },
 ): BotMemoryResult {
   const outside = opts.trust?.from === "outside" ? opts.trust : null;
   if (typeof body.text === "string" && body.action !== "remove" && body.action !== "forget" && looksLikeInstruction(body.text)) {
@@ -144,16 +157,15 @@ export function botMemoryUpdate(
     if (!text || text.length > PREFERENCE_CHARS) {
       return { ok: false, code: "invalid", error: `prefer needs text: the person's preference as one short line, at most ${PREFERENCE_CHARS} characters.` };
     }
+    const replaces = typeof body.oldText === "string" && body.oldText.trim() ? [body.oldText.trim()] : [];
+    if (outside && opts.prefer && opts.confirmPreference) return opts.confirmPreference(opts.prefer, text, replaces);
     if (outside) {
       return { ok: false, code: "invalid", error: "This turn read content from outside (a page, a tool, an email or another bot), so it cannot change About me. If the person said it, ask them to confirm in their own words." };
     }
     if (!opts.prefer) {
       return { ok: false, code: "invalid", error: "Only work one person began with their own words can save their preference: ask them to say it in their own chat with you." };
     }
-    // Said again now, it holds again, even after the person had it forgotten.
-    clearForgotten(text);
-    const replaces = typeof body.oldText === "string" && body.oldText.trim() ? [body.oldText.trim()] : [];
-    return { ok: true, preference: opts.prefer.save(text, replaces) > 0 ? "saved" : "known", ...(opts.prefer.person ? { person: opts.prefer.person } : {}) };
+    return savePreference(opts.prefer, text, replaces);
   }
   if (body.action === "forget" || (outside && body.action === "remove")) {
     if (outside) return { ok: false, code: "invalid", error: "Only the person's own request can make you forget or remove a note, and this turn read content from outside." };

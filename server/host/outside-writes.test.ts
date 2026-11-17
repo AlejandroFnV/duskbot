@@ -18,9 +18,11 @@ function world(over: Partial<OutsideWriteDeps> = {}) {
     patchGroup: (id: string, patch: { bulletin: string }) => { const group = groups.get(id); if (group) Object.assign(group, patch); return group; },
   } as unknown as OutsideWriteDeps["store"];
   const writeMemory = vi.fn((): string | null => null);
+  const savePreference = vi.fn((): string | null => null);
   const decide = vi.fn();
-  const writes = createOutsideWrites({ store, language: () => undefined, writeMemory, decide, notify: () => {}, ...over });
-  return { writes, lines, groups, writeMemory, decide };
+  let clock = Date.parse("2026-11-17T12:00:00Z");
+  const writes = createOutsideWrites({ store, language: () => undefined, writeMemory, savePreference, decide, notify: () => {}, now: () => clock, ...over });
+  return { writes, lines, groups, writeMemory, savePreference, decide, later: (ms: number) => { clock += ms; } };
 }
 
 describe("what work from outside writes where later turns read it waits on a card", () => {
@@ -94,5 +96,19 @@ describe("what work from outside writes where later turns read it waits on a car
 
   it("leaves other cards to whoever owns them", () => {
     expect(world().writes.resolve("hook-run", "someone-elses", "allow")).toBeNull();
+  });
+
+  it("lets a preference card expire, or be discarded, without saving it", () => {
+    const owner = { botId: "chief", botName: "Clive" };
+    const w = world();
+    const late = w.writes.submitPreference(bot, "chat", { text: "Short answers", replaces: [], owner }) as { requestId: string };
+    w.later(25 * 60 * 60 * 1000);
+    expect(w.writes.resolve("chat", late.requestId, "allow")).toMatchObject({ outcome: "unavailable" });
+    expect(w.lines[0]!.card).toMatchObject({ expired: true });
+    const skipped = w.writes.submitPreference(bot, "chat", { text: "Short answers", replaces: [], owner }) as { requestId: string };
+    expect(w.writes.resolve("chat", skipped.requestId, "deny")).toMatchObject({ outcome: "rejected" });
+    expect(w.savePreference).not.toHaveBeenCalled();
+    expect(w.writes.submitPreference(bot, "chat", { text: "Short answers", replaces: [] })).toMatchObject({ ok: false });
+    expect(w.lines).toHaveLength(2);
   });
 });

@@ -135,6 +135,7 @@ const FORGOTTEN_SHOWN = 8;
 /** A preference saved once in the person's About me, which every bot reads in their work. */
 function preferText(r: Json): string {
   const whose = typeof r.person === "string" && r.person ? `${r.person}'s` : "the person's";
+  if (r.preference === "pending_confirmation") return typeof r.message === "string" ? r.message : "Not saved yet: the person decides on a card.";
   return r.preference === "saved"
     ? `Saved in ${whose} About me, which every bot reads in their work. Don't pass it on to other bots or save it in your own notes too.`
     : `Already in ${whose} About me, or they removed it before: nothing to save or pass on.`;

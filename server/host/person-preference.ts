@@ -21,18 +21,22 @@ export interface PersonPreferenceDeps<T extends Turn> {
 }
 
 export function createPersonPreference<T extends Turn>(deps: PersonPreferenceDeps<T>) {
+  const forOwner = (owner: { botId: string; botName: string }, person?: string): PreferenceTarget => ({
+    ...(person ? { person } : {}), owner,
+    save: (text, replaces) => replaces?.length ? deps.aboutMe.learn(owner, [text], replaces) : deps.aboutMe.learn(owner, [text]),
+  });
   return {
     /** Where `bot`'s turn may save a preference; null when no one person's own words began its work. */
     target(turn: T, bot: { id: string; name: string }): PreferenceTarget | null {
       if (deps.team) {
         const person = deps.requester(turn.threadId, turn.generation);
         if (!person) return null;
-        const name = deps.personName(person);
         // Their own layer of this bot, which is how About me finds the person it belongs to.
-        const layer = layerId(bot.id, memberAudience(person));
-        return { ...(name ? { person: name } : {}), save: (text, replaces) => replaces?.length ? deps.aboutMe.learn({ botId: layer, botName: bot.name }, [text], replaces) : deps.aboutMe.learn({ botId: layer, botName: bot.name }, [text]) };
+        return forOwner({ botId: layerId(bot.id, memberAudience(person)), botName: bot.name }, deps.personName(person));
       }
-      return deps.userStarted(turn) ? { save: (text, replaces) => replaces?.length ? deps.aboutMe.learn({ botId: bot.id, botName: bot.name }, [text], replaces) : deps.aboutMe.learn({ botId: bot.id, botName: bot.name }, [text]) } : null;
+      return deps.userStarted(turn) ? forOwner({ botId: bot.id, botName: bot.name }) : null;
     },
+    /** The same place again, for a preference the person confirms later on a card. */
+    forOwner,
   };
 }

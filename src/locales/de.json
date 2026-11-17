@@ -263,6 +263,8 @@
   "server.outside.memoryChangeTitle": "Das im Gedächtnis des Bots ändern oder entfernen?",
   "server.outside.save": "Speichern",
   "server.outside.skip": "Überspringen",
+  "server.outside.preferenceTitle": "In „Über mich“ für alle deine Bots speichern?",
+  "server.outside.discard": "Verwerfen",
   "server.rooms.postedIn": "Gepostet in {room}",
   "server.rooms.openedThread": "Thread #{title} geöffnet",
   "server.rooms.held": "{bot} ist angehalten (von dir gestoppt). Erwähne ihn mit @ oder schreib „resume“",

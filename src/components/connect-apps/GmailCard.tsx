@@ -47,7 +47,7 @@ export function gmailCard(input: GmailInput): GmailCardModel {
   let line = input.via ? viaLine(flow, name) : null;
   if (flow?.step === "waiting" && !flow.note) line = { text: t("connectApps.gmail.waiting"), tone: "status" };
   if (connected) line = { text: t("connectApps.gmail.connected"), tone: "done" };
-  else if (!line && input.via && input.viaSignedIn && !flow) line = { text: t("connectApps.gmail.next"), tone: "status" };
+  else if (!line && input.via && input.viaSignedIn && !flow && phase?.kind !== "checking") line = { text: t("connectApps.gmail.next"), tone: "status" };
   else if (!line && phase?.kind === "continue") line = { text: t("connectApps.gmail.waiting"), tone: "status" };
   else if (!line && phase?.kind === "reconnect") line = { text: t("connectApps.gmail.reconnect"), tone: "alert" };
   else if (!line && phase?.kind === "failed") line = viaLine({ step: "failed", why: phase.why, ...(phase.message ? { message: phase.message } : {}) }, name);

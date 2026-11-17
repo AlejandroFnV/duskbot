@@ -513,8 +513,7 @@ export function ModelPicker({
     dispatch({ type: "setModel", botId: bot.id, threadId, ...(threadId && updatesBotDefault ? { updateBotDefault: true } : {}),
       selection: effort ? { ...model, effort } : model, ...(working && threadId ? { nextTurn: true } : {}) });
   };
-  const thinking: SimpleThinking | null = contained ? null
-    : variantChoices(state, selection, threadId ?? bot.threadId) ? {
+  const thinking: SimpleThinking | null = variantChoices(state, selection, threadId ?? bot.threadId) ? contained ? null : {
       variants: (
         <ModelVariantRow compact quiet bot={shown} threadId={threadId} updateBotDefault={Boolean(threadId) && updatesBotDefault} className="px-2 py-1"
           label={<span className="shrink-0 text-[12px] font-medium leading-4 text-ink-tertiary">{t("botSettings.simple.thinking")}</span>} />

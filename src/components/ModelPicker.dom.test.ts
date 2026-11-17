@@ -489,3 +489,15 @@ describe("OpenCode's free models in the menu", () => {
     }));
   });
 });
+
+describe("the panel's model row (contained)", () => {
+  it("offers the Thinking levels and writes the picked one to the bot's own model", async () => {
+    flushSync(() => root.render(createElement(ModelPicker, { bot: scout(), threadId: "thread-scout", contained: true })));
+    await openWith("click");
+    const pills = [...document.querySelectorAll<HTMLElement>("[data-effort-pill]")];
+    expect(pills.map((pill) => pill.textContent)).toEqual(["Low", "Medium", "High"]);
+    flushSync(() => pills[2]!.click());
+    expect(fixture.dispatch).toHaveBeenLastCalledWith(expect.objectContaining({ botId: "scout", updateBotDefault: true,
+      selection: { instanceId: "claude", model: "claude-opus-5-5", effort: "high" } }));
+  });
+});

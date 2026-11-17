@@ -15,7 +15,7 @@ import { useMenuMotion } from "../MenuMotion";
 import { modelMenuKey, modelMenuPointerMove } from "../model-menu-keys";
 import { SIMPLE_POPOVER_WIDTH } from "../ModelPicker";
 import { InstanceProviderMark } from "../ProviderIcons";
-import { SimpleModelMenu } from "../SimpleModelMenu";
+import { SimpleModelMenu, type SimpleThinking } from "../SimpleModelMenu";
 import { buttonCls, Card, ColRow, RowIcon, RowText, TrashButton } from "./rows";
 
 export type Backup = NonNullable<Bot["fallback"]>[number];
@@ -187,6 +187,7 @@ export function BackupChooser({ bot, current, exclude, onPick, label, title, but
             query={query}
             bot={bot}
             botModel={{ label: "", title: "" }}
+            thinking={current ? backupThinking(current, state.instances, onPick) : null}
             idPrefix={menuId}
             onQuery={setQuery}
             onPick={(instance, model) => {
@@ -210,6 +211,15 @@ export function BackupChooser({ bot, current, exclude, onPick, label, title, but
       )}
     </>
   );
+}
+
+/** A backup's reasoning level; no level takes the main model's. */
+function backupThinking(current: Backup, instances: readonly InstanceInfo[], onPick: (picked: Backup) => void): SimpleThinking | null {
+  const levels = instances.find((instance) => instance.instanceId === current.instanceId)?.capabilities?.effortLevels ?? [];
+  if (!levels.length) return null;
+  const { effort: _effort, ...rest } = current;
+  return { levels, current: current.effort, onPick: (effort) => onPick({ ...rest, effort }), onReset: () => onPick(rest),
+    unset: { label: t("botPanel.backups.effortInherit"), reset: t("botPanel.backups.useInherit") } };
 }
 
 export function BackupAis({ bot, onChange }: { bot: Bot; onChange: (fallback: Backup[]) => void }) {

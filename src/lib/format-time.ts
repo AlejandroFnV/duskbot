@@ -1,14 +1,22 @@
 import { activeLocale } from "@/lib/i18n";
 
-const formats = new Map<string, Intl.DateTimeFormat>();
+const SYSTEM_FORMAT = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
+const appFormats = new Map<string, Intl.DateTimeFormat>();
+let appLocaleClock = false;
 
-/** The clock in the app's own language, so Spanish reads 18:05 even on a phone set to English. */
+/** The phone app turns this on so its clock follows the app's language (Spanish reads 18:05 on a phone set to
+ * English), like its chat list. The desktop never calls it and keeps the system's own clock. */
+export function setAppLocaleClock(on: boolean): void {
+  appLocaleClock = on;
+}
+
 function timeFormat(): Intl.DateTimeFormat {
+  if (!appLocaleClock) return SYSTEM_FORMAT;
   const locale = activeLocale();
-  let format = formats.get(locale);
+  let format = appFormats.get(locale);
   if (!format) {
     format = new Intl.DateTimeFormat(locale, { hour: "numeric", minute: "2-digit" });
-    formats.set(locale, format);
+    appFormats.set(locale, format);
   }
   return format;
 }

@@ -1,6 +1,7 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import type { Message } from "@/state/store";
 import { formatTime } from "@/state/store";
+import { setAppLocaleClock } from "./format-time";
 import { setLocale, t } from "./i18n";
 import { dayLabel, localDay, transcriptLookups } from "./transcript-derivations";
 
@@ -89,6 +90,30 @@ describe("formatTime", () => {
     const options = { hour: "numeric", minute: "2-digit" } as const;
     for (const at of [0, 1_700_000_000_000, Date.UTC(2026, 2, 8, 6, 59), Date.UTC(2026, 9, 3, 23, 30), Date.now()]) {
       expect(formatTime(at)).toBe(new Date(at).toLocaleTimeString([], options));
+    }
+  });
+
+  it("keeps the system's clock on the desktop whatever the app's language", () => {
+    setLocale("es");
+    try {
+      expect(formatTime(0)).toBe(new Date(0).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
+    } finally {
+      setLocale("en");
+    }
+  });
+
+  it("follows the app's language in the phone app", () => {
+    const at = Date.UTC(2026, 9, 3, 23, 30);
+    setAppLocaleClock(true);
+    try {
+      setLocale("es");
+      expect(formatTime(at)).toBe(new Intl.DateTimeFormat("es", { hour: "numeric", minute: "2-digit" }).format(at));
+      expect(formatTime(at)).not.toMatch(/[AP]\.?M/i);
+      setLocale("en");
+      expect(formatTime(at)).toBe(new Intl.DateTimeFormat("en", { hour: "numeric", minute: "2-digit" }).format(at));
+    } finally {
+      setAppLocaleClock(false);
+      setLocale("en");
     }
   });
 });

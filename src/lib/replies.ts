@@ -29,3 +29,22 @@ export function escapeCancelsReply(
 ): boolean {
   return event.key === "Escape" && replying && !recording && !event.isComposing;
 }
+
+export const REPLY_SOURCE = "data-reply-source";
+
+/** The one message a text selection sits inside and its words, or null when it is empty or spans more than one message. */
+export function selectionReply(
+  selection: { isCollapsed: boolean; toString(): string; anchorNode: Node | null; focusNode: Node | null } | null,
+): { messageId: string; quote: string } | null {
+  if (!selection || selection.isCollapsed) return null;
+  const quote = selection.toString().replace(/\s+/g, " ").trim();
+  if (!quote) return null;
+  const source = (node: Node | null) => {
+    const element = node && (node.nodeType === 1 ? node as Element : node.parentElement);
+    return element?.closest(`[${REPLY_SOURCE}]`) ?? null;
+  };
+  const start = source(selection.anchorNode);
+  if (!start || start !== source(selection.focusNode)) return null;
+  const messageId = start.getAttribute(REPLY_SOURCE);
+  return messageId ? { messageId, quote } : null;
+}

@@ -2393,6 +2393,7 @@
   "chat.reply.cancel": "Cancel reply",
   "chat.reply.image": "[Image]",
   "chat.reply.file": "[File]",
+  "chat.reply.selection": "Reply to selection",
   "chat.speak.needsKey": "Add an ElevenLabs key in an agent profile to read messages aloud",
   "chat.speak.needsSetup": "Set up a voice provider in this agent's profile to read messages aloud",
   "chat.speak.needsVoice": "Pick a voice in this agent's profile to read messages aloud",

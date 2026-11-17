@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { escapeCancelsReply, replyAuthor, replySnippet } from "./replies";
+import { REPLY_SOURCE, escapeCancelsReply, replyAuthor, replySnippet, selectionReply } from "./replies";
 import type { Message } from "@/state/store";
 
 const base: Message = { id: "m1", at: 1, role: "bot", kind: "text", text: "hello" };
@@ -45,5 +45,27 @@ describe("replySnippet markup", () => {
   });
   it("leaves a lone asterisk or underscore alone", () => {
     expect(replySnippet("2 * 3 = 6 and snake_case")).toBe("2 * 3 = 6 and snake_case");
+  });
+});
+
+describe("replying to a selection", () => {
+  const bubble = (id: string | null) => ({ getAttribute: (name: string) => (name === REPLY_SOURCE ? id : null) });
+  const textIn = (source: ReturnType<typeof bubble> | null) =>
+    ({ nodeType: 3, parentElement: { closest: () => source } }) as unknown as Node;
+  const pick = (anchor: Node | null, focus: Node | null, text: string, isCollapsed = false) =>
+    selectionReply({ isCollapsed, toString: () => text, anchorNode: anchor, focusNode: focus });
+
+  it("returns the message and its selected words, whitespace folded", () => {
+    const one = bubble("m7");
+    expect(pick(textIn(one), textIn(one), "  two\n  words ")).toEqual({ messageId: "m7", quote: "two words" });
+  });
+
+  it("ignores an empty selection, one outside any message, and one across two messages", () => {
+    const one = bubble("m7");
+    expect(pick(textIn(one), textIn(one), "words", true)).toBeNull();
+    expect(pick(textIn(one), textIn(one), "   ")).toBeNull();
+    expect(pick(textIn(null), textIn(null), "words")).toBeNull();
+    expect(pick(textIn(one), textIn(bubble("m8")), "words")).toBeNull();
+    expect(selectionReply(null)).toBeNull();
   });
 });

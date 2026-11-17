@@ -113,6 +113,7 @@ const supportsAgents = (instances: InstanceInfo[], candidate?: Bot) =>
 
 interface ComposerDraftSnapshot extends ComposerSendSnapshot {
   reply: Message | null;
+  replyQuote?: string;
 }
 
 type SlotGlyph = "waveform" | "mic" | "arrow-up" | "stop";
@@ -133,6 +134,7 @@ export function Composer({
   members,
   onEditLast,
   replyTo,
+  replyQuote,
   onClearReply,
   onConsumeReply,
   onRestoreReply,
@@ -143,9 +145,11 @@ export function Composer({
   members?: Bot[];
   onEditLast?: () => void;
   replyTo?: Message | null;
+  /** The selected words of `replyTo` this reply answers; absent answers the whole message. */
+  replyQuote?: string;
   onClearReply?: () => void;
   onConsumeReply?: () => void;
-  onRestoreReply?: (message: Message, threadId: string) => void;
+  onRestoreReply?: (message: Message, threadId: string, quote?: string) => void;
   locked?: boolean;
 }) {
   const bot = profile ? currentTaskBot(profile) : undefined;
@@ -210,7 +214,7 @@ export function Composer({
   const restoreDraft = useCallback(
     (sent: ComposerDraftSnapshot) => {
       if (recoverFailedComposerSend(sent) === "restored") {
-        restoreMentionPicks(sent.draftId, sent.mentions); if (sent.reply) onRestoreReply?.(sent.reply, sent.threadId);
+        restoreMentionPicks(sent.draftId, sent.mentions); if (sent.reply) onRestoreReply?.(sent.reply, sent.threadId, sent.replyQuote);
       }
     },
     [onRestoreReply],
@@ -687,6 +691,7 @@ export function Composer({
       attachments: [...attachments],
       reply: replyTo ?? null,
       replyToId: replyTo?.id,
+      ...(replyTo && replyQuote ? { replyQuote } : {}),
       threadId,
       channelMode: effectiveChannelMode, mentions: picks.ids(body),
     };
@@ -699,7 +704,7 @@ export function Composer({
         groupId: group.id,
         text: body,
         sendId: sentDraft.sendId,
-        replyToId: replyTo?.id,
+        replyToId: replyTo?.id, replyQuote: sentDraft.replyQuote,
         threadId,
         mode: effectiveChannelMode, mentions: sentDraft.mentions,
         onError: () => restoreDraft(sentDraft), onSettled,
@@ -709,7 +714,7 @@ export function Composer({
       const points = effectiveChannelMode === "goal" ? null : takePointedChips(threadId);
       noteSendLaunch(sendId, inputRef.current);
       dispatch({
-        type: "send", botId: bot.id, text: body, sendId: sentDraft.sendId, replyToId: replyTo?.id, threadId, mode: effectiveChannelMode, mentions: sentDraft.mentions,
+        type: "send", botId: bot.id, text: body, sendId: sentDraft.sendId, replyToId: replyTo?.id, replyQuote: sentDraft.replyQuote, threadId, mode: effectiveChannelMode, mentions: sentDraft.mentions,
         ...(points ? { pointed: points.pointed } : {}), ...(followUp ? { followUp } : {}),
         onError: () => { points?.restore(); restoreDraft(sentDraft); }, onSettled,
       });
@@ -981,7 +986,7 @@ export function Composer({
           </div>
         )}
         <div ref={pillContentRef} className={singleRow ? cn("flex min-h-[52px] min-w-0 flex-1 flex-col justify-center rounded-[26px] py-1 pl-3 pr-1", ELEVATED_FLOAT) : simpleDock ? "flex shrink-0 flex-col" : "contents"}>
-        {replyTo && <ComposerReplyStrip message={replyTo} fallbackName={bot?.name} onClear={onClearReply} />}<ComposerAttachmentStrip items={attachments} onRemove={removeAttachment} onRetry={retryUpload} onDisplayInChatBox={displayPasteInChatBox} notice={attachmentNotice} onNotice={setAttachmentNotice} />
+        {replyTo && <ComposerReplyStrip message={replyTo} quote={replyQuote} fallbackName={bot?.name} onClear={onClearReply} />}<ComposerAttachmentStrip items={attachments} onRemove={removeAttachment} onRetry={retryUpload} onDisplayInChatBox={displayPasteInChatBox} notice={attachmentNotice} onNotice={setAttachmentNotice} />
         <div data-composer-row data-glyph-swap={glyphs.swapped ? "" : undefined} data-glyph-from-held={glyphs.swapped && glyphs.fromHeld ? "" : undefined} style={simpleDock ? slot.vars : undefined} className={cn("flex items-end", simpleDock ? cn("gap-2", stacked && "gap-y-2") : "gap-1", !singleRow && !simpleDock && "@max-[30rem]/composer:flex-wrap", stacked && "flex-wrap")}>
           {pickers.inputs}
           {!locked && !singleRow && (

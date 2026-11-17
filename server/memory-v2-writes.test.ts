@@ -88,7 +88,7 @@ describe("a preference from a turn that read outside content", () => {
         botByThread: () => bot, bot: () => bot, group: () => undefined, patchGroup: () => undefined,
       } as never,
       language: () => undefined, writeMemory: () => null, decide: () => {}, notify: () => {},
-      savePreference: (write) => { savePreference(people.forOwner(write.owner, write.person), write.text, write.replaces ?? []); return null; },
+      savePreference: (write) => { savePreference(people.forOwner(write.owner, write.person, write.personKey), write.text, write.replaces ?? []); return { known: false }; },
     });
     const prefer = (body: Record<string, unknown>) => botMemoryUpdate(BOT, { action: "prefer", text: PREF, ...body }, { source: "chat", aboutMe: null, trust: outside,
       prefer: people.target({ threadId: "t", generation: "g" }, bot),

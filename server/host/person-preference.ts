@@ -21,8 +21,8 @@ export interface PersonPreferenceDeps<T extends Turn> {
 }
 
 export function createPersonPreference<T extends Turn>(deps: PersonPreferenceDeps<T>) {
-  const forOwner = (owner: { botId: string; botName: string }, person?: string): PreferenceTarget => ({
-    ...(person ? { person } : {}), owner,
+  const forOwner = (owner: { botId: string; botName: string }, person?: string, personKey?: string): PreferenceTarget => ({
+    ...(person ? { person } : {}), ...(personKey ? { personKey } : {}), owner,
     save: (text, replaces) => replaces?.length ? deps.aboutMe.learn(owner, [text], replaces) : deps.aboutMe.learn(owner, [text]),
   });
   return {
@@ -32,7 +32,7 @@ export function createPersonPreference<T extends Turn>(deps: PersonPreferenceDep
         const person = deps.requester(turn.threadId, turn.generation);
         if (!person) return null;
         // Their own layer of this bot, which is how About me finds the person it belongs to.
-        return forOwner({ botId: layerId(bot.id, memberAudience(person)), botName: bot.name }, deps.personName(person));
+        return forOwner({ botId: layerId(bot.id, memberAudience(person)), botName: bot.name }, deps.personName(person), person);
       }
       return deps.userStarted(turn) ? forOwner({ botId: bot.id, botName: bot.name }) : null;
     },

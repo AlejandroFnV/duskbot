@@ -1053,6 +1053,10 @@ function cardAnswerRefusal(auth: RequestAuth, threadId: string, requestId: strin
       ? "A local service can only decline this request. Approve or answer it in dusk bot while signed in."
       : null;
   }
+  // On a Team Cloud a preference card saves into one person's About me: only that person answers it, an admin included,
+  // and a card that does not name them is answered by no one.
+  const preference = CLOUD_TEAM ? store.messagesFor(threadId).find((message) => message.card?.requestId === requestId && message.card.outsideWrite?.kind === "preference")?.card?.outsideWrite : undefined;
+  if (preference?.kind === "preference") return preference.personKey && preference.personKey === personKey(auth.session) ? null : "Only the person this preference is about can save or discard it.";
   const reviewed = auth.scopes.includes("admin") ? undefined : store.messagesFor(threadId).find(message => message.card?.requestId === requestId && (message.card.teamMemoryRequest || (message.card.outsideWrite && message.card.outsideWrite.kind !== "preference")))?.card;
   if (reviewed) return reviewed.outsideWrite ? "Only a workspace admin can save what came in from outside." : "Only a workspace admin can review shared team memory.";
   // A Cloud guest may read along but never answer: its words would reach the owner's turn.
@@ -10108,7 +10112,7 @@ const validateModelProposal = (selection: ModelSelection, current?: BotRecord): 
 };
 const outsideWrites = createOutsideWrites({ store, notify, language: (threadId) => threadLanguage(threadId), decide: (row) => appendDecision(DATA_DIR, row),
   writeMemory: (botId, threadId, change) => { const written = botMemoryUpdate(teamHost.layer(botId, threadId), change, { source: memorySourceLabel({ room: store.groupByThread(threadId), task: store.taskByThread(teamHost.baseBotId(botId), threadId), threadId }), aboutMe: null, prefer: null }); return written.ok ? null : written.error; },
-  savePreference: (write) => { savePreference(personPreference.forOwner(write.owner, write.person), write.text, write.replaces ?? []); return null; } });
+  savePreference: (write) => { const saved = savePreference(personPreference.forOwner(write.owner, write.person, write.personKey), write.text, write.replaces ?? []); return { known: "preference" in saved && saved.preference === "known" }; } });
 const outboundRequests = new OutboundRequestService();
 const outboundCounts = new OutboundCounts(join(DATA_DIR, "outbound-counts.json"));
 const outboundHold = createOutboundHold({ store, dataDir: DATA_DIR, outboundRequests, outboundCounts, holdMs: OUTBOUND_HOLD_MS, connectorThread, activeGroupTurnForBot, notify });
@@ -14163,7 +14167,7 @@ const handleRequestInner = async (req: IncomingMessage, res: ServerResponse) => 
         const result = botMemoryUpdate(layer, body, { source: memorySource(), aboutMe: ownersAsk ? aboutMeFacts : null,
           prefer: body?.action === "prefer" ? personPreference.target(internalCapability, internalSender) : null,
           trust: memoryWriteTrust(internalSender.id, internalCapability.threadId),
-          confirmPreference: (target, text, replaces) => outsideWrites.submitPreference(internalSender, internalCapability.threadId, { text, replaces, owner: target.owner, person: target.person }),
+          confirmPreference: (target, text, replaces) => outsideWrites.submitPreference(internalSender, internalCapability.threadId, { text, replaces, owner: target.owner, person: target.person, personKey: target.personKey }),
           about: { owner: aboutOwnerFor(internalSender.id, internalCapability.threadId), text: teamHost.profileFor(internalCapability.threadId, cfg.profile)?.aboutMe ?? "" } });
         return json(res, result.ok ? 200 : result.code === "conflict" || result.code === "ambiguous" ? 409 : 400, result);
       }

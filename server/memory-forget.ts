@@ -124,6 +124,8 @@ export interface PreferenceTarget {
   person?: string;
   /** The layer About me finds the person by, kept on a card the person confirms later. */
   owner?: { botId: string; botName: string };
+  /** On a Team Cloud, the person key of that layer: the one person who may confirm it on a card. */
+  personKey?: string;
   /** Adds the line; 0 when it was there already or the person removed it before. `replaces`: an older learned line it
    * changes, which leaves About me (the newer fact wins). */
   save(text: string, replaces?: readonly string[]): number;

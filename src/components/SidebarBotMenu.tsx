@@ -17,7 +17,7 @@ import { submenuPosition } from "./SidebarPopoverMenu";
 import { submenuIntent, type SubmenuIntent } from "@/lib/submenu-intent";
 import { openBotSettingsPage } from "./bot-panel/panel-link";
 import type { MenuState } from "./Sidebar";
-import { departmentNames, moveBotsToSection, useMayMoveBots } from "./bot-sections";
+import { departmentNames, moveBotsToSection, setBotPinned, useMayMoveBots } from "./bot-sections";
 
 type Flyout = "more" | "move";
 
@@ -228,7 +228,7 @@ export function BotContextMenu({
     : member ? null : grokItem("eye-slash", t("sidebar.grok.hide"), () => onArchive(bot), { disabled: archiveBlocked, hint: archiveHint });
   const remove = member ? null : <BotDeleteMenuItem key="delete" deleting={deleting} className={cn(GROK_MENU_ITEM, GROK_ROW_FILL, "text-ink hover:bg-transparent")} labelClassName={cn(GROK_LABEL, GROK_DANGER)} icon={deleting ? undefined : <GrokMenuIcon name="trash" danger />} label={t("sidebar.grok.delete")} onClick={() => { onClose(); onDelete(bot); }} />;
   const groups = [
-    [remoteClient ? null : grokItem(bot.pinned ? "pin-slash" : "pin", bot.pinned ? t("sidebar.bot.unpin") : t("sidebar.bot.pin"), () => dispatch({ type: "updateBot", botId: bot.id, patch: { pinned: !bot.pinned } })), moveTo, readState],
+    [remoteClient ? null : grokItem(bot.pinned ? "pin-slash" : "pin", bot.pinned ? t("sidebar.bot.unpin") : t("sidebar.bot.pin"), () => setBotPinned(dispatch, bot.id, !bot.pinned)), moveTo, readState],
     [rename],
     [copyId],
     [settings],

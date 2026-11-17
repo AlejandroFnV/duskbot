@@ -33,6 +33,10 @@ export function moveBotsToSection(dispatch: Dispatch<Action>, botIds: string[], 
     .catch((cause) => dispatch({ type: "error", message: failure(cause) }));
 }
 
+export function setBotPinned(dispatch: Dispatch<Action>, botId: string, pinned: boolean): void {
+  dispatch({ type: "updateBot", botId, patch: { pinned } });
+}
+
 /** Shows `botIds` in this order at once and saves it; every other bot keeps its place in the fleet. */
 export function saveBotOrder(dispatch: Dispatch<Action>, bots: readonly Pick<Bot, "id">[], botIds: string[]): void {
   const before = bots.filter((bot) => botIds.includes(bot.id)).map((bot) => bot.id);

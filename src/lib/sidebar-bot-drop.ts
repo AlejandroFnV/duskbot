@@ -54,6 +54,11 @@ export function planBotDrop(lists: BotLists, botId: string, drop: BotDrop): BotM
   return placed(lists, botId, from, to, (others) => others.indexOf(drop.botId) + (drop.place === "after" ? 1 : 0));
 }
 
+/** A row let go above the top of the list, over the pinned bots, pins its bot; Escape or a cancelled pointer does not. */
+export function pinsOnRelease(clientY: number, listTop: number, cancelled: boolean): boolean {
+  return !cancelled && clientY < listTop;
+}
+
 export function stepBot(lists: BotLists, botId: string, direction: -1 | 1): BotMove | null {
   const from = botListOf(lists, botId);
   if (from === undefined) return null;

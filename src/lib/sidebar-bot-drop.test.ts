@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { botDropPlace, planBotDrop, stepBot, stepKey, unusedName, type BotLists } from "./sidebar-bot-drop";
+import { botDropPlace, pinsOnRelease, planBotDrop, stepBot, stepKey, unusedName, type BotLists } from "./sidebar-bot-drop";
 
 const lists: BotLists = new Map([
   ["", ["atlas", "bea", "cleo"]],
@@ -65,5 +65,15 @@ describe("a new department's name", () => {
   it("is the plain name until a department has it, then the first free number", () => {
     expect(unusedName("New department", ["Work"])).toBe("New department");
     expect(unusedName("New department", ["New department", "New department 2", "New department 4"])).toBe("New department 3");
+  });
+});
+
+describe("a row let go over the pinned bots", () => {
+  it("pins its bot only above the list's top and never when the drag is cancelled", () => {
+    expect(pinsOnRelease(40, 120, false)).toBe(true);
+    expect(pinsOnRelease(119, 120, false)).toBe(true);
+    expect(pinsOnRelease(120, 120, false)).toBe(false);
+    expect(pinsOnRelease(300, 120, false)).toBe(false);
+    expect(pinsOnRelease(40, 120, true)).toBe(false);
   });
 });

@@ -1138,7 +1138,11 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
         </div>
       )}
 
-      {tiles && <SidebarTileGrid primary={null} pinned={pinnedBots} row={botRow} corner={corner} />}
+      {tiles && (
+        <div data-sidebar-pin-drop={drops.pinning ? "" : undefined} className={cn("rounded-[14px] transition-shadow", drops.pinning && "ring-2 ring-accent")}>
+          <SidebarTileGrid primary={null} pinned={pinnedBots} row={botRow} corner={corner} />
+        </div>
+      )}
       {simpleDesk && !tiles && <SidebarNoBots />}
       </GlassBar>
 

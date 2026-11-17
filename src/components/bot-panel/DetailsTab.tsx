@@ -8,6 +8,7 @@ import type { useBotSettingsDerived } from "../bot-settings/useBotSettingsDerive
 import { SelectPill } from "../ui/SelectPill";
 import type { SimplePageId } from "./page-registry";
 import { BotRoutines } from "../routines/BotRoutines";
+import { CodingTasks } from "./CodingTasks";
 import { Card, PanelSections, rowCls, RowText } from "./rows";
 import { ModelSelectRow } from "../native/ModelSelectRow";
 import { UsageMeterRow } from "../native/UsageMeter";
@@ -106,6 +107,7 @@ export function DetailsTab({ bot }: {
 }) {
   return (
     <PanelSections data-panel-tabpanel="details">
+      <CodingTasks bot={bot} />
       <BotRoutines bot={bot} />
 
       <ModelCard bot={bot} />

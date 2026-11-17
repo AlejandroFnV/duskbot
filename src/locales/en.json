@@ -9334,5 +9334,12 @@
   "mobile.settings.versionOn": "Version {version} on {environment} servers",
   "mobile.settings.servers": "Servers",
   "mobile.settings.serversHint": "Switching signs this phone out of its dusk account",
-  "mobile.settings.serversConfirm": "Tap again to switch and sign out"
+  "mobile.settings.serversConfirm": "Tap again to switch and sign out",
+  "botPanel.coding.title": "Programming",
+  "botPanel.coding.detached": "No branch",
+  "botPanel.coding.worktree": "Worktree",
+  "botPanel.coding.state.coding": "Coding",
+  "botPanel.coding.state.testing": "Testing",
+  "botPanel.coding.state.review": "In review",
+  "botPanel.coding.state.done": "Done"
 }

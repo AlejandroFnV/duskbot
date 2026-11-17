@@ -1,8 +1,20 @@
-import type { Notification, NotifyKind } from "../shared/notification.ts";
+import type { Notification, NotificationLine, NotifyKind } from "../shared/notification.ts";
 import { personMentionExcerpt } from "../shared/person-mention.ts";
 import { conversationLanguage, serverLine, type ServerLineKey } from "./server-lines.ts";
 
-export type { Notification, NotifyKind } from "../shared/notification.ts";
+export type { Notification, NotificationLine, NotifyKind } from "../shared/notification.ts";
+
+type Line = { key: ServerLineKey; params?: Record<string, string | Line> };
+
+function lineText(language: string | undefined, line: NotificationLine): string {
+  const params = Object.fromEntries(Object.entries(line.params ?? {}).map(([name, value]) => [name, typeof value === "string" ? value : lineText(language, value)]));
+  return serverLine(language, line.key as ServerLineKey, params);
+}
+
+/** The notification's title in `language`, for a reader whose language may not be the one it was made in. */
+export function notificationTitle(notification: Pick<Notification, "title" | "titleLine">, language: string | undefined): string {
+  return notification.titleLine ? lineText(language, notification.titleLine) : notification.title;
+}
 
 export function summarize(text: string, max = 140): string {
   const line = text.replace(/```[\s\S]*?```/g, " ").replace(/\s+/g, " ").trim();
@@ -47,18 +59,19 @@ export function buildNotification(
 
   const body = summarize(detail);
   const language = conversationLanguage(threadId);
-  const who = extra?.group ? serverLine(language, "server.notify.inRoom", { bot: bot.name, room: extra.group.name }) : bot.name;
-  const title = kind === "secret" ? serverLine(language, "server.notify.secret", { who, label: extra?.label ?? "" })
+  const who: string | Line = extra?.group ? { key: "server.notify.inRoom", params: { bot: bot.name, room: extra.group.name } } : bot.name;
+  const titleLine: Line = kind === "secret" ? { key: "server.notify.secret", params: { who, label: extra?.label ?? "" } }
     : kind === "sign-in"
-      ? extra?.app ? serverLine(language, "server.notify.connect", { who, app: extra.app })
-        : extra?.check && extra.site ? serverLine(language, "server.notify.humanCheck", { who, site: extra.site })
-        : extra?.site ? serverLine(language, "server.notify.signIn", { who, site: extra.site }) : serverLine(language, "server.notify.signInWebsite", { who })
-      : serverLine(language, TITLE[kind] ?? "server.notify.done", { who });
+      ? extra?.app ? { key: "server.notify.connect", params: { who, app: extra.app } }
+        : extra?.check && extra.site ? { key: "server.notify.humanCheck", params: { who, site: extra.site } }
+        : extra?.site ? { key: "server.notify.signIn", params: { who, site: extra.site } } : { key: "server.notify.signInWebsite", params: { who } }
+      : { key: TITLE[kind] ?? "server.notify.done", params: { who } };
+  const title = lineText(language, titleLine);
 
   if ((kind === "done" || kind === "mention") && !body) return null;
   if (kind === "done" && bot.hidden) return null;
 
-  const notification: Notification = { kind, botId: bot.id, botName: bot.name, threadId, title, body };
+  const notification: Notification = { kind, botId: bot.id, botName: bot.name, threadId, title, titleLine, body };
   if (extra?.avatarUrl) notification.avatarUrl = extra.avatarUrl;
   if (extra?.group) notification.groupId = extra.group.id;
   return notification;

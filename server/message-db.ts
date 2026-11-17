@@ -13,7 +13,7 @@ import { MessageSearchWorker } from "./message-search-worker.ts";
 import { rowToMessage, threadPreviewRows, type ThreadRows, type ThreadTailRows } from "./message-db-rows.ts";
 import { searchMessagesInDatabase, type SearchHit } from "./message-search-query.ts";
 import { rollbackKeeping } from "./sqlite-rollback.ts";
-import type { Notification, NotificationLogEntry } from "../shared/notification.ts";
+import type { Notification, NotificationLine, NotificationLogEntry } from "../shared/notification.ts";
 export type { SearchHit } from "./message-search-query.ts";
 export type { ThreadRows, ThreadTailRows } from "./message-db-rows.ts"; import { missingMediaRows, setMediaRow } from "./message-media-rows.ts";
 
@@ -102,6 +102,7 @@ function open(): DatabaseSync {
   `);
   const notificationColumns = db.prepare("PRAGMA table_info(notification_log)").all() as Array<{ name: string }>;
   if (!notificationColumns.some((column) => column.name === "for_person")) db.exec("ALTER TABLE notification_log ADD COLUMN for_person TEXT");
+  if (!notificationColumns.some((column) => column.name === "title_line")) db.exec("ALTER TABLE notification_log ADD COLUMN title_line TEXT");
   ensureRecallIndex(db);
   ensureMemoryIndex(db);
   ensureFactStore(db);
@@ -290,9 +291,26 @@ export function withCommandReceipt(
 
 const NOTIFICATION_LOG_LIMIT = 500;
 
+function isNotificationLine(value: unknown): value is NotificationLine {
+  if (!value || typeof value !== "object") return false;
+  const { key, params } = value as { key?: unknown; params?: unknown };
+  return typeof key === "string" && (params === undefined || (Boolean(params) && typeof params === "object"
+    && Object.values(params as object).every((param) => typeof param === "string" || isNotificationLine(param))));
+}
+
+function titleLineOf(stored: string | null): { titleLine?: NotificationLine } {
+  if (!stored) return {};
+  try {
+    const parsed: unknown = JSON.parse(stored);
+    return isNotificationLine(parsed) ? { titleLine: parsed } : {};
+  } catch {
+    return {};
+  }
+}
+
 const rowToNotificationLogEntry = (row: {
   id: string; at: number; kind: string; bot_id: string; bot_name: string; thread_id: string;
-  group_id: string | null; title: string; body: string; avatar_url: string | null; read: number; for_person: string | null;
+  group_id: string | null; title: string; body: string; avatar_url: string | null; read: number; for_person: string | null; title_line: string | null;
 }): NotificationLogEntry => ({
   id: row.id,
   at: row.at,
@@ -302,6 +320,7 @@ const rowToNotificationLogEntry = (row: {
   threadId: row.thread_id,
   ...(row.group_id ? { groupId: row.group_id } : {}),
   title: row.title,
+  ...titleLineOf(row.title_line),
   body: row.body,
   ...(row.avatar_url ? { avatarUrl: row.avatar_url } : {}),
   ...(row.for_person ? { forPerson: row.for_person } : {}),
@@ -311,8 +330,9 @@ const rowToNotificationLogEntry = (row: {
 export function insertNotificationLog(entry: NotificationLogEntry): void {
   transaction((database) => {
     database.prepare(
-      "INSERT INTO notification_log(id, at, kind, bot_id, bot_name, thread_id, group_id, title, body, avatar_url, for_person, read) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)",
-    ).run(entry.id, entry.at, entry.kind, entry.botId, entry.botName, entry.threadId, entry.groupId ?? null, entry.title, entry.body, entry.avatarUrl ?? null, entry.forPerson ?? null);
+      "INSERT INTO notification_log(id, at, kind, bot_id, bot_name, thread_id, group_id, title, title_line, body, avatar_url, for_person, read) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)",
+    ).run(entry.id, entry.at, entry.kind, entry.botId, entry.botName, entry.threadId, entry.groupId ?? null, entry.title,
+      entry.titleLine ? JSON.stringify(entry.titleLine) : null, entry.body, entry.avatarUrl ?? null, entry.forPerson ?? null);
     database.prepare(
       "DELETE FROM notification_log WHERE id NOT IN (SELECT id FROM notification_log ORDER BY at DESC, rowid DESC LIMIT ?)",
     ).run(NOTIFICATION_LOG_LIMIT);
@@ -332,7 +352,7 @@ export function logNotification(notification: Notification): NotificationLogEntr
 
 export function recentNotificationLog(limit = NOTIFICATION_LOG_LIMIT): NotificationLogEntry[] {
   const rows = db().prepare(
-    "SELECT id, at, kind, bot_id, bot_name, thread_id, group_id, title, body, avatar_url, for_person, read FROM notification_log ORDER BY at DESC, rowid DESC LIMIT ?",
+    "SELECT id, at, kind, bot_id, bot_name, thread_id, group_id, title, title_line, body, avatar_url, for_person, read FROM notification_log ORDER BY at DESC, rowid DESC LIMIT ?",
   ).all(limit) as Array<Parameters<typeof rowToNotificationLogEntry>[0]>;
   return rows.map(rowToNotificationLogEntry);
 }

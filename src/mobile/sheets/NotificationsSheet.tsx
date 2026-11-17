@@ -2,7 +2,7 @@ import { plainPreviewText } from "@/lib/plain-preview";
 import { useMemo, useState, type ComponentType } from "react";
 import { BotAvatar, MausAvatar } from "@/components/Avatar";
 import { cn } from "@/lib/cn";
-import { t } from "@/lib/i18n";
+import { t, tFromServerLine } from "@/lib/i18n";
 import { api, openBotThread, openRoomThread, useStore } from "@/state/store";
 import type { NotificationLogEntry } from "../../../shared/notification";
 import { haptic } from "../haptics";
@@ -103,13 +103,14 @@ export const NotificationsSheet: ComponentType<SheetPageProps<"notifications">> 
                   const entry = stack.latest;
                   const bot = state.bots.find((candidate) => candidate.id === entry.botId);
                   const more = stack.entries.length - 1;
+                  const title = tFromServerLine(entry.titleLine, entry.title);
                   return (
                     <li key={stack.key}>
-                      <button type="button" disabled={Boolean(opening)} onClick={() => { void openEntry(stack); }} aria-label={stack.unread ? t("mobile.notifications.unread", { title: entry.title }) : undefined} className="mobile-row flex min-h-[76px] w-full items-start gap-3 rounded-2xl px-4 py-3 text-left disabled:opacity-60">
+                      <button type="button" disabled={Boolean(opening)} onClick={() => { void openEntry(stack); }} aria-label={stack.unread ? t("mobile.notifications.unread", { title }) : undefined} className="mobile-row flex min-h-[76px] w-full items-start gap-3 rounded-2xl px-4 py-3 text-left disabled:opacity-60">
                         <span className="shrink-0 pt-0.5">{bot ? <BotAvatar bot={bot} size={40} animated={false} label="" /> : <MausAvatar color="blue" size={40} animated={false} label="" />}</span>
                         <span className="min-w-0 flex-1">
                           <span className="flex items-center gap-2">
-                            <span className={cn("min-w-0 flex-1 truncate text-[16px] leading-5 text-ink", stack.unread ? "font-semibold" : "font-medium")}>{entry.title}</span>
+                            <span className={cn("min-w-0 flex-1 truncate text-[16px] leading-5 text-ink", stack.unread ? "font-semibold" : "font-medium")}>{title}</span>
                             <time dateTime={new Date(entry.at).toISOString()} className="shrink-0 text-[14px] font-medium tabular-nums text-ink-secondary">{listTime(entry.at)}</time>
                             <span aria-hidden className={cn("size-2.5 shrink-0 rounded-full", stack.unread ? "bg-ink" : "bg-transparent")} />
                           </span>

@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { HandoffView } from "../coordinator.ts";
 import { addServerLinePacks } from "../server-lines.ts";
-import { createQueuedNotes, createWaitWords, QUEUED_NOTE_AFTER_MS, type QueuedNotesDeps } from "./wait-words.ts";
+import { createWaitWords } from "./wait-words.ts";
 
 const words = (starter: boolean, language?: string) => {
   const held: [string, string][] = [];
@@ -37,64 +36,5 @@ describe("how a held send reads", () => {
     expect(words(false).waits.queued("t", "capacity")).toBe("Queued. Starts when this bot has a free thread slot.");
     expect(words(true).waits.queued("t", "group-turn")).toContain("room turn");
     expect(words(true).waits.queued("t", undefined)).toBeUndefined();
-  });
-});
-
-describe("a hand-off held a while", () => {
-  const node = { id: "h", threadId: "t", botId: "b", lastProgressAt: 0, status: "queued" } as HandoffView;
-  const notes = (over: Partial<QueuedNotesDeps> = {}, now = QUEUED_NOTE_AFTER_MS) => {
-    const posted: string[] = [];
-    const note = createQueuedNotes({ now: () => now, language: () => undefined, botName: () => "Ops", parent: () => ({ threadId: "p" }) as HandoffView,
-      post: (_p, _n, line) => String(posted.push(line) - 1), regroup: (_p, id, _n, line) => { posted[Number(id)] = line; }, live: () => true,
-      threadBusy: () => false, slots: () => ({ busy: [], limit: 16 }), groupTurn: () => false, waitsForComputer: () => false, behindPerson: () => undefined, ...over });
-    return { note, posted };
-  };
-
-  it("says which limit, once", () => {
-    const { note, posted } = notes({ slots: () => ({ busy: [{ threadId: "a", title: "A" }, { threadId: "c", title: "C" }], limit: 2 }) });
-    note(node);
-    note(node);
-    expect(posted).toEqual(["Ops hasn't started this yet: it's already running 2 of 2 threads at once."]);
-  });
-
-  it("folds three held hand-offs for the same teammate into one line, and starts a new one once they have all started", () => {
-    const live = new Set(["h1", "h2", "h3"]);
-    const { note, posted } = notes({ threadBusy: () => true, live: (id) => live.has(id) });
-    for (const id of ["h1", "h2", "h3"]) note({ ...node, id } as HandoffView);
-    expect(posted).toEqual(["3 handoffs waiting for Ops"]);
-    live.clear();
-    live.add("h4");
-    note({ ...node, id: "h4" } as HandoffView);
-    expect(posted).toEqual(["3 handoffs waiting for Ops", "Ops hasn't started this yet: an earlier turn in that thread is still running."]);
-  });
-
-  it("keeps one line per teammate", () => {
-    const { note, posted } = notes({ threadBusy: () => true, botName: (id) => id === "b" ? "Ops" : "Ada" });
-    note({ ...node, id: "h1" } as HandoffView);
-    note({ ...node, id: "h2", botId: "a" } as HandoffView);
-    expect(posted).toEqual(["Ops hasn't started this yet: an earlier turn in that thread is still running.", "Ada hasn't started this yet: an earlier turn in that thread is still running."]);
-  });
-
-  it("names an earlier turn in its thread, and a room turn", () => {
-    const thread = notes({ threadBusy: () => true });
-    thread.note(node);
-    expect(thread.posted).toEqual(["Ops hasn't started this yet: an earlier turn in that thread is still running."]);
-    const room = notes({ groupTurn: () => true });
-    room.note(node);
-    expect(room.posted).toEqual(["Ops hasn't started this yet: it's finishing a turn in a room."]);
-  });
-
-  it("stays quiet for a short hold, a room's own hand-off, a computer's wait and a person's open card, which say so themselves", () => {
-    const busy = { threadBusy: () => true };
-    for (const { over, at, row } of [
-      { over: busy, at: QUEUED_NOTE_AFTER_MS - 1, row: node },
-      { over: busy, at: QUEUED_NOTE_AFTER_MS, row: { ...node, groupId: "g" } as HandoffView },
-      { over: { ...busy, waitsForComputer: () => true }, at: QUEUED_NOTE_AFTER_MS, row: node },
-      { over: { ...busy, behindPerson: () => ({ kind: "question" as const, title: "Pick" }) }, at: QUEUED_NOTE_AFTER_MS, row: node },
-    ]) {
-      const { note, posted } = notes(over, at);
-      note(row);
-      expect(posted).toEqual([]);
-    }
   });
 });

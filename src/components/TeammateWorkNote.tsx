@@ -16,7 +16,10 @@ function teammateName(botId: string, bots: Teammates): string {
 export function teammateWorkSummary(work: readonly WireTeammateWork[] | undefined, bots: Teammates): string {
   if (!work?.length) return t("chat.teammatesWorking");
   const names = new Intl.ListFormat(activeLocale(), { type: "conjunction" }).format([...new Set(work.map((item) => teammateName(item.botId, bots)))]);
-  return work.length === 1 ? t("chat.teammateWork.summary.one", { names }) : t("chat.teammateWork.summary.many", { count: work.length, names });
+  const queued = work.filter((item) => item.status === "queued").length;
+  if (queued === 0) return work.length === 1 ? t("chat.teammateWork.summary.one", { names }) : t("chat.teammateWork.summary.many", { count: work.length, names });
+  if (queued === work.length) return queued === 1 ? t("chat.teammateWork.queuedSummary.one", { names }) : t("chat.teammateWork.queuedSummary.many", { count: queued, names });
+  return t("chat.teammateWork.mixedSummary", { count: work.length, running: work.length - queued, queued, names });
 }
 
 function statusPhrase(status: WireTeammateWork["status"]): string {

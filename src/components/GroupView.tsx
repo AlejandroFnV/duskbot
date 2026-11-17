@@ -24,7 +24,7 @@ import { RoomHoldsBanner } from "./RoomHoldsBanner";
 import { ThreadChip } from "./ThreadChip";
 import { ToolActivity } from "./ToolActivity";
 import { ThreadRefText } from "./ThreadRefs";
-import { handoffWorkIds, RoomWorkingLines, roomWorkingIds } from "./RoomWorkingLines";
+import { handoffWorkIds, roomAtWorkIds, RoomWorkingLines } from "./RoomWorkingLines";
 import { roomRetryRequest, roomRetryText } from "@/lib/room-retry";
 import { showToolCallsEnabled } from "@/lib/feature-flags";
 import { DigestChip } from "./DigestChip";
@@ -98,7 +98,7 @@ import { pendingApprovals } from "./PendingApproval";
 import { DataResultChip } from "./DataResultChip"; import { PublishedPageCard } from "./PublishedPageCard";
 import { TranscriptAnnouncer } from "./TranscriptAnnouncer";
 import { localDay } from "@/lib/transcript-derivations";
-import { roomThreadWorking } from "@/lib/room-threads";
+import { roomThreadWorking, roomWaitingCount } from "@/lib/room-threads";
 import { JumpToLatestButton } from "./JumpToLatestButton";
 import { HandoffChip } from "./HandoffReply"; import { HandoffRow } from "./HandoffRow"; import { TeammateChip } from "./TeammateChip"; import { useTeammates } from "@/state/team-people";
 import { RoomWorkingFolder } from "./RoomWorkingFolder";
@@ -932,7 +932,7 @@ export function GroupView({ group: room }: { group: Group }) {
   const presence = useHeldPresence(threadWorking ? presenceKind({ writing: streamingReply, activity: live.status?.activity, worked }) : null);
   const statusMarkState = presence === "typing" ? "streaming" : presence === "working" ? workingMark(live.status?.activity) : baseMarkState;
   const handoffIds = useMemo(() => handoffWorkIds(group.messages), [group.messages]);
-  const workingIds = threadWorking ? [...new Set([...roomWorkingIds(group, lastGroupMessage), ...handoffIds])] : roomWorkingIds(group, lastGroupMessage);
+  const workingIds = roomAtWorkIds(group, lastGroupMessage, threadWorking ? handoffIds : []);
   const trailing = useTrailingRows(group.messages);
   const folded = useMemo(() => foldedNoticeIds(trailing), [trailing]);
   const retry = useMemo(() => {
@@ -1120,6 +1120,7 @@ export function GroupView({ group: room }: { group: Group }) {
             members={members}
             workingIds={workingIds}
             typingIds={[]}
+            waiting={roomWaitingCount(group)}
             speaker={{ bot: presenceSpeaker, visible: presenceVisible, markState: statusMarkState, phrases: now.phrases, phase: now.phase, since: speaker ? group.turnStartedAt ?? null : null }}
             slot={statusSlot}
             landed={Boolean(landed.reply)}

@@ -281,3 +281,54 @@ html[data-native-glass-composer] .dusk-mobile [data-mobile-chat] [data-tour="com
 }
 html[data-native-glass-composer] .dusk-mobile [data-mobile-chat] [data-tour="composer"] textarea { visibility: visible; opacity: 0; caret-color: transparent; }
 html[data-native-glass-composer] .dusk-mobile [data-mobile-chat] [data-tour="composer"] :is([role="menu"], [role="listbox"], [data-sidebar-popover-menu], [data-composer-menu]) { visibility: visible; }
+
+/* chat bubbles on the phone, as the reference measures them at 430 wide: up to 354 (82%), 17/22 type, roomier padding
+   and fully round corners. Only the phone shell; the desktop keeps chat-bubble.ts's 15/20. */
+.dusk-mobile [data-mobile-chat] {
+  --m-bubble-max: min(354px, 89%);
+}
+.dusk-mobile [data-mobile-chat] :is(.chat-bubble-bot, .chat-bubble-user) {
+  max-width: var(--m-bubble-max);
+  font-size: 17px;
+  line-height: 22px;
+}
+.dusk-mobile [data-mobile-chat] .chat-bubble-bot {
+  padding: 11px 14px;
+  border-radius: 22px;
+}
+.dusk-mobile [data-mobile-chat] .chat-bubble-user {
+  padding: 8px 14px;
+  border-radius: 19px;
+}
+.dusk-mobile [data-mobile-chat] :is(.chat-bubble-bot, .chat-bubble-user) :is(p, li, td, th, blockquote) {
+  font-size: inherit;
+  line-height: inherit;
+}
+
+/* a long draft scrolls inside the field: the lines passing its top and bottom edge fade out instead of being cut
+   flat by the pill. The field keeps its size, so nothing in the bar moves when it fills. */
+.dusk-mobile [data-mobile-chat] textarea:not(:placeholder-shown) {
+  mask-image: linear-gradient(to bottom, transparent, #000 6px, #000 calc(100% - 6px), transparent);
+}
+
+/* the field's round buttons are drawn at 34 but take a 44pt touch, as Apple asks */
+.dusk-mobile [data-mobile-chat] :is([data-composer-actions] button, button:has(> [data-composer-plus]), button[data-composer-plus]) {
+  position: relative;
+}
+.dusk-mobile [data-mobile-chat] :is([data-composer-actions] button, button:has(> [data-composer-plus]), button[data-composer-plus])::after {
+  content: "";
+  position: absolute;
+  inset: min(0px, calc((100% - 44px) / 2));
+}
+/* the tap-to-show actions pill floats over the bubble's top edge instead of keeping a hidden 108px slot beside it,
+   so a bubble can really reach 354 wide */
+.dusk-mobile [data-mobile-chat] :has(> [data-chat-bubble] + [data-testid="message-actions"]),
+.dusk-mobile [data-mobile-chat] :has(> .chat-bubble-bot + [data-testid="message-actions"]),
+.dusk-mobile [data-mobile-chat] :has(> .chat-bubble-user + [data-testid="message-actions"]) { position: relative; }
+.dusk-mobile [data-mobile-chat] [data-testid="message-actions"] {
+  position: absolute;
+  z-index: 5;
+  bottom: calc(100% - 6px);
+  left: 6px;
+}
+.dusk-mobile [data-mobile-chat] [data-testid="message-actions"].flex-row-reverse { left: auto; right: 6px; }

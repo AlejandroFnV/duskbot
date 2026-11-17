@@ -10640,6 +10640,7 @@ async function runClaimedGroupMemberTurn(
     return true;
   }
   revokeEarlierTurnCapabilities(threadId);
+  if (!cardContinuation) turnWordsFrom.set(threadId, hop > 0 ? "other-bot" : "person");
   spoken.add(botId);
   // The same resolver as the readiness re-check below, or a Chief's delegated level makes every such turn retry and settle busy.
   const preparedApprovalMode = roomTurnApprovalMode(bot, threadId, orchestration);

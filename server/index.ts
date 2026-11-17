@@ -218,7 +218,7 @@ import {
   newId,
 } from "./contracts.ts";
 import { retryLine } from "./retry-line.ts";
-import { recoveryCapabilityError, startupBackups } from "./automatic-recovery.ts";
+import { backupSelection, recoveryCapabilityError, startupBackups } from "./automatic-recovery.ts";
 import { createQuotaSwitchHost } from "./host/quota-switch.ts"; import { quotaSwitchEnabled } from "./quota-switch.ts";
 import { decodeGeneratedImage } from "./generated-image.ts";
 import { failedReplyReason } from "./failed-reply-reason.ts"; import { isDiskFull } from "./sqlite-rollback.ts"; import { createMcpServersHost } from "./host/mcp-servers-host.ts"; import { createLimitTakeover, signedOutStop } from "./host/limit-takeover.ts";
@@ -9510,7 +9510,7 @@ async function beginTurn(
         // No await between releasing the failed attempt and admitting its replacement: a newer send or Stop must never lose to a stale retry.
         store.setTaskActivity(bot.id, threadId, "idle");
         directTurnBots.delete(threadId);
-        const checked = checkedTaskModelSwitch(current, backup, false, false, true);
+        const checked = checkedTaskModelSwitch(current, backupSelection(backup, current.modelSelection, registry.get(backup.instanceId)?.adapter.capabilities.effortLevels), false, false, true);
         const target = checked.ok ? registry.get(checked.selection.instanceId) : null;
         const refusal = !checked.ok ? checked.error : !target || !target.enabled ? "The backup AI is unavailable."
           : !store.taskByThread(bot.id, threadId)?.cwd ? "This older thread has no pinned working folder. Choose its backup manually."

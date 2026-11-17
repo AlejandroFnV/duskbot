@@ -200,7 +200,7 @@ export function createLimitTakeover(deps: LimitTakeoverDeps) {
     const add = (selection: ModelSelection) => {
       if (selection.instanceId === from.instanceId && (scope === "engine" || scope === "signed-out" || selection.model === from.model)) return;
       if (out.some((known) => known.instanceId === selection.instanceId && known.model === selection.model)) return;
-      if (usable(engines, current, selection, scope, approval)) out.push({ instanceId: selection.instanceId, model: selection.model });
+      if (usable(engines, current, selection, scope, approval)) out.push({ instanceId: selection.instanceId, model: selection.model, ...(selection.effort ? { effort: selection.effort } : {}) });
     };
     if (scope === "model" || scope === "credits") add({ instanceId: current.instanceId, model: current.models.default });
     // like a sign-out, a provider's hiccup never reaches the installation backup while Automatic recovery is off

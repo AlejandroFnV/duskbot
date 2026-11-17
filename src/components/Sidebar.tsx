@@ -547,6 +547,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
           motion={mascotMotion?.kind ?? "none"}
           motionKey={mascotMotion?.nonce ?? 0}
           animated
+          personality={working}
         /> : <BotAvatar
           bot={bot}
           state={markState}
@@ -554,6 +555,7 @@ export const BotListItem = memo(function BotListItem(props: BotRowProps) {
           motion={mascotMotion?.kind ?? "none"}
           motionKey={mascotMotion?.nonce ?? 0}
           animated
+          personality={working}
         />}
         {/* Bottom-left, clear of the status dots on the right and of the row's hover actions. */}
         {simpleRow && <AvatarActivityDot activity={rowActivity} />}

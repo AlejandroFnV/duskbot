@@ -28,7 +28,7 @@ type ChipProps = { leading?: ReactNode; wideGap?: boolean; children: ReactNode; 
 export function EventChip({ leading, wideGap = false, children, title, onClick, ...button }: ChipProps & Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "title">) {
   const body = (
     <>
-      {leading && <span aria-hidden="true" className="flex size-4 shrink-0 items-center justify-center">{leading}</span>}
+      {leading && <span aria-hidden="true" className="flex h-4 min-w-4 shrink-0 items-center justify-center">{leading}</span>}
       <span className="min-w-0 truncate">{children}</span>
     </>
   );

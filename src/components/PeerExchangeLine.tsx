@@ -3,6 +3,7 @@ import type { Bot } from "@/state/store";
 import type { ExchangeSummary, PeerRef } from "@/lib/peer-exchange";
 import { t } from "@/lib/i18n";
 import { BotAvatar } from "./Avatar";
+import { AvatarStack } from "./AvatarStack";
 import { EventChip, EventLabel, EventLine } from "./EventLine";
 
 function peerBot(peer: PeerRef, bots: readonly Pick<Bot, "id" | "name" | "color">[]) {
@@ -35,11 +36,11 @@ export function PeerExchangeLine({ summary, bots, expanded, onToggle }: {
   };
   const crowd = (peers: readonly PeerRef[]): ReactNode => {
     const names = peers.map((peer) => peerBot(peer, bots)?.name ?? peer.name).join(", ");
-    const lead = peerBot(peers[0]!, bots);
+    const stacked = peers.map((peer) => peerBot(peer, bots) ?? { id: peer.id, name: peer.name, color: (peer.color ?? "blue") as Bot["color"] });
     return (
       <EventChip
         wideGap
-        leading={<BotAvatar bot={lead ?? { name: peers[0]!.name, color: (peers[0]!.color ?? "blue") as Bot["color"] }} state="happy" size={16} motion="none" motionKey={0} animated={false} />}
+        leading={<AvatarStack bots={stacked} label={names} />}
         title={names}
         aria-expanded={expanded}
         aria-label={t(expanded ? "chat.event.hideExchange" : "chat.event.showExchange", { name: names })}

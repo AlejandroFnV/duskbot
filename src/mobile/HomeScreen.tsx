@@ -258,7 +258,7 @@ function PinnedTileFace({ bot }: { bot: Bot }) {
         )}
       </span>
       <span className="flex w-full min-w-0 items-center justify-center gap-1.5 px-1">
-        <NameRole name={bot.name} role={botRole(bot)} className={cn("text-center text-[16px] leading-5 text-ink", unread && "font-semibold")} />
+        <span className={cn("min-w-0 truncate text-center text-[16px] leading-5", unread ? "font-semibold text-ink" : "text-ink")}>{bot.name}</span>
         {unread && <span aria-hidden className="size-2 shrink-0 rounded-full bg-accent" />}
       </span>
     </span>

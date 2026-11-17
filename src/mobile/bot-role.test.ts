@@ -30,3 +30,13 @@ describe("NameRole", () => {
     expect(html.replace(/<[^>]+>/g, "")).toBe("Ada");
   });
 });
+
+describe("featured tiles", () => {
+  it("show only the name: a role cut short in a narrow tile confuses more than it helps", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync(new URL("./HomeScreen.tsx", import.meta.url), "utf8");
+    const tile = src.slice(src.indexOf("function PinnedTileFace"), src.indexOf("function RowFace"));
+    expect(tile).toContain("{bot.name}");
+    expect(tile).not.toContain("NameRole");
+  });
+});

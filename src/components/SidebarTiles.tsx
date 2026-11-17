@@ -4,7 +4,7 @@ import { memo, useLayoutEffect, useRef, useState, type KeyboardEvent, type Mouse
 import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n";
 import { useLiveMedia } from "@/lib/live-call-media";
-import { stateForBot } from "@/lib/mascot";
+import { useBotMarkState } from "./mascot-presence";
 import { api, openBotRow, useStore, type Bot } from "@/state/store";
 import { useChiefStepOpen } from "@/lib/default-bot";
 
@@ -13,7 +13,7 @@ import { botTooltip } from "./BotModelBadge";
 import { liveBadgeFor } from "./LiveCallPill";
 import { pinnedCircleDragClass, pinnedCircleDragHandlers, usePinnedCircleDrag, type PinnedCircleDragProps } from "./PinnedCircleThreads";
 import { RenameTitle } from "./RenameTitle";
-import { openBotContextMenu, useVisibleMessages, type BotRowProps } from "./Sidebar";
+import { openBotContextMenu, type BotRowProps } from "./Sidebar";
 import { sidebarBotStatus } from "./SidebarBotActivity";
 import { SIMPLE_ROW_FOCUS } from "./SidebarSimpleTop";
 import { useBotUnread } from "./unread-notice";
@@ -28,9 +28,9 @@ export const SidebarBotTile = memo(function SidebarBotTile({ primary = false, dr
   const liveMedia = useLiveMedia();
   const remoteClient = typeof window !== "undefined" && window.duskDesktop?.remoteClient?.active === true;
   const [renaming, setRenaming] = useState(false);
-  const visible = useVisibleMessages(bot);
   const { waiting, working, teammateWait, queued } = sidebarBotStatus(bot, pendingQueued);
   const { unread, noticing } = useBotUnread(bot);
+  const markState = useBotMarkState(bot, working);
   const onLiveCall = liveBadgeFor(bot.id, liveMedia, liveCall);
   const tooltip = botTooltip(bot, instances);
   const status = waiting ? t("sidebar.preview.waiting") : working ? t("chat.activity.working") : teammateWait ? t("sidebar.preview.waitingOnTeammate") : queued ? t("task.queued") : "";
@@ -82,7 +82,7 @@ export const SidebarBotTile = memo(function SidebarBotTile({ primary = false, dr
       <span className="relative flex">
         <BotAvatar
           bot={bot}
-          state={stateForBot({ ...bot, messages: visible })}
+          state={markState}
           size={56}
           motion={mascotMotion?.kind ?? "none"}
           motionKey={mascotMotion?.nonce ?? 0}

@@ -59,12 +59,11 @@ export interface MarkBot {
 
 /** The sidebar row's mark state for a bot. A turn that ends while the row is on screen shows finished (or failed) for
  * 8 s, as Grok's lastTurnSettlement does; a stop from here ends it quietly. Unread and selection change nothing. */
-export function useBotMarkState(bot: MarkBot): MarkState {
+export function useBotMarkState(bot: MarkBot, running = Boolean(bot.busy)): MarkState {
   const threadId = bot.threadId ?? "";
   const live = useTurnLive(threadId || null);
   const composing = useLiveReplyActive(threadId || null);
   const stoppedAt = useStoppedAt(threadId);
-  const running = Boolean(bot.busy);
   const last = lastNonReceipt(bot.messages);
   const failed = last?.kind === "activity" && last.tool?.ok === false;
   const [settled, setSettled] = useState<TurnFacts["settled"]>(null);

@@ -589,6 +589,7 @@ await import(${JSON.stringify(pathToFileURL(join(SERVER_DIR, "testing", "fake-cl
       main.close();
       for (const desk of desks) desk.close();
       for (const child of children) await waitForExit(child, { signal: "SIGTERM" });
+      if (process.env.DUSK_FIXTURE_DUMP) console.error(`FIXTURE-LOGS-BEGIN\n${logs}\nFIXTURE-LOGS-END`);
       await removeTempDir(root);
     },
   };

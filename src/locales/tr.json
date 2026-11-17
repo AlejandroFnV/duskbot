@@ -214,6 +214,7 @@
   "server.teammates.queued.thread": "{bot} buna henüz başlamadı: o konudaki önceki tur hâlâ çalışıyor.",
   "server.teammates.queued.slots": "{bot} buna henüz başlamadı: zaten aynı anda {limit} konudan {busy} tanesini çalıştırıyor.",
   "server.teammates.queued.room": "{bot} buna henüz başlamadı: bir odadaki turunu bitiriyor.",
+  "server.teammates.queued.grouped": "{bot} için bekleyen {count} iş",
   "server.queued.capacity": "Sırada — bu botta boş bir konu yuvası olduğunda başlar.",
   "server.queued.capacityStarter": "Sırada. Starter, bot başına aynı anda bir konu çalıştırır; bu, çalışan bitince başlar. Daha büyük bir plan daha fazlasını çalıştırır.",
   "server.queued.groupTurn": "Sırada — bu botun grup turu teker teker çalışır; o bittiğinde başlar.",

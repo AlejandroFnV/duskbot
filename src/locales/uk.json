@@ -183,6 +183,7 @@
   "server.teammates.queued.thread": "{bot} ще не почав: попередній хід у цьому потоці досі виконується.",
   "server.teammates.queued.slots": "{bot} ще не почав: уже виконується {busy} з {limit} потоків одночасно.",
   "server.teammates.queued.room": "{bot} ще не почав: завершує хід у кімнаті.",
+  "server.teammates.queued.grouped": "{count} доручень чекають на {bot}",
   "server.queued.capacity": "У черзі — почнеться, коли у бота звільниться слот гілки.",
   "server.queued.capacityStarter": "У черзі. Starter запускає по одному потоку за раз на бота, тож цей почнеться, коли завершиться поточний. Більший план запускає більше.",
   "server.rooms.stayedBusy.one": "{bot} був зайнятий в іншій розмові {count} хвилину, тому пропущений у цьому раунді",

@@ -214,6 +214,7 @@
   "server.teammates.queued.thread": "{bot} chưa bắt đầu việc này: lượt trước trong luồng đó vẫn đang chạy.",
   "server.teammates.queued.slots": "{bot} chưa bắt đầu việc này: đang chạy cùng lúc {busy} trên {limit} luồng.",
   "server.teammates.queued.room": "{bot} chưa bắt đầu việc này: đang hoàn tất một lượt trong phòng.",
+  "server.teammates.queued.grouped": "{count} việc đang chờ {bot}",
   "server.queued.capacity": "Đang chờ — sẽ bắt đầu khi bot có luồng trống.",
   "server.queued.capacityStarter": "Đang xếp hàng. Starter chạy mỗi bot một luồng một lúc, nên luồng này bắt đầu khi luồng đang chạy xong. Gói lớn hơn chạy được nhiều hơn.",
   "server.queued.groupTurn": "Đang chờ — bot chỉ xử lý từng lượt một trong phòng; tin nhắn sẽ bắt đầu sau khi lượt hiện tại kết thúc.",

@@ -635,6 +635,9 @@ export interface WireMessage extends HelperIntroField, SetupCardFields, WaitLine
   relay?: { kind: "told" | "reply" | "assistant"; email: string; name: string };
   /** On a Team Cloud, a line in its person's inbox: who it is from and where it came from. */
   inbox?: InboxItem;
+  /** A teammate's hand-offs still waiting to start, folded into one line in the requester's chat: "3 handoffs waiting for Ada".
+   * `tool.name` carries the same words in the chat's language for clients that do not know this field. */
+  queuedHandoffs?: { botId: string; count: number };
   /** thread chips: "Opened thread #Title on @X". */
   threadRef?: { botId: string; threadId: string; title: string };
   /** A "Sent to" row for work addressed into a room the bot `name` isn't in, so it went to the bot directly. `room`

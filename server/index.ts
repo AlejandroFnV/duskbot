@@ -252,7 +252,7 @@ import { createFailureNotices } from "./host/failure-notices.ts";
 import { createHandoffTicks } from "./handoff-ticks.ts"; import { IDLE_HTTP_SERVER } from "./due-timer.ts";
 
 const SESSION_READ_MAX_CHARS = 8_000;
-import { personOf, promptWithReply, replyTargetIn, speakerOf, transcriptText, type PersonName, type ReplyTarget } from "./replies.ts";
+import { personOf, promptWithReply, replyQuoteField, replyTargetIn, withReplyQuote, speakerOf, transcriptText, type PersonName, type ReplyTarget } from "./replies.ts";
 import type { DataContext } from "./data-context.ts";
 import { promptWithDataContext } from "../shared/data-context.ts";
 import { admit, roomTurnHolds } from "./admission.ts";
@@ -7956,7 +7956,7 @@ async function startOrQueueDirectMessage(botId: string, threadId: string, text: 
   });
   if (decision.action === "queue") {
     const queued = queueSteeredMessage(botId, threadId, text, {
-      replyToId: replyTo?.id, ...(relayed ? { relayed: true, origin: OUTSIDE } : {}),
+      replyToId: replyTo?.id, ...replyQuoteField(replyTo), ...(relayed ? { relayed: true, origin: OUTSIDE } : {}),
       sendId,
       dataContext, fromApp: app?.fromApp, mentions,
       reason: decision.reason,
@@ -8115,7 +8115,7 @@ async function acceptDirectSend(
             role: "user",
             kind: "text",
             text,
-            replyToId: replyTo?.id,
+            replyToId: replyTo?.id, ...replyQuoteField(replyTo),
             sendId,
             ...(dataContext ? { dataContext } : {}), ...(app?.fromApp ? { fromApp: app.fromApp } : {}),
             steered: true, ...(relayed ? { relayed: true } : {}),
@@ -8133,7 +8133,7 @@ async function acceptDirectSend(
           return startOrQueueDirectMessage(botId, threadId, text, replyTo, sendId, sender, trigger, via, callId, dataContext, app, mentions, relayed);
         }
         const queued = queueSteeredMessage(current.id, threadId, text, {
-          replyToId: replyTo?.id, ...(relayed ? { relayed: true, origin: OUTSIDE } : {}),
+          replyToId: replyTo?.id, ...replyQuoteField(replyTo), ...(relayed ? { relayed: true, origin: OUTSIDE } : {}),
           sendId,
           dataContext, fromApp: app?.fromApp, mentions,
           prompt: queuedPrompt,
@@ -8596,7 +8596,7 @@ async function beginTurn(
           role: "user",
           kind: "text",
           text,
-          replyToId: opts?.replyTo?.id,
+          replyToId: opts?.replyTo?.id, ...replyQuoteField(opts?.replyTo),
           reaction: opts?.replyTo?.reactedWith,
           sendId: opts?.sendId,
           ...(opts?.dataContext ? { dataContext: opts.dataContext } : {}), ...(opts?.app?.fromApp ? { fromApp: opts.app.fromApp } : {}), ...(opts?.app?.pointed ? { pointed: opts.app.pointed } : {}),
@@ -11812,7 +11812,7 @@ function startGroupTurn(
             role: "user",
             kind: "text",
             text: item.text,
-            replyToId: item.replyToId,
+            replyToId: item.replyToId, ...(item.replyQuote ? { replyQuote: item.replyQuote } : {}),
             reaction: item.reaction,
             sendId: item.sendId,
             channelMode: item.mode,
@@ -11826,7 +11826,7 @@ function startGroupTurn(
           role: "user",
           kind: "text",
           text: last.text,
-          replyToId: replyTo?.id,
+          replyToId: replyTo?.id, ...replyQuoteField(replyTo),
           reaction: last.reaction,
           sendId: last.sendId,
           channelMode: last.mode,
@@ -11839,7 +11839,7 @@ function startGroupTurn(
         role: "user",
         kind: "text",
         text,
-        replyToId: replyTo?.id,
+        replyToId: replyTo?.id, ...replyQuoteField(replyTo),
         reaction: replyTo?.reactedWith,
         sendId,
         channelMode,
@@ -12042,7 +12042,7 @@ function drainQueuedChannelSendsNow(): void {
       const last = items[items.length - 1]!;
       const joined = items.map((item) => item.text).join("\n\n");
       try {
-        startGroupTurn(groupId, joined, resolveReplyTarget(threadId, last.replyToId), last.sendId, last.mode, last.id, {
+        startGroupTurn(groupId, joined, withReplyQuote(resolveReplyTarget(threadId, last.replyToId), last.replyQuote), last.sendId, last.mode, last.id, {
           threadId,
           sender: head.sender,
           trigger: queuedTurnTrigger({ trigger: head.trigger, sender: head.sender }),
@@ -12051,7 +12051,7 @@ function drainQueuedChannelSendsNow(): void {
       } catch (error) {
         for (const item of items) {
           if (!store.messagesFor(threadId).some((message) => message.queueId === item.id && message.role === "user")) {
-            store.appendMessage(threadId, { role: "user", kind: "text", text: item.text, replyToId: item.replyToId, sendId: item.sendId, channelMode: item.mode, queueId: item.id, via: item.via, sender: item.sender });
+            store.appendMessage(threadId, { role: "user", kind: "text", text: item.text, replyToId: item.replyToId, ...(item.replyQuote ? { replyQuote: item.replyQuote } : {}), sendId: item.sendId, channelMode: item.mode, queueId: item.id, via: item.via, sender: item.sender });
           }
         }
         store.appendMessage(threadId, {

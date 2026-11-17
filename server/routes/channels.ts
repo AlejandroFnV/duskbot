@@ -15,7 +15,7 @@ import type { ProviderInstance, SteerOutcome } from "../contracts.ts";
 import { cancelledChatFollowup } from "../message-db.ts";
 import { messageTextRefusal } from "../message-text.ts";
 import type { PhoneSecretSubmissionRegistry } from "../phone-secret.ts";
-import { promptWithReply, type PersonName } from "../replies.ts";
+import { promptWithReply, withReplyQuote, type PersonName } from "../replies.ts";
 import { clientGroupPatchViolation, requestSource, type RequestAuth } from "../request-auth.ts";
 import type { RoomContextTracker } from "../room-context.ts";
 import { parseConversationTurnTimeout } from "../room-turn-timeout.ts";
@@ -342,7 +342,7 @@ export function createChannelRoutes(deps: ChannelRouteDeps): RouteHandler {
         return json(res, 409, { error: "the channel switched tasks before it could receive the message" });
       }
       const sendId = parseSendId(body.sendId);
-      const replyTo = resolveReplyTarget(threadId, body.replyToId);
+      const replyTo = withReplyQuote(resolveReplyTarget(threadId, body.replyToId), body.replyQuote);
       // A bot's shell is a loopback caller too: with no paired session and no browser origin the message
       // is stamped, not trusted as typed (readers, posting budget and transcript see the stamp), and logged.
       const browserOrigin = typeof req.headers.origin === "string" && req.headers.origin.trim() !== "";
@@ -397,7 +397,7 @@ export function createChannelRoutes(deps: ChannelRouteDeps): RouteHandler {
           const decision = admit("room", {}, { roomWorking: threadWorking, threadWorking });
           if (decision.action === "queue") {
             const queued = queueChannelMessage(current.id, threadId, text, {
-              replyToId: replyTo?.id,
+              replyToId: replyTo?.id, replyQuote: replyTo?.quote,
               sendId,
               mode: channelMode,
               via,
@@ -487,7 +487,7 @@ export function createChannelRoutes(deps: ChannelRouteDeps): RouteHandler {
               index === 0
                 ? replyTo
                 : item.replyToId
-                  ? resolveReplyTarget(targetThreadId, item.replyToId)
+                  ? withReplyQuote(resolveReplyTarget(targetThreadId, item.replyToId), item.replyQuote)
                   : undefined,
               speakerName,
             ),
@@ -516,7 +516,7 @@ export function createChannelRoutes(deps: ChannelRouteDeps): RouteHandler {
           role: "user",
           kind: "text",
           text: item.text,
-          replyToId: item.replyToId,
+          replyToId: item.replyToId, ...(item.replyQuote ? { replyQuote: item.replyQuote } : {}),
           sendId: item.sendId,
           channelMode: item.mode,
           queueId: item.id,

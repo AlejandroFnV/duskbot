@@ -22,7 +22,7 @@ export const BLOCKED_LINE = "[blocked: a saved line read like an instruction rat
 const OUTSIDE_TOOL = /browser|web|fetch|read_pages?|research|search|crawl|scrape|download|gmail|mail|inbox|slack|composio|http|url|rss|calendar|drive|notion|github|webhook|connector|mcp__/i;
 const OWN_TOOL = /^(?:session_search|memory_update|memory_log|list_bots|list_threads)$/;
 
-type PathMessage = { role: string; kind?: string; sender?: unknown; peerAsk?: unknown; tool?: { name?: string }; from?: { botId?: string } };
+type PathMessage = { role: string; kind?: string; sender?: unknown; peerAsk?: unknown; tool?: { name?: string } };
 
 /** What the current turn has read since the person's last message: outside content taints what it may remember. */
 export function readOutsideContent(path: readonly PathMessage[]): boolean {
@@ -32,11 +32,4 @@ export function readOutsideContent(path: readonly PathMessage[]): boolean {
     if (message.kind === "activity" && name && !OWN_TOOL.test(name) && OUTSIDE_TOOL.test(name)) return true;
   }
   return false;
-}
-
-/** Whether another bot spoke since the person's last message, as when its reply in a room tags this bot: the turn then
- * acts on that bot's words, not the person's. */
-export function heardAnotherBot(path: readonly PathMessage[], botId: string): boolean {
-  const asked = path.findLastIndex((message) => message.role === "user" && message.kind === "text");
-  return path.slice(asked + 1).some((message) => message.role === "bot" && message.kind === "text" && Boolean(message.from?.botId) && message.from?.botId !== botId);
 }

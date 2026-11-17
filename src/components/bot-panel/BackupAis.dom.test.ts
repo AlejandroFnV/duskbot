@@ -32,6 +32,7 @@ const engine = (instanceId: string, displayName: string, driverKind: string, mod
 const claude = engine("claude", "Claude", "claudeAgent", [["claude-sonnet-5", "Claude Sonnet 5"]]);
 const codex = engine("codex", "Codex", "codex", [["gpt-5.5", "GPT-5.5"], ["gpt-5.5-mini", "GPT-5.5 mini"]]);
 const gemini = engine("gemini", "Gemini", "geminiAgent", [["gemini-3-pro", "Gemini 3 Pro"]]);
+const thinkingCodex = { ...codex, capabilities: { effortLevels: ["low", "medium", "high"] } } as InstanceInfo;
 
 const bot = (fallback?: Bot["fallback"]): Bot => ({
   id: "scout", threadId: "thread-scout", name: "Scout", title: "", description: "", soul: "",
@@ -173,5 +174,25 @@ describe("a bot's backup AIs in Simple", () => {
     await new Promise((resolve) => setTimeout(resolve, 250));
     expect(menu()).toBeNull();
     expect(document.activeElement?.getAttribute("data-panel-action")).toBe("backup-add");
+  });
+
+  it("sets a backup's own thinking level, and goes back to the main model's", async () => {
+    fixture.instances.splice(0, fixture.instances.length, claude, thinkingCodex, gemini);
+    render([{ instanceId: "codex", model: "gpt-5.5" }]);
+    click(host.querySelector("[data-panel-action=backup-change]"));
+    await settle();
+    expect(menu()?.querySelector("[data-simple-thinking]")?.textContent).toContain("Same as main");
+    click([...(menu()?.querySelectorAll("[data-effort-pill]") ?? [])].find((pill) => pill.textContent === "High"));
+    expect(onChange).toHaveBeenLastCalledWith([{ instanceId: "codex", model: "gpt-5.5", effort: "high" }]);
+    render([{ instanceId: "codex", model: "gpt-5.5", effort: "high" }]);
+    click(menu()?.querySelector("[data-simple-effort-default]"));
+    expect(onChange).toHaveBeenLastCalledWith([{ instanceId: "codex", model: "gpt-5.5" }]);
+  });
+
+  it("offers no thinking level for a backup whose AI has none", async () => {
+    render([{ instanceId: "gemini", model: "gemini-3-pro" }]);
+    click(host.querySelector("[data-panel-action=backup-change]"));
+    await settle();
+    expect(menu()?.querySelector("[data-simple-thinking]")).toBeNull();
   });
 });

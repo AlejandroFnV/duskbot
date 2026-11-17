@@ -17,13 +17,14 @@ export const MODEL_PILL = cn(
 
 /** A panel row: "Model" on the left, the bot's model as a ghost pill on the right. Picking runs the real model picker
  * (sign-in, keys, the ask-first confirmation and reasoning levels included). */
-export function ModelSelectRow({ bot, threadId, title }: { bot: Bot; threadId?: string; title?: string }) {
+export function ModelSelectRow({ bot, threadId, title, thinking = false }: { bot: Bot; threadId?: string; title?: string; thinking?: boolean }) {
   return (
     <div data-panel-row="model" className={cn("flex min-h-[30px] items-center gap-2 rounded-lg px-2 py-1.5", MODEL_PILL)}>
       <ModelPicker
         bot={bot}
         threadId={threadId ?? bot.threadId}
         contained
+        containedThinking={thinking}
         size="sm"
         label={<span className="min-w-0 flex-1 truncate text-[13px] leading-[18px] tracking-[0.015em] text-ink">{title ?? t("model.simple.model")}</span>}
       />

@@ -201,3 +201,12 @@ describe("skill extras", () => {
     expect(readSkillLibraryIndex().weekly).toMatchObject({ description: "Weekly, shorter.", reviewState: "approved" });
   });
 });
+
+describe("My Cloud sets a bot's backups with their thinking level", () => {
+  it("keeps a known level and refuses an unknown one", async () => {
+    const d = deps("/data");
+    expect((await take(d, "bot:b1", { fallback: [{ instanceId: "claude", model: "h", effort: "high" }] })).status).toBe(200);
+    expect(d.patched.at(-1)![1]).toEqual({ fallback: [{ instanceId: "claude", model: "h", effort: "high" }] });
+    expect((await take(d, "bot:b1", { fallback: [{ instanceId: "claude", model: "h", effort: "turbo" }] })).status).toBe(400);
+  });
+});

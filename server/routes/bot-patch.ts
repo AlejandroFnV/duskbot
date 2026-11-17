@@ -4,7 +4,7 @@ import { normalizeConnectorScopes } from "../../shared/connector-scopes.ts";
 import { normalizeOutboundPolicy } from "../../shared/outbound.ts";
 import { normalizePhoneApps } from "../../shared/phone-apps.ts";
 import { parseToolScope, toolScopeWidens } from "../../shared/tool-scope.ts";
-import { isMausColor, MAUS_COLOR_NAMES, type WireBot, type WireGroup } from "../../shared/wire.ts";
+import { isEffortLevel, isMausColor, MAUS_COLOR_NAMES, type WireBot, type WireGroup } from "../../shared/wire.ts";
 import { validateBotCwd } from "../bot-cwd.ts";
 import { parseBotProfilePatch } from "../bot-profile.ts";
 import { accessFromVisibility } from "../../shared/bot-access.ts";
@@ -225,16 +225,20 @@ export function createBotPatchRoutes(deps: BotPatchRouteDeps): RouteHandler {
         if (!Array.isArray(body.fallback) || body.fallback.length > 5) {
           return json(res, 400, { error: "fallback must be a list of up to five { instanceId, model } entries" });
         }
-        const chain: Array<{ instanceId: string; model: string }> = [];
+        const chain: NonNullable<BotRecord["fallback"]> = [];
         for (const entry of body.fallback as unknown[]) {
-          const row = entry && typeof entry === "object" ? (entry as { instanceId?: unknown; model?: unknown }) : null;
+          const row = entry && typeof entry === "object" ? (entry as { instanceId?: unknown; model?: unknown; effort?: unknown }) : null;
           if (!row || typeof row.instanceId !== "string" || !/^[\w.-]+$/.test(row.instanceId) || typeof row.model !== "string" || !row.model.trim() || row.model.length > 500) {
             return json(res, 400, { error: "fallback must be a list of up to five { instanceId, model } entries" });
           }
-          if (!registry.get(row.instanceId)) return json(res, 400, { error: `fallback engine "${row.instanceId}" is not available` });
+          const engine = registry.get(row.instanceId);
+          if (!engine) return json(res, 400, { error: `fallback engine "${row.instanceId}" is not available` });
+          if (row.effort !== undefined && (!isEffortLevel(row.effort) || !engine.adapter.capabilities.effortLevels?.includes(row.effort))) {
+            return json(res, 400, { error: `effort "${String(row.effort)}" is not offered by fallback engine "${row.instanceId}"` });
+          }
           const model = row.model.trim();
           if (chain.some((seen) => seen.instanceId === row.instanceId && seen.model === model)) continue;
-          chain.push({ instanceId: row.instanceId, model });
+          chain.push({ instanceId: row.instanceId, model, ...(row.effort !== undefined ? { effort: row.effort } : {}) });
         }
         patch.fallback = chain;
       }

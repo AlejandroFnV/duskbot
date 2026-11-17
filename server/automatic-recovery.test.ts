@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { recoveryCapabilityError, startupBackups } from "./automatic-recovery.ts";
+import { backupSelection, recoveryCapabilityError, startupBackups } from "./automatic-recovery.ts";
 
 describe("automatic recovery capabilities", () => {
   const engine = { driverKind: "qwenAgent", capabilities: {
@@ -40,5 +40,23 @@ describe("startup backups", () => {
     expect(startupBackups({}, { enabled: false, backup: app })).toEqual([]);
     expect(startupBackups({}, { enabled: false })).toEqual([]);
     expect(startupBackups({})).toEqual([]);
+  });
+});
+
+describe("a backup's thinking level", () => {
+  const levels = ["low", "medium", "high"] as const;
+  const main = { instanceId: "claude", model: "claude-opus-5-5", effort: "high" as const };
+  it("keeps its own level when its AI offers it", () => {
+    expect(backupSelection({ instanceId: "codex", model: "gpt-5.5", effort: "low" }, main, levels)).toEqual({ instanceId: "codex", model: "gpt-5.5", effort: "low" });
+  });
+  it("takes the main model's level when it has none of its own", () => {
+    expect(backupSelection({ instanceId: "codex", model: "gpt-5.5" }, main, levels)).toEqual({ instanceId: "codex", model: "gpt-5.5", effort: "high" });
+  });
+  it("runs with no level when its AI does not offer the one it would use", () => {
+    expect(backupSelection({ instanceId: "gemini", model: "gemini-3-pro" }, main, undefined)).toEqual({ instanceId: "gemini", model: "gemini-3-pro" });
+    expect(backupSelection({ instanceId: "codex", model: "gpt-5.5", effort: "max" }, main, levels)).toEqual({ instanceId: "codex", model: "gpt-5.5" });
+  });
+  it("inherits nothing from a main model that uses a variant instead of a level", () => {
+    expect(backupSelection({ instanceId: "codex", model: "gpt-5.5" }, { instanceId: "claude", model: "m", variant: "fast" }, levels)).toEqual({ instanceId: "codex", model: "gpt-5.5" });
   });
 });

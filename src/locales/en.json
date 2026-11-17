@@ -4323,6 +4323,8 @@
   "botPanel.backups.title": "Backup AIs",
   "botPanel.backups.hint": "Used only when {name}'s AI is at its usage limit or can't start on a message. The first one here that can take over does, in that conversation only. After a usage limit resets, the conversation goes back.",
   "botPanel.backups.row": "Backup {position}: {model}",
+  "botPanel.backups.effortInherit": "Same as main",
+  "botPanel.backups.useInherit": "Use main's",
   "botPanel.backups.remove": "Remove {model} from backups",
   "botPanel.backups.choose": "Choose a backup AI",
   "botPanel.backups.sameAccount": "Same account as the main AI: it shares the usage limit.",

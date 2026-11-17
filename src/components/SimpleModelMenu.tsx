@@ -16,7 +16,9 @@ import { MotionDiv } from "./ui/SheetMotion";
 import { EASE_OUT, SPRING } from "@/lib/motion-presets";
 
 export type SimpleThinking =
-  | { levels: readonly EffortLevel[]; current?: EffortLevel; onPick: (level: EffortLevel) => void; onReset: () => void }
+  | { levels: readonly EffortLevel[]; current?: EffortLevel; onPick: (level: EffortLevel) => void; onReset: () => void;
+    /** What no level means here, and the button that returns to it; the engine's default when left out. */
+    unset?: { label: string; reset: string } }
   | { variants: ReactNode };
 
 export interface SimpleMenuActions {
@@ -189,11 +191,11 @@ function Thinking({ thinking, labelId }: { thinking: SimpleThinking; labelId: st
       <div className="flex h-6 items-end justify-between gap-2 px-2 pb-0.5">
         <span id={labelId} className="text-[12px] font-medium leading-4 text-ink-tertiary">{t("botSettings.simple.thinking")}</span>
         {(levels.current === undefined
-          ? <span title={t("model.simple.thinkingDefault")} className="text-[12px] leading-4 text-ink-tertiary">{t("model.effort.default")}</span>
+          ? <span title={t("model.simple.thinkingDefault")} className="text-[12px] leading-4 text-ink-tertiary">{levels.unset?.label ?? t("model.effort.default")}</span>
           : (
             <button type="button" data-simple-effort-default onClick={levels.onReset} title={t("model.simple.thinkingDefault")}
               className="-mr-1 rounded-[5px] px-1 text-[12px] leading-4 text-ink-secondary hover:bg-ink/[0.06] hover:text-ink">
-              {t("model.simple.useDefault")}
+              {levels.unset?.reset ?? t("model.simple.useDefault")}
             </button>
           ))}
       </div>

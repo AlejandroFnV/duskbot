@@ -60,6 +60,8 @@ function fixture() {
     // A member's session may chat with this bot: the level that still can't move it or change what it may do.
     levelOf: () => "chat",
     mainThreadTasks: (botId: string) => store.tasks(botId).filter((task) => !privateThreads.has(task.threadId)),
+    registry: { get: (instanceId: string) => ({ codex: { adapter: { capabilities: { effortLevels: ["low", "high"] } } },
+      gemini: { adapter: { capabilities: {} } } } as Record<string, unknown>)[instanceId] },
   } as unknown as BotPatchRouteDeps;
   const handler = createBotPatchRoutes(deps);
   const patch = async (botId: string, body: Record<string, unknown>, as: { auth?: RequestAuth; headers?: Record<string, string> } = {}) => {
@@ -380,5 +382,23 @@ describe("PATCH /api/bots/:id mainThreadChoice", () => {
     expect(client.status).toBe(403);
     expect(paired.status).toBe(403);
     expect(store.bot(bot.id)?.mainThreadChoice).toBeUndefined();
+  });
+});
+
+describe("PATCH /api/bots/:id fallback thinking level", () => {
+  it("stores a backup's level its AI offers, and a backup with none", async () => {
+    const { store, bot, patch } = fixture();
+    const stored = await patch(bot.id, { fallback: [{ instanceId: "codex", model: "gpt-5.5", effort: "high" }, { instanceId: "gemini", model: "gemini-3-pro" }] });
+    expect(stored.status).toBe(200);
+    expect(store.bot(bot.id)?.fallback).toEqual([{ instanceId: "codex", model: "gpt-5.5", effort: "high" }, { instanceId: "gemini", model: "gemini-3-pro" }]);
+  });
+
+  it("refuses an unknown level, or one the backup's AI does not offer", async () => {
+    const { store, bot, patch } = fixture();
+    for (const fallback of [[{ instanceId: "codex", model: "gpt-5.5", effort: "turbo" }], [{ instanceId: "codex", model: "gpt-5.5", effort: "max" }],
+      [{ instanceId: "gemini", model: "gemini-3-pro", effort: "low" }]]) {
+      expect((await patch(bot.id, { fallback })).status).toBe(400);
+    }
+    expect(store.bot(bot.id)?.fallback).toBeUndefined();
   });
 });

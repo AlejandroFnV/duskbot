@@ -144,7 +144,7 @@ describe("Simple-mode sidebar layout", () => {
   });
 
   it("shows the pinned bots as tiles above the rows and the Chief as the first row, with no Pinned or Bots heading", () => {
-    fixture.state = { ...fixture.state, bots: [bot("chief", { chiefOfStaff: true, pinned: true }), bot("atlas", { pinned: true }), bot("bea"), bot("dodo", { section: "Work", pinned: true })] };
+    fixture.state = { ...fixture.state, bots: [bot("chief", { chiefOfStaff: true }), bot("atlas", { pinned: true }), bot("bea"), bot("dodo", { section: "Work", pinned: true })] };
     const { tree } = render();
     const grid = tree.find((node) => node.type === SidebarTileGrid)!.props as Parameters<typeof SidebarTileGrid>[0];
     expect(grid.primary).toBeNull();
@@ -152,6 +152,14 @@ describe("Simple-mode sidebar layout", () => {
     expect(sectionOrder(tree)).toEqual([userSectionId("Work"), BOTS_SECTION_ID, CHANNELS_SECTION_ID]);
     expect(listedBots(tree)).toEqual(["chief", "bea"]);
     expect(headers(tree).map((header) => header.props.name)).toEqual(["Work", "Unassigned", "Group chats"]);
+  });
+
+  it("puts a pinned Chief first among the pinned tiles at the top, out of the rows, like any pinned bot", () => {
+    fixture.state = { ...fixture.state, bots: [bot("chief", { chiefOfStaff: true, pinned: true }), bot("atlas", { pinned: true }), bot("bea"), bot("dodo", { section: "Work", pinned: true })] };
+    const { tree } = render();
+    const grid = tree.find((node) => node.type === SidebarTileGrid)!.props as Parameters<typeof SidebarTileGrid>[0];
+    expect(grid.pinned.map((candidate) => candidate.id)).toEqual(["chief", "atlas", "dodo"]);
+    expect(listedBots(tree)).toEqual(["bea"]);
   });
 
   it("fades the list's edges in both modes, with the top buttons and the tiles fixed above it", () => {

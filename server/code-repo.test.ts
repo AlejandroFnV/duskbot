@@ -57,7 +57,7 @@ describe("createCodeRepos", () => {
     let release: (value: string | null) => void = () => {};
     const changed: string[] = [];
     let calls = 0;
-    const repos = createCodeRepos({ git: () => { calls++; return new Promise((done) => { release = done; }); }, changed: (id) => changed.push(id) });
+    const repos = createCodeRepos({ git: () => { calls++; return new Promise((done) => { release = done; }); }, now: () => 0, changed: (id) => changed.push(id) });
     const messages = () => [activity("Bash", { command: "cd /r && ls" })];
     expect(repos.of("t1", messages, null, 1)).toBeNull();
     expect(repos.of("t1", messages, null, 1)).toBeNull();
@@ -83,5 +83,31 @@ describe("createCodeRepos", () => {
     repos.of("t2", () => [], "/not-a-repo", undefined);
     await flush();
     expect(repos.of("t2", () => [], "/not-a-repo", undefined)).toBeNull();
+  });
+
+  it("never reads archived threads or ones idle for a day, unless they are working", async () => {
+    let calls = 0, reads = 0;
+    const day = 24 * 60 * 60_000;
+    const repos = createCodeRepos({ git: async () => { calls++; return output; }, now: () => 2 * day, changed: () => {} });
+    const messages = () => { reads++; return [activity("Bash", { command: "cd /r && ls" })]; };
+    expect(repos.of("archived", messages, null, 2 * day, { archived: true })).toBeNull();
+    expect(repos.of("idle", messages, null, day - 1)).toBeNull();
+    expect([calls, reads]).toEqual([0, 0]);
+    repos.of("busy", messages, null, day - 1, { live: true });
+    await flush();
+    expect([calls, reads]).toEqual([1, 1]);
+  });
+
+  it("does not announce a change when git answers the same repo again", async () => {
+    let clock = 0;
+    const changed: string[] = [];
+    const repos = createCodeRepos({ git: async () => output, now: () => clock, changed: (id) => changed.push(id) });
+    const messages = () => [activity("Bash", { command: "cd /r && ls" })];
+    repos.of("t1", messages, null, 0);
+    await flush();
+    clock = 61_000;
+    repos.of("t1", messages, null, 0);
+    await flush();
+    expect(changed).toEqual(["t1"]);
   });
 });

@@ -7,6 +7,8 @@ import type { WireCodeRepo, WireMessage } from "../shared/wire.ts";
 const EDIT_TOOLS = new Set(["Edit", "Write", "MultiEdit", "NotebookEdit", "edit", "write", "apply_patch"]);
 const SHELL_TOOLS = new Set(["Bash", "bash", "shell", "exec_command"]);
 const REPO_TTL_MS = 60_000;
+/** Past this without activity an idle thread is no longer shown as a coding task, so it is not resolved at all. */
+const IDLE_CUTOFF_MS = 24 * 60 * 60_000;
 
 const expandHome = (path: string): string => path === "~" ? homedir() : path.startsWith("~/") ? resolve(homedir(), path.slice(2)) : path;
 const unquote = (word: string): string => word.replace(/^(["'])(.*)\1$/, "$2");
@@ -64,7 +66,8 @@ const sameRepo = (a: WireCodeRepo | null | undefined, b: WireCodeRepo | null | u
 
 /** Repo, branch and worktree of each thread. `of` never waits on git: it answers from the cache and starts at most one
  * background `git` per folder, then calls `changed` for each thread whose answer moved, so the next projection carries it.
- * Messages are read only when the thread's `version` (its newest message time) changes. */
+ * Messages are read only when the thread's `version` (its newest message time) changes; archived threads and idle ones
+ * quiet for a day are never resolved, so a large history is not loaded from disk. */
 export function createCodeRepos({ git = runGit, now = Date.now, changed }: { git?: GitRun; now?: () => number; changed: (threadId: string) => void }) {
   const byFolder = new Map<string, { repo: WireCodeRepo | null; at: number }>();
   const inFlight = new Set<string>();
@@ -80,7 +83,8 @@ export function createCodeRepos({ git = runGit, now = Date.now, changed }: { git
     }, () => undefined).finally(() => inFlight.delete(folder));
   };
   return {
-    of(threadId: string, messages: () => readonly WireMessage[], pinnedCwd: string | null | undefined, version: number | undefined): WireCodeRepo | null {
+    of(threadId: string, messages: () => readonly WireMessage[], pinnedCwd: string | null | undefined, version: number | undefined, thread: { live?: boolean; archived?: boolean } = {}): WireCodeRepo | null {
+      if (thread.archived || (!thread.live && version !== undefined && now() - version >= IDLE_CUTOFF_MS)) return null;
       const key = `${version ?? ""}|${pinnedCwd ?? ""}`;
       let entry = byThread.get(threadId);
       if (!entry || entry.key !== key) {

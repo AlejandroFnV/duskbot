@@ -33,6 +33,10 @@ export function moveBotsToSection(dispatch: Dispatch<Action>, botIds: string[], 
     .catch((cause) => dispatch({ type: "error", message: failure(cause) }));
 }
 
+export function moveRoomToSection(dispatch: Dispatch<Action>, groupId: string, section: string): void {
+  dispatch({ type: "patchGroup", groupId, patch: { section } });
+}
+
 export function setBotPinned(dispatch: Dispatch<Action>, botId: string, pinned: boolean): void {
   dispatch({ type: "updateBot", botId, patch: { pinned } });
 }

@@ -1,6 +1,6 @@
 import { OrganizationIdentity } from "./OrganizationIdentity";
 import { StartFreshHost } from "./bot-panel/StartFresh";
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type Dispatch } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type Dispatch, type DragEvent } from "react";
 import { motion, type MotionStyle } from "motion/react";
 import { createPortal } from "react-dom";
 import { Bot as BotIcon, Check, ClipboardCopy, Crown, FolderPlus, Library, Loader2, MoreHorizontal, Pencil, Phone, Pin, Plus, TextQuote, Trash2, Users, X } from "../icons";
@@ -38,7 +38,8 @@ import { BOT_CHATS_SECTION_ID, BOTS_SECTION_ID, CHANNELS_SECTION_ID, PINNED_SECT
 import { stepKey } from "@/lib/sidebar-bot-drop";
 import { botRowDropClass, useSidebarBotDrag, type BotRowDrag } from "./SidebarBotDrag";
 import { useSidebarSections } from "./SidebarSections";
-import { departmentNames, setBotPinned } from "./bot-sections";
+import { departmentNames, moveRoomToSection, setBotPinned } from "./bot-sections";
+import { draggedRoom, ROOM_ROW_DRAG_TYPE, roomDropSection } from "@/lib/sidebar-room-drop";
 import { draggedPinnedCircle, PINNED_CIRCLE_DRAG_TYPE } from "@/lib/pinned-circle-order";
 import { sidebarSectionAttention } from "@/lib/sidebar-attention";
 import { botListItemPointerIntent } from "@/lib/sidebar-selection";
@@ -114,6 +115,8 @@ export function openBotContextMenu(onMenu: (menu: MenuState) => void, botId: str
   onMenu({ botId, x: event.clientX, y: event.clientY + 4 });
 }
 
+const remoteRoomDrag = () => typeof window !== "undefined" && window.duskDesktop?.remoteClient?.active === true;
+
 export function GroupListItem({
   group,
   density,
@@ -136,6 +139,11 @@ export function GroupListItem({
     <div className={cn("group relative", railTile && "mx-auto w-[54px]")}>
     <button
       data-sidebar-group-row={group.id}
+      draggable={!railTile && !remoteRoomDrag()}
+      onDragStart={(event) => {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData(ROOM_ROW_DRAG_TYPE, group.id);
+      }}
       aria-current={selected ? "page" : undefined}
       onClick={() => dispatch({ type: "select", id: group.id })}
       onContextMenu={(e) => {
@@ -947,6 +955,28 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
     if (!sectionNames.includes(group.section!)) sectionNames.push(group.section!);
   }
   const drops = botDrag.arrange({ enabled: sections.interactive && !phone, main: saved.unsectionedBots, sectioned: saved.sectionedBots, departments: sectionNames, bots: state.bots, taken: departmentNames(state) });
+  const roomZone = <Z extends { onDragOver: (event: DragEvent<HTMLElement>) => void; onDrop: (event: DragEvent<HTMLElement>) => void }>(id: string, zone: Z): Z => {
+    const section = remoteClient || !sections.interactive ? null : roomDropSection(id);
+    if (section === null) return zone;
+    return {
+      ...zone,
+      onDragOver: (event: DragEvent<HTMLElement>) => {
+        if (!event.dataTransfer.types.includes(ROOM_ROW_DRAG_TYPE)) return zone.onDragOver(event);
+        event.preventDefault();
+        event.dataTransfer.dropEffect = "move";
+      },
+      onDrop: (event: DragEvent<HTMLElement>) => {
+        const groupId = draggedRoom(event.dataTransfer);
+        if (!groupId) return zone.onDrop(event);
+        event.preventDefault();
+        event.stopPropagation();
+        const room = state.groups.find((group) => group.id === groupId);
+        if (!room || (room.section ?? "") === section) return;
+        moveRoomToSection(dispatch, groupId, section);
+        sections.announce(`${room.name}: ${section || t("sidebar.section.channels")}`);
+      },
+    };
+  };
   const naturalSectionIds = [
     ...(pinnedBots.length > 0 && !universalPins && !simpleDesk ? [PINNED_SECTION_ID] : []),
     ...(unsectionedRooms.length > 0 ? [CHANNELS_SECTION_ID] : []),
@@ -1210,7 +1240,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
               <div
                 key={id}
                 data-sidebar-section-id={id}
-                {...layout.zone(id)} data-bot-drop-list={drops.list(id)}
+                {...roomZone(id, layout.zone(id))} data-bot-drop-list={drops.list(id)}
                 className={cn(
                   "flex flex-col",
                   "gap-1",
@@ -1382,7 +1412,7 @@ export function Sidebar({ open, onClose, collapseToIcons = false }: {
           onClose={() => setRoomSectionPicker(null)}
           onAssign={(section) => {
             if (!roomSectionPicker) return;
-            dispatch({ type: "patchGroup", groupId: roomSectionPicker.groupId, patch: { section } });
+            moveRoomToSection(dispatch, roomSectionPicker.groupId, section);
           }}
         />
       {newRoom && <NewRoomPanel onClose={() => setNewRoom(false)} />}

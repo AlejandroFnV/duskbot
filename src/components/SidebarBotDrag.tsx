@@ -4,13 +4,13 @@ import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n";
 import { nextRename } from "@/lib/rename";
 import { BOTS_SECTION_ID, userSectionName } from "@/lib/sidebar-layout";
-import { botListOf, stepBot, unusedName, type BotLists, type BotMove } from "@/lib/sidebar-bot-drop";
+import { botListOf, pinsOnRelease, stepBot, unusedName, type BotLists, type BotMove } from "@/lib/sidebar-bot-drop";
 import {
   autoScrollStep, clampLift, landingTop, pressStep, releaseMove, reorderShifts, reorderTarget, sameTarget, SLIDE_EASE, SLIDE_MS, TOUCH_HOLD_MS,
   type Press, type ReorderShifts, type ReorderSnapshot, type ReorderTarget,
 } from "@/lib/sidebar-reorder";
 import type { Action, Bot } from "@/state/store";
-import { moveBotsToSection, renameDepartment, saveBotOrder, useMayMoveBots } from "./bot-sections";
+import { moveBotsToSection, renameDepartment, saveBotOrder, setBotPinned, useMayMoveBots } from "./bot-sections";
 import { friendlyError } from "@/lib/plain-error";
 
 /** The department being named, before it exists. The server trims names and never keeps a control character. */
@@ -77,12 +77,14 @@ type Session = {
   frame: number;
   /** whether the button or finger is still down */
   held: boolean;
+  /** the pointer is above the list, over the pinned bots: letting go pins the bot */
+  pin: boolean;
   restore: () => void;
 };
 
 /** Dragging bots within and between the rows outside any department and each department's, Discord's way: the row lifts
  * after a few pixels (a short hold on touch), the rest slide to make room, Escape puts everything back. Alt+Up/Down does
- * the same from the keyboard. Also the name field a new or renamed department shows in its heading. */
+ * the same from the keyboard. Let go above the list, over the pinned bots, the row's bot is pinned, as its menu's Pin does. Also the name field a new or renamed department shows in its heading. */
 export function useSidebarBotDrag({ dispatch, announce, onNamed, onRenamed, onError, onCancelled }: {
   dispatch: Dispatch<Action>;
   announce: (text: string) => void;
@@ -94,6 +96,7 @@ export function useSidebarBotDrag({ dispatch, announce, onNamed, onRenamed, onEr
   const [dragging, setDragging] = useState<string | null>(null);
   /** a folded section the row would go into, its heading marked */
   const [into, setInto] = useState<string | null>(null);
+  const [pinning, setPinning] = useState(false);
   const [naming, setNaming] = useState<Naming | null>(null);
   const mayMove = useMayMoveBots();
   const latest = useRef<Arranged>({ enabled: false, lists: new Map(), bots: [], taken: [] });
@@ -139,6 +142,11 @@ export function useSidebarBotDrag({ dispatch, announce, onNamed, onRenamed, onEr
     return s.snapshot.zones.find((zone) => zone.list === list)?.id ?? "";
   };
   const placeLine = (s: Session) => {
+    if (s.pin) {
+      s.line.style.opacity = "1";
+      s.line.style.transform = `translate3d(${s.view.left + 8}px, ${s.view.top + 1}px, 0)`;
+      return;
+    }
     const land = landingTop(s.snapshot, s.botId, s.target, s.shifts);
     const y = land === null ? null : land - s.snapshot.gap / 2 - 1 - s.scroller.scrollTop + s.view.top;
     const shown = y !== null && y > s.view.top && y < s.view.bottom;
@@ -153,7 +161,9 @@ export function useSidebarBotDrag({ dispatch, announce, onNamed, onRenamed, onEr
     if (step) s.scroller.scrollTop += step;
     const contentY = s.clientY - s.view.top + s.scroller.scrollTop;
     const top = clampLift(contentY - s.grab, s.height, s.snapshot.zones);
-    const target = reorderTarget(s.snapshot, latest.current.lists, s.botId, top + s.height / 2);
+    const pin = pinsOnRelease(s.clientY, s.view.top, false);
+    if (pin !== s.pin) { s.pin = pin; setPinning(pin); }
+    const target = pin ? null : reorderTarget(s.snapshot, latest.current.lists, s.botId, top + s.height / 2);
     if (!sameTarget(target, s.target)) {
       s.target = target;
       s.shifts = reorderShifts(s.snapshot, s.botId, target);
@@ -174,7 +184,8 @@ export function useSidebarBotDrag({ dispatch, announce, onNamed, onRenamed, onEr
     settling.current = true;
     swallowClick(s.held);
     const lists = latest.current.lists;
-    const move = latest.current.enabled ? releaseMove(lists, s.botId, s.target, cancelled) : null;
+    const pin = latest.current.enabled && s.pin && pinsOnRelease(s.clientY, s.view.top, cancelled);
+    const move = latest.current.enabled && !pin ? releaseMove(lists, s.botId, s.target, cancelled) : null;
     if (!move) s.shifts = reorderShifts(s.snapshot, s.botId, null);
     const land = move ? landingTop(s.snapshot, s.botId, s.target, s.shifts) : null;
     const animate = !reducedMotion();
@@ -186,8 +197,14 @@ export function useSidebarBotDrag({ dispatch, announce, onNamed, onRenamed, onEr
     const done = () => {
       flushSync(() => {
         if (move) apply(s.botId, move, false);
+        if (pin) {
+          setBotPinned(actions.current.dispatch, s.botId, true);
+          const name = latest.current.bots.find((bot) => bot.id === s.botId)?.name ?? "";
+          actions.current.announce(`${name}: ${t("sidebar.section.pinned")}`);
+        }
         setDragging(null);
         setInto(null);
+        setPinning(false);
       });
       s.restore();
       settling.current = false;
@@ -267,7 +284,7 @@ export function useSidebarBotDrag({ dispatch, announce, onNamed, onRenamed, onEr
       botId: press.botId, wrapper: press.wrapper, pointerId: press.pointerId, scroller,
       view: { top: box.top, bottom: box.bottom, left: box.left, width: box.width },
       snapshot: { rows, zones, gap }, rowEls, zoneEls, originTop: dragged.top, height: dragged.height,
-      grab: toContent(press.clientY) - dragged.top, clientY: press.clientY, target: null, shifts: reorderShifts({ rows, zones, gap }, press.botId, null), line, frame: 0, held: true, restore,
+      grab: toContent(press.clientY) - dragged.top, clientY: press.clientY, target: null, shifts: reorderShifts({ rows, zones, gap }, press.botId, null), line, frame: 0, held: true, pin: false, restore,
     };
     session.current = s;
     s.target = reorderTarget(s.snapshot, lists, s.botId, dragged.top + dragged.height / 2);
@@ -356,6 +373,8 @@ export function useSidebarBotDrag({ dispatch, announce, onNamed, onRenamed, onEr
           return { botDrag: controller.current!, botDragging: active === botId };
         },
         into: (name: string | null) => active !== null && name !== null && into === name,
+        /** a dragged row is over the pinned bots: letting go pins it */
+        pinning: active !== null && pinning,
         naming: (name: string | null): SectionNaming | undefined => {
           if (!naming || name === null) return undefined;
           const value = naming.kind === "new" ? (name === NEW_DEPARTMENT ? naming.name : null) : (name === naming.section ? naming.section : null);

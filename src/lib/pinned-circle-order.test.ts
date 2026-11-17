@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  draggedPinnedCircle,
   PINNED_CIRCLE_DRAG_TYPE,
   pinnedCircleDropPlace,
   placePinnedCircle,
@@ -46,5 +47,14 @@ describe("pinned circle order", () => {
     expect(pinnedCircleDropPlace(70, 40, rect, true)).toEqual({ place: "before", axis: "x" });
     expect(pinnedCircleDropPlace(40, 5, rect)).toEqual({ place: "before", axis: "y" });
     expect(pinnedCircleDropPlace(40, 75, rect)).toEqual({ place: "after", axis: "y" });
+  });
+});
+
+describe("a pinned bot dragged down into the list", () => {
+  const data = (types: string[], value: string) => ({ types, getData: (type: string) => (types.includes(type) ? value : "") });
+  it("names the pinned bot it carries and nothing for another drag", () => {
+    expect(draggedPinnedCircle(data([PINNED_CIRCLE_DRAG_TYPE], "atlas"))).toBe("atlas");
+    expect(draggedPinnedCircle(data(["text/plain"], "atlas"))).toBeNull();
+    expect(draggedPinnedCircle(data([PINNED_CIRCLE_DRAG_TYPE], ""))).toBeNull();
   });
 });

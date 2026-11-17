@@ -9,13 +9,18 @@ function peerBot(peer: PeerRef, bots: readonly Pick<Bot, "id" | "name" | "color"
   return bots.find((bot) => bot.id === peer.id) ?? (peer.name ? bots.find((bot) => bot.name === peer.name) : undefined);
 }
 
-/** One run of bot-to-bot messages as grok draws it; a chip opens the messages under the line. */
-export function PeerExchangeLine({ summary, bots, expanded, onToggle }: {
+/** One run of bot-to-bot messages as grok draws it. A chip opens the messages under the line or, given `onOpen`,
+ * on a sheet of their own that holds only that bot-to-bot conversation. */
+export function PeerExchangeLine({ summary, bots, expanded, onToggle, onOpen }: {
   summary: ExchangeSummary;
   bots: readonly Bot[];
   expanded: boolean;
   onToggle: () => void;
+  onOpen?: (peers: PeerRef[]) => void;
 }) {
+  const press = (peers: PeerRef[], name: string) => onOpen
+    ? { "aria-haspopup": "dialog" as const, "aria-label": t("chat.event.openExchange", { name }), onClick: () => onOpen(peers) }
+    : { "aria-expanded": expanded, "aria-label": t(expanded ? "chat.event.hideExchange" : "chat.event.showExchange", { name }), onClick: onToggle };
   const chip = (peer: PeerRef): ReactNode => {
     const bot = peerBot(peer, bots);
     const name = bot?.name ?? peer.name;
@@ -25,9 +30,7 @@ export function PeerExchangeLine({ summary, bots, expanded, onToggle }: {
         wideGap
         leading={<BotAvatar bot={bot ?? { name, color: (peer.color ?? "blue") as Bot["color"] }} state="happy" size={16} motion="none" motionKey={0} animated={false} />}
         title={name}
-        aria-expanded={expanded}
-        aria-label={t(expanded ? "chat.event.hideExchange" : "chat.event.showExchange", { name })}
-        onClick={onToggle}
+        {...press([peer], name)}
       >
         {name}
       </EventChip>
@@ -41,9 +44,7 @@ export function PeerExchangeLine({ summary, bots, expanded, onToggle }: {
         wideGap
         leading={<BotAvatar bot={lead ?? { name: peers[0]!.name, color: (peers[0]!.color ?? "blue") as Bot["color"] }} state="happy" size={16} motion="none" motionKey={0} animated={false} />}
         title={names}
-        aria-expanded={expanded}
-        aria-label={t(expanded ? "chat.event.hideExchange" : "chat.event.showExchange", { name: names })}
-        onClick={onToggle}
+        {...press([...peers], names)}
       >
         {t("chat.event.botsMany", { count: peers.length })}
       </EventChip>

@@ -134,6 +134,8 @@ import { useTranscriptViewport } from "@/hooks/use-transcript-viewport";
 import { useUnreadDivider } from "@/hooks/use-unread-divider";
 import { NewMessagesDivider } from "./NewMessagesDivider";
 import { PeerExchangeLine } from "./PeerExchangeLine";
+import { PeerExchangeView } from "./PeerExchangeView";
+import { exchangeEntries, peerConversation, type PeerRef } from "@/lib/peer-exchange";
 import { useExchangeRows } from "@/hooks/use-exchange-runs";
 import { unreadMessageIds } from "@/lib/unread-divider";
 import { useReplyDraft } from "@/lib/drafts";
@@ -851,6 +853,10 @@ const MessagesList = memo(function MessagesList({
     return at < 0 ? layout.joins : layout.joins.map((join, index) => index === at ? { ...join, below: true } : join);
   }, [layout, items, seamId]);
   const exchanges = useExchangeRows(messages, items, transcriptRows, showToolCalls ? noneTransparent : hiddenSteps, botId);
+  // a chip opens the bot-to-bot conversation on its own sheet, apart from the person's thread with the bot
+  const [exchangePeers, setExchangePeers] = useState<PeerRef[] | null>(null);
+  const exchangeLines = useMemo(() => exchangePeers ? peerConversation(messages, exchangeEntries(messages, botId), exchangePeers) : [],
+    [messages, botId, exchangePeers]);
   const rowJoins = useMemo(() => joins.map((join, index) => exchanges.closedBelow(index) || exchanges.closedAbove(index)
     ? { ...join, ...(exchanges.closedBelow(index) ? { below: false } : {}), ...(exchanges.closedAbove(index) ? { above: false } : {}) } : join), [joins, exchanges]);
   const dividerAbove = (rows: readonly Message[]) => {
@@ -860,6 +866,9 @@ const MessagesList = memo(function MessagesList({
   };
   return (
     <>
+      {exchangePeers && (
+        <PeerExchangeView self={{ name: botName, color: botColor }} peers={exchangePeers} lines={exchangeLines} bots={bots} onClose={() => setExchangePeers(null)} />
+      )}
       {items.map((item, i) => {
         const previous = items[i - 1];
         const prev = previous && (previous.kind === "message" ? previous.message : previous.messages.at(-1));
@@ -874,7 +883,7 @@ const MessagesList = memo(function MessagesList({
           <>
             {divider}
             {newDay && <DaySeparator at={first.at} today={today} prev={prev} next={first} />}
-            <PeerExchangeLine summary={run.summary} bots={bots} expanded={!collapsed} onToggle={() => exchanges.toggle(run)} />
+            <PeerExchangeLine summary={run.summary} bots={bots} expanded={!collapsed} onToggle={() => exchanges.toggle(run)} onOpen={setExchangePeers} />
           </>
         );
         if (lead && collapsed) return <div key={run.id} className="contents" data-mid={first.id}>{lead}</div>;

@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo, useRef, useState, type ReactNode } from "react";
 import { motion, useTransform, type MotionValue } from "motion/react";
-import { BellDot, Check, ChevronDown, ChevronRight, MonitorSmartphone, Pin, PinOff, Plus, RotateCcw, Search, Star, UserRound } from "../icons";
+import { BellDot, Check, ChevronDown, ChevronRight, LayoutGrid, MonitorSmartphone, Pin, PinOff, Plus, RotateCcw, Search, Star, UserRound } from "../icons";
 import { api, retryLoad, useStore, type Bot, type Group } from "@/state/store";
 import { BotAvatar, MausAvatar } from "@/components/Avatar";
 import { GroupAvatar, useGroupYou } from "@/components/GroupAvatar";
@@ -46,6 +46,7 @@ type Entry =
 
 const BAR_TOP = "calc(var(--m-safe-top) + 6px)";
 const LIST_TOP = "calc(var(--m-safe-top) + 64px)";
+const DOCK_BOTTOM = "calc(var(--m-safe-bottom) + 8px)";
 
 function lastAt(owner: Bot | Group): number {
   return lastPreviewable(sidebarPreviewMessages(owner))?.at ?? owner.tasks?.reduce((max, task) => Math.max(max, task.createdAt ?? 0), 0) ?? 0;
@@ -132,7 +133,7 @@ export function HomeScreen({ onOpenChat, onOpenSheet }: { onOpenChat: (id: strin
           top={LIST_TOP}
           indicator={(progress, refreshing) => <RefreshMark bot={primary} progress={progress} refreshing={refreshing} />}
         >
-          <div ref={listRef} style={{ paddingTop: LIST_TOP }} className="pb-[calc(var(--m-safe-bottom)+24px)]">
+          <div ref={listRef} style={{ paddingTop: LIST_TOP }} className="pb-[calc(var(--m-safe-bottom)+96px)]">
             {state.hydrated && <ConnectionProblemCard notice={live.notice} place={live.place} trying={live.trying} onRetry={live.retry} />}
             {!state.hydrated ? (state.loadFailed ? (
               <EmptyState tone="error" art="signpost" className="pt-16" title={t("mobile.home.loadFailedTitle")} body={t(offline ? "mobile.home.loadFailedOffline" : "mobile.home.loadFailedBody")}
@@ -202,9 +203,22 @@ export function HomeScreen({ onOpenChat, onOpenSheet }: { onOpenChat: (id: strin
         </RoundButton>
         <div className="flex-1" />
         <ConnectionPill notice={live.notice} trying={live.trying} onRetry={live.retry} testId="mobile-connection-status" />
-        <RoundButton floating label={t("mobile.home.search")} onClick={() => onOpenSheet({ kind: "search" })} className="pointer-events-auto"><Search size={19} strokeWidth={1.9} /></RoundButton>
         <RoundButton floating label={t("mobile.home.newBot")} onClick={() => onOpenSheet({ kind: "create" })} className="pointer-events-auto"><Plus size={21} strokeWidth={1.9} /></RoundButton>
       </header>
+
+      {/* grok's bottom dock: a square apps button, then search as a wide pill the thumb reaches */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[calc(var(--m-safe-bottom)+80px)] bg-gradient-to-t from-app from-50% to-transparent" />
+      <nav className="pointer-events-none absolute inset-x-0 bottom-0 z-10 flex items-center gap-3 px-5" style={{ paddingBottom: DOCK_BOTTOM }}>
+        <button type="button" aria-label={t("mobile.connectors.title")} onClick={() => onOpenSheet({ kind: "connectors" })}
+          className="mobile-press mobile-float pointer-events-auto flex size-12 shrink-0 items-center justify-center rounded-[16px] bg-composer text-ink">
+          <LayoutGrid size={20} strokeWidth={1.9} />
+        </button>
+        <button type="button" onClick={() => onOpenSheet({ kind: "search" })} data-testid="mobile-search-dock"
+          className="mobile-press mobile-float pointer-events-auto flex h-12 min-w-0 flex-1 items-center gap-2.5 rounded-full bg-composer px-4 text-left text-[17px] text-ink-secondary">
+          <Search size={19} strokeWidth={1.9} aria-hidden className="shrink-0 text-ink" />
+          <span className="truncate">{t("mobile.home.search")}</span>
+        </button>
+      </nav>
 
       <ContextMenu
         open={Boolean(menu)}

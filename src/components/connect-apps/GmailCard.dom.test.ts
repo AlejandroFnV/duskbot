@@ -14,7 +14,7 @@ const GMAIL = { slug: "gmail", label: "Gmail", blurb: "Email from Google", logo:
 function connectorsWith(over: Partial<Connectors> = {}): Connectors {
   return {
     cards: [GMAIL], ready: true, configured: true, mode: "managed", setup: "ready", stale: false, phase: "ready",
-    status: {}, error: null, aliasFor: null, setupFor: null, keyFor: null, via: null, viaApps: {}, viaFlow: {},
+    status: {}, error: null, aliasFor: null, setupFor: null, keyFor: null, via: null, viaRead: true, viaChecked: { gmail: true }, viaApps: {}, viaFlow: {},
     viaRoute: () => false, authorizeComposio: vi.fn(async () => {}), reopenVia: vi.fn(), checkVia: vi.fn(), setError: vi.fn(),
     askAlias: vi.fn(), askKey: vi.fn(), phaseOf: () => ({ kind: "connect" }), isConnected: () => false,
     connect: vi.fn(async () => {}), cancel: vi.fn(), continueAfterKey: vi.fn(async () => {}), resume: vi.fn(),
@@ -51,6 +51,23 @@ afterEach(() => {
 });
 
 describe("Gmail connects on one card", () => {
+  it("while Composio is asked whether Gmail is connected already, the card says Checking…, never Connect Gmail", async () => {
+    const via = { signedIn: true, enabled: true, added: true } as Connectors["via"];
+    // Composio Connect not read yet
+    await render(model(connectorsWith({ configured: false, via: null, viaRead: false, viaChecked: {}, viaRoute: () => true }), { kind: "connect" }));
+    expect(primaries().map(shown)).toEqual(["Checking…"]);
+    expect(primaries()[0]!.disabled).toBe(true);
+
+    // signed in to Composio, the app's own answer still out
+    await render(model(connectorsWith({ configured: false, via, viaChecked: {}, viaRoute: () => true }), { kind: "connect" }));
+    expect(primaries().map(shown)).toEqual(["Checking…"]);
+    expect(said(), "no 'now pick your account' before Composio has answered").not.toBe("Signed in. Now pick your Google account.");
+
+    // Composio said it is not connected: now it is Connect
+    await render(model(connectorsWith({ configured: false, via, viaChecked: { gmail: true }, viaRoute: () => true }), { kind: "connect" }));
+    expect(primaries().map(shown)).toEqual(["Connect Gmail"]);
+  });
+
   it("Idle: one short safety line and one Connect Gmail button; no step list, no tool list", async () => {
     const connectors = connectorsWith();
     await render(model(connectors, { kind: "connect" }));

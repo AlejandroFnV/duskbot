@@ -103,6 +103,10 @@ export function AppPage({ model }: { model: AppPageModel }) {
   // Composio is connected once per person: its guided step shows only until then; after that an app is just its sign-in
   const firstTime = viaSteps && !viaSignedIn;
   const viaStatus = viaSteps && viaSignedIn ? viaLine(flow, entry.label) : null;
+  // an app that may be connected through Composio Connect is not Connect until Composio has said it is not
+  const viaPending = composio && !model.remoteClient && model.connection !== "connected" && flow === undefined && connectors.viaRoute(slug)
+    && (!connectors.viaRead || (viaSignedIn && !connectors.viaChecked[slug]));
+  const shownPhase: ConnectorPhase | null = viaPending ? { kind: "checking" } : phase;
   const askingAlias = composio && connectors.aliasFor === slug;
   const aliasError = askingAlias && connectors.error ? (typeof connectors.error === "string" ? connectors.error : t(connectors.error.key)) : null;
 
@@ -121,6 +125,7 @@ export function AppPage({ model }: { model: AppPageModel }) {
     }
     if (!composio || !phase) return null;
     const connect: Primary = { label: t("connectApps.connectApp", { name: entry.label }), onClick: () => void connectors.connect(slug), onCancel: () => connectors.cancel(slug) };
+    if (shownPhase?.kind === "checking") return { ...connect, label: t("common.checking"), disabled: true };
     if (viaSteps) {
       const authorize: Primary = { label: t("connectApps.via.authorize"), signIn: true, disabled: model.remoteClient, onClick: () => void connectors.authorizeComposio(slug), onCancel: () => connectors.cancel(slug) };
       if (flow?.step === "authorizing") return { ...authorize, busy: true, busyLabel: t(flow.opened ? "connectApps.signIn.waiting" : "connectApps.signIn.opening") };
@@ -135,7 +140,6 @@ export function AppPage({ model }: { model: AppPageModel }) {
     if (ways && model.connection === "connected" && phase.kind === "connect") return null;
     if (!connectors.configured && !viaSignedIn) return { ...connect, disabled: model.remoteClient, onClick: () => connectors.askKey(slug) };
     switch (phase.kind) {
-      case "checking": return { ...connect, disabled: true };
       case "connecting": return { ...connect, busy: true };
       case "continue": return { label: t("connectApps.via.openAgain"), onClick: () => connectors.resume(slug), onCancel: () => connectors.cancel(slug), waiting: true };
       case "failed": return { label: t("connectors.action.retry"), onClick: () => void connectors.connect(slug) };
@@ -152,7 +156,7 @@ export function AppPage({ model }: { model: AppPageModel }) {
   // gmail connects on one card: its promise, the one button, and where the sign-in stands
   const gmail = composio && slug === "gmail" && composioOnly && !model.remote && phase !== null
     ? gmailCard({
-      name: entry.label, primary, connected: model.connection === "connected", via: viaSteps, viaSignedIn, flow, phase,
+      name: entry.label, primary, connected: model.connection === "connected", via: viaSteps, viaSignedIn, flow, phase: shownPhase,
       ...(model.remoteClient ? {} : { onOwnKey: model.onOpenKeys }),
     })
     : null;

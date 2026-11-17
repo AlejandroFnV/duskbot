@@ -67,6 +67,10 @@ export interface Connectors {
   keyFor: string | null;
   /** Composio Connect, once read. */
   via: ComposioConnect | null;
+  /** Composio Connect has answered once (or failed): until then nobody knows whether an app is connected through it. */
+  viaRead: boolean;
+  /** Apps whose page asked Composio whether they are connected, and got an answer (or gave up). */
+  viaChecked: Record<string, true>;
   /** Apps connected through Composio Connect on this device. */
   viaApps: Record<string, true>;
   /** Where each app's Composio Connect sign-in is: authorizing Composio, waiting on Composio's page, done or failed. */
@@ -144,6 +148,8 @@ export function useConnectors(): Connectors {
   const [setupFor, setSetupFor] = useState<string | null>(null);
   const [keyFor, setKeyFor] = useState<string | null>(null);
   const [via, setVia] = useState<ComposioConnect | null>(null);
+  const [viaRead, setViaRead] = useState(false);
+  const [viaChecked, setViaChecked] = useState<Record<string, true>>({});
   const [viaApps, setViaApps] = useState<Record<string, true>>(readViaApps);
   const [viaFlow, setViaFlow] = useState<Record<string, ViaFlow>>({});
   const viaPolls = useRef(new Map<string, () => void>());
@@ -209,7 +215,8 @@ export function useConnectors(): Connectors {
       });
     api("/api/connectors/composio-connect")
       .then((answer: ComposioConnect) => { if (alive) setVia(answer); })
-      .catch(() => { if (alive) setVia(null); });
+      .catch(() => { if (alive) setVia(null); })
+      .finally(() => { if (alive) setViaRead(true); });
     loadConnectorCatalog()
       .then((response) => {
         if (!alive) return;
@@ -559,12 +566,14 @@ export function useConnectors(): Connectors {
     });
   };
 
+  const checked = (slug: string) => setViaChecked((current) => current[slug] ? current : { ...current, [slug]: true });
   const checkVia = (slug: string) => {
-    if (!viaNow.current?.signedIn || viaFlow[slug] || viaPolls.current.has(slug)) return;
+    if (!viaNow.current?.signedIn) return;
+    if (viaFlow[slug] || viaPolls.current.has(slug)) { checked(slug); return; }
     void askVia(slug, "GET").then((answer) => {
       if (answer.status === "connected") { if (!viaApps[slug] || !viaNow.current?.enabled) void finishVia(slug); }
       else if (answer.status === "none" && viaApps[slug]) markVia(slug, false);
-    }).catch(() => {});
+    }).catch(() => {}).finally(() => { if (mounted.current) checked(slug); });
   };
 
   const run = async (slug: string, launch: ConnectionPage, alias?: string, replacing?: ConnectorAccount) => {
@@ -722,7 +731,7 @@ export function useConnectors(): Connectors {
   const ready = bundledSettled && liveSettled && cards !== null && (phase !== "loading" || Object.keys(status).length > 0);
 
   return {
-    cards, ready, configured, mode, setup, stale, phase, status, error, aliasFor, setupFor, keyFor, via, viaApps, viaFlow,
+    cards, ready, configured, mode, setup, stale, phase, status, error, aliasFor, setupFor, keyFor, via, viaRead, viaChecked, viaApps, viaFlow,
     viaRoute: (slug) => !configured || unmanaged.current.has(slug) || keyFor === slug, authorizeComposio, reopenVia, checkVia,
     setError, askAlias: setAliasFor, askKey: setKeyFor, phaseOf,
     isConnected: (slug) => hasActiveConnection(status[slug]) || viaApps[slug] === true,

@@ -9443,7 +9443,14 @@
       "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273",
       "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
       "chat.event.handoffsWaiting.one": "c73c2c6fd46f81d27a99c9a06a4852fbb74113977f5beba2bbb4b8b7a541cf4f",
-      "chat.event.handoffsWaiting.many": "3aa0e108ce066c33acff6e26adce14284aefecd66a46a422c773894d9b812205"
+      "chat.event.handoffsWaiting.many": "3aa0e108ce066c33acff6e26adce14284aefecd66a46a422c773894d9b812205",
+      "server.notify.connect": "69e4a1b2d9ea87bebb2af9b61a9206e56d8cb01b067d7de26015840bdc27a6a7",
+      "server.notify.humanCheck": "5d0f5ae2b2e8e891e93e32ecf81e81e94c37927afa1c68891c4b34d823aa591f",
+      "server.notify.humanCheckBody": "e3c345af6c4b84ae3172d7a75206d10c96668f52510e362c9539f86d1e929fa3",
+      "server.notify.message": "ac155f86f1b8db033330398babcd4dd9f5432437210a2e0de6e71b933eae592a",
+      "server.notify.secret": "5d6c45546c1c1975f38b8650e6a86613beda5b3dd6ab040d68cc1f2a600fadca",
+      "server.notify.workingFor": "689d2dedd23180907fe51f82dc7923a49152ef683b1006532e2ba1cfda538aab",
+      "mobile.notifications.more": "f2f450ddac7b1a3e8e462a937e6c39dd346b34cda3f5bed5eebc607ca48edc4b"
     },
     "fr": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",

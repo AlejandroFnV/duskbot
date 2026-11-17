@@ -11,6 +11,7 @@ import { WorkingDots } from "@/components/WorkingIndicator";
 import { partitionSidebarBots, withPrimaryTile } from "@/lib/sidebar-layout";
 import { loadCollapsedSections, saveCollapsedSections, toggleCollapsedSection } from "@/lib/sidebar-preferences";
 import { homeSections } from "./home-sections";
+import { botRole, NameRole } from "./bot-role";
 import { botShowsUnread } from "@/lib/bot-unread";
 import { botUnreadThreadIds, markBotRead } from "@/lib/folder-read";
 import { stateForBot } from "@/lib/mascot";
@@ -292,7 +293,7 @@ function RowFace({ entry }: { entry: Entry }) {
       <span className="shrink-0">{avatar}</span>
       <span className="min-w-0 flex-1">
         <span className="flex items-baseline gap-2">
-          <span className={cn("min-w-0 truncate text-[17px] leading-[22px] text-ink", entry.unread && "font-semibold")}>{name}</span>
+          <NameRole name={name} role={entry.kind === "bot" ? botRole(entry.bot) : ""} className={cn("text-[17px] leading-[22px] text-ink", entry.unread && "font-semibold")} />
           {entry.unread && <span aria-hidden className="size-2 shrink-0 self-center rounded-full bg-accent" />}
           <span className="flex-1" />
           {entry.at > 0 && <span className="shrink-0 text-[15px] tabular-nums leading-5 text-ink-secondary">{listTime(entry.at)}</span>}

@@ -141,6 +141,13 @@ export interface WireTeammateWork {
   status: "queued" | "running" | "waiting";
 }
 
+/** A thread's git repo: its top folder, the checked-out branch (null when detached) and whether it is a linked worktree. */
+export interface WireCodeRepo {
+  root: string;
+  branch: string | null;
+  worktree?: true;
+}
+
 /** One task = one conversation with its own context, thread and provider
  * session. */
 export interface WireTask extends InboxTask {
@@ -210,6 +217,9 @@ export interface WireTask extends InboxTask {
   /** Prompt-cache keep-warm status for this thread, derived at projection;
    * absent when no window is open. */
   cacheKeepWarm?: CacheKeepWarmStatus;
+  /** The git repo this thread last edited or ran commands in, else its pinned folder's; derived at projection, never
+   * stored. Absent when neither is inside a repo. */
+  codeRepo?: WireCodeRepo;
   /** The thread runs on a backup because its own AI hit its limit, was signed out or did not answer: that AI, and when
    * the thread goes back to it (null: once it works again). Derived at projection, only while the thread is still on
    * that backup. */

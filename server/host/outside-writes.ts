@@ -6,7 +6,7 @@ import { randomUUID } from "node:crypto";
 
 import type { DecisionRow } from "../decision-log.ts";
 import { buildNotification, type Notification } from "../notify.ts";
-import { serverLine } from "../server-lines.ts";
+import { serverLine, type ServerLineKey } from "../server-lines.ts";
 import type { BotRecord, GroupRecord, Message, Store } from "../store.ts";
 import { OUTSIDE_STAYS_HERE } from "./outside-lineage.ts";
 
@@ -47,7 +47,7 @@ export function createOutsideWrites(deps: OutsideWriteDeps) {
   const now = () => deps.now?.() ?? Date.now();
   const expiredPreference = (write: Write) => write.kind === "preference" && Date.parse(write.expiresAt) <= now();
 
-  function propose(from: Pick<BotRecord, "id" | "name" | "color">, threadId: string, title: string, subtitle: string, write: Write, skip = "server.outside.skip") {
+  function propose(from: Pick<BotRecord, "id" | "name" | "color">, threadId: string, title: string, subtitle: string, write: Write, skip: ServerLineKey = "server.outside.skip") {
     if (subtitle.length > SHOWN_CHARS) return { status: 400, body: { error: `This is too long for a person to review on a card: keep it under ${SHOWN_CHARS} characters.` } };
     if (store.messagesFor(threadId).filter((line) => line.card?.outsideWrite && !line.card.answered && !expiredPreference(line.card.outsideWrite)).length >= OPEN_CARDS) {
       return { status: 429, body: { error: "A person already has several of these to look at from this conversation. Finish without saving more." } };

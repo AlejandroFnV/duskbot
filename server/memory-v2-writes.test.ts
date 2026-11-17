@@ -79,7 +79,7 @@ describe("a preference from a turn that read outside content", () => {
     const store = aboutMeStore("");
     const people = createPersonPreference<{ threadId: string; generation: string }>({ team: false, aboutMe: store.aboutMe, requester: () => null, userStarted: () => true, personName: () => undefined });
     const lines: Array<{ id: string; from?: { botId: string }; card?: Record<string, any> }> = [];
-    const bot = { id: BOT, name: "Chief", color: "#123" };
+    const bot = { id: BOT, name: "Chief", color: "chrome" as const };
     const writes = createOutsideWrites({
       store: {
         appendMessage: (_threadId: string, row: any) => { const line = { ...row, id: `m${lines.length}` }; lines.push(line); return line; },

@@ -46,9 +46,24 @@ export function roomQueueLabel(entry: RoomQueueEntry, nameOf: (botId: string) =>
     : t("room.queue.waiting", { position: entry.position, of: entry.of });
 }
 
+function roomQueued(group: Pick<Group, "queue">): RoomQueueEntry[] {
+  return (group.queue ?? []).filter((entry) => entry.state === "queued");
+}
+
+/** How many jobs wait their turn in the room's line, across its conversations. */
+export function roomWaitingCount(group: Pick<Group, "queue">): number {
+  return roomQueued(group).length;
+}
+
+/** Members holding a place in the room's line with no job of theirs running: they wait their turn, they are not at work. */
+export function roomWaitingIds(group: Pick<Group, "queue">): Set<string> {
+  const running = new Set((group.queue ?? []).filter((entry) => entry.state === "running").map((entry) => entry.botId));
+  return new Set(roomQueued(group).map((entry) => entry.botId).filter((id) => !running.has(id)));
+}
+
 export function roomWorkingPreview(group: RoomThreads & Pick<Group, "queue">, nameOf: (botId: string) => string | undefined): string | undefined {
   const speakerId = group.busyBotId ?? roomSpeakerIds(group)[0];
-  const queued = (group.queue ?? []).filter((entry) => entry.state === "queued");
+  const queued = roomQueued(group);
   if (speakerId) {
     const name = nameOf(speakerId) ?? t("sidebar.preview.aBot");
     return queued.length ? t("sidebar.preview.botWorkingQueued", { name, count: queued.length }) : t("sidebar.preview.botWorking", { name });

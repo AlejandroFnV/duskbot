@@ -9,6 +9,7 @@ import type { MarkState } from "./mascot-engine";
 import { TurnPresence } from "./TurnPresence";
 import { useReplyLife } from "@/hooks/use-reply-life";
 import { lifeMarkState } from "@/lib/reply-life";
+import { roomWaitingIds } from "@/lib/room-threads";
 
 type RoomWork = Pick<Group, "busyBotId" | "threadId" | "tasks" | "busyBotIds">;
 
@@ -36,6 +37,13 @@ export function handoffWorkIds(messages: readonly Message[]): string[] {
   return [...open].filter(([, count]) => count > 0).map(([id]) => id).reverse();
 }
 
+/** Who the room's line names as at work: every running turn and each open hand-off, less the members only waiting their
+ * turn in the room's line, so it agrees with the sidebar. */
+export function roomAtWorkIds(group: RoomWork & Pick<Group, "queue">, lastMessage: Message | undefined, handoffIds: readonly string[]): string[] {
+  const waiting = roomWaitingIds(group);
+  return [...new Set([...roomWorkingIds(group, lastMessage), ...handoffIds])].filter((id) => !waiting.has(id));
+}
+
 /** Ids in the order they first showed up, so faces never trade places while they work. */
 function useArrivalOrder(ids: readonly string[]): string[] {
   const order = useRef<string[]>([]);
@@ -51,6 +59,14 @@ const NAMED = { typing: "room.status.typing", working: "room.status.working", th
 const SEVERAL = { typing: "room.status.severalTyping", working: "room.status.severalWorking", thinking: "room.status.severalThinking" } as const;
 /** Up to this many bots are named; more are "Several bots". */
 const MAX_NAMED = 3;
+
+/** "Pixel is working · 2 waiting their turn": who works, and how many wait behind them, as one phrase. */
+export function roomWaitingPhrase(names: readonly string[], waiting: number): string {
+  if (names.length > MAX_NAMED) return t("room.status.severalWorkingWaiting", { count: waiting });
+  if (names.length === 1) return t("room.status.oneWorkingWaiting", { name: names[0]!, count: waiting });
+  const list = new Intl.ListFormat(activeLocale(), { style: "long", type: "conjunction" }).format(names);
+  return t("room.status.workingWaiting", { names: list, count: waiting });
+}
 
 /** "Nova and Quill are typing…", "Nova, Quill and Rivet are working…", "Several bots are working…". */
 export function roomStatusPhrase(names: readonly string[], verb: RoomVerb): string {
@@ -74,12 +90,14 @@ export interface RoomSpeakerLine {
  * a friendly phrase. Several share it: their faces in a small stack, joining and leaving as each starts and finishes,
  * and one phrase that names them ("Nova and Quill are typing…") or, past three, "Several bots are working…". A member
  * whose reply has landed but waits its turn (`typingIds`) still counts as typing until its bubble takes over. With the
- * speaker's reply `landed` and nobody else at work, the line is gone in that frame, with no exit left to play. */
-export function RoomWorkingLines({ group, members, workingIds, typingIds = [], speaker, slot, landed = false }: {
+ * speaker's reply `landed` and nobody else at work, the line is gone in that frame, with no exit left to play. Members
+ * waiting their turn are not among `workingIds`; with `waiting` above zero the line names who works and counts the rest. */
+export function RoomWorkingLines({ group, members, workingIds, typingIds = [], waiting = 0, speaker, slot, landed = false }: {
   group: Pick<Group, "id" | "turnStartedAt">;
   members: readonly Bot[];
   workingIds: readonly string[];
   typingIds?: readonly string[];
+  waiting?: number;
   speaker: RoomSpeakerLine;
   slot: boolean;
   landed?: boolean;
@@ -98,7 +116,9 @@ export function RoomWorkingLines({ group, members, workingIds, typingIds = [], s
   const several = bots.length > 1;
   const solo = bots[0];
   const soloTyping = solo ? typing.has(solo.id) : false;
-  const words = several
+  const words = waiting > 0 && bots.length > 0
+    ? { label: roomWaitingPhrase(bots.map((bot) => bot.name), waiting) }
+    : several
     ? { label: roomStatusPhrase(bots.map((bot) => bot.name), verb) }
     : soloTyping ? { phrases: [t("chat.typing")], phase: TYPING_PHASE }
     : solo?.id === speakerId ? { phrases: speaker.phrases, phase: speaker.phase }

@@ -9,7 +9,8 @@ import type { MarkState } from "./mascot-engine";
 
 import { loadLocale } from "@/lib/i18n";
 import type { Bot, Message } from "@/state/store";
-import { handoffWorkIds, RoomWorkingLines, roomStatusPhrase, roomWorkingIds } from "./RoomWorkingLines";
+import { handoffWorkIds, roomAtWorkIds, RoomWorkingLines, roomStatusPhrase, roomWaitingPhrase, roomWorkingIds } from "./RoomWorkingLines";
+import { roomWorkingPreview } from "@/lib/room-threads";
 
 await loadLocale("en");
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -46,6 +47,38 @@ describe("members at work on a hand-off", () => {
   });
 });
 
+describe("who works while others wait their turn", () => {
+  const sent = (id: string, to: string): Message => ({ id, role: "bot", kind: "activity", at: 2, tool: { name: id, ok: true }, handoff: { phase: "sent", from: { botId: "ada", name: "Ada", color: "blue" }, to: { botId: to, name: to, color: "green" } } });
+  const ask: Message = { id: "q", role: "user", kind: "text", at: 1, text: "go" };
+  const room = {
+    threadId: "t", busyBotId: "echo", busyBotIds: ["echo"], working: true,
+    queue: [
+      { botId: "echo", threadId: "t", state: "running" as const, position: 1, of: 3 },
+      { botId: "nova", threadId: "t", state: "queued" as const, position: 2, of: 3, waitingForBotId: "echo" },
+      { botId: "moss", threadId: "t", state: "queued" as const, position: 3, of: 3, waitingForBotId: "echo" },
+    ],
+  };
+  const handoffs = handoffWorkIds([ask, sent("a", "echo"), sent("b", "nova"), sent("c", "moss")]);
+
+  it("names only the one at work: members queued behind it are not working, even with a hand-off out to them", () => {
+    expect(handoffs).toEqual(["echo", "nova", "moss"]);
+    expect(roomAtWorkIds(room, undefined, handoffs)).toEqual(["echo"]);
+    expect(roomWorkingPreview(room, (id) => members.find((m) => m.id === id)?.name)).toBe("Echo is working… · 2 queued");
+  });
+
+  it("keeps a member with a job running even when another of its jobs waits", () => {
+    const both = { ...room, queue: [...room.queue, { botId: "echo", threadId: "t", state: "queued" as const, position: 4, of: 4 }] };
+    expect(roomAtWorkIds(both, undefined, handoffs)).toEqual(["echo"]);
+    expect(roomAtWorkIds({ ...room, queue: [] }, undefined, handoffs)).toEqual(["echo", "nova", "moss"]);
+  });
+
+  it("says who works and how many wait in one short phrase, singular for one name", () => {
+    expect(roomWaitingPhrase(["Pixel"], 2)).toBe("Pixel is working · 2 waiting their turn");
+    expect(roomWaitingPhrase(["Ada", "Lin"], 1)).toBe("Ada and Lin are working · 1 waiting their turn");
+    expect(roomWaitingPhrase(["A", "B", "C", "D"], 3)).toBe("Several bots are working · 3 waiting their turn");
+  });
+});
+
 describe("the room's working phrase", () => {
   it("names two or three bots as a list and calls more of them several", () => {
     expect(roomStatusPhrase(["Nova", "Quill"], "typing")).toBe("Nova and Quill are typing…");
@@ -55,7 +88,7 @@ describe("the room's working phrase", () => {
 });
 
 describe("the room's working line", () => {
-  const draw = (workingIds: string[], speakerVisible = true, markState: MarkState = "streaming", phase = "friendly:chat.typing") => {
+  const draw = (workingIds: string[], speakerVisible = true, markState: MarkState = "streaming", phase = "friendly:chat.typing", waiting = 0) => {
     const host = document.createElement("div");
     document.body.append(host);
     const root = createRoot(host);
@@ -63,6 +96,7 @@ describe("the room's working line", () => {
       group: { id: "room", turnStartedAt: 1 },
       members,
       workingIds,
+      waiting,
       speaker: { bot: members[0], visible: speakerVisible, markState, phrases: ["typing…"], phase, since: null },
       slot: true,
     })));
@@ -75,6 +109,14 @@ describe("the room's working line", () => {
     expect([...host.querySelectorAll("[data-bot-faces] [role=img]")].map((face) => face.getAttribute("aria-label"))).toEqual(["Echo", "Nova", "Moss"]);
     expect(host.querySelector(".turn-presence > div")?.getAttribute("title"), "no timer, step or tool name").toBe("Echo, Nova, and Moss are typing…");
     expect(host.querySelector("button[aria-expanded]")).toBeNull();
+    done();
+  });
+
+  it("with 1 at work and 2 queued shows one face and one name, and counts the two waiting", () => {
+    const { host, done } = draw(["echo"], true, "thinking", "friendly:thinking", 2);
+    expect([...host.querySelectorAll("[data-bot-faces] [role=img]")].map((face) => face.getAttribute("aria-label"))).toEqual(["Echo"]);
+    expect(host.querySelector(".turn-presence > div")?.getAttribute("title")).toBe("Echo is working · 2 waiting their turn");
+    expect(host.textContent).not.toMatch(/Nova|Moss/);
     done();
   });
 

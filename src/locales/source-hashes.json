@@ -9443,7 +9443,16 @@
       "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273",
       "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
       "chat.event.handoffsWaiting.one": "c73c2c6fd46f81d27a99c9a06a4852fbb74113977f5beba2bbb4b8b7a541cf4f",
-      "chat.event.handoffsWaiting.many": "3aa0e108ce066c33acff6e26adce14284aefecd66a46a422c773894d9b812205"
+      "chat.event.handoffsWaiting.many": "3aa0e108ce066c33acff6e26adce14284aefecd66a46a422c773894d9b812205",
+      "room.status.typing": "3e7bfe82860d7d8fb04ad8876211c4f930d5ea1e1b4c65a4a84e2c9d81c9336a",
+      "room.status.working": "551284096f26054a58d3184e0a3f4b352815b9d1588f7e3e5447a5a26e5f7b88",
+      "room.status.thinking": "335c4019ef7ffc1b9468a412df78012365c362d8317a902f23d55ef28589249f",
+      "room.status.severalTyping": "f02bb5d31f93d158bbeb393012f5c7511d6c0510e5e4e2230bdd348287d22541",
+      "room.status.severalWorking": "3dd0e90da18bfd63c97e62b2f7b7b520aeef3f0c24ba26de9624599789309c95",
+      "room.status.severalThinking": "83c81877cc49ce8fff4d41348261abeff602b859fa59d89ce7287634e05daa22",
+      "room.status.oneWorkingWaiting": "3bb86489f1e83eaca10e530137b0f96db8831eb38a8cbc6bdac1f16aeaf756c9",
+      "room.status.workingWaiting": "2516e338363b5c493b3d11bbfe030c4ed794004e366a2e57f666ca2076f11326",
+      "room.status.severalWorkingWaiting": "d9e0009f0212485435ccc24803517186f3902e24bb113148976a238dafd3ada4"
     },
     "fr": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",

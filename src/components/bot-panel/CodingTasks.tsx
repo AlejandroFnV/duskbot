@@ -3,24 +3,16 @@ import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n";
 import { localizedTaskTitle } from "@/lib/task-title";
 import { useStore, type Bot, type Task } from "@/state/store";
-import { useTurnLive, type LiveStatus } from "@/state/turn-status";
 import { isArchived, orderedThreadList } from "../SidebarThreadRow";
 import { Card, rowCls, RowText } from "./rows";
 
 export const CODING_DONE_FOR_MS = 24 * 60 * 60_000;
-export type CodingState = "coding" | "testing" | "review" | "done";
+/** Only what is certain: the bot is working in the thread, or it finished. Waiting on teammates says neither. */
+export type CodingState = "working" | "done" | null;
 
-const CHECK_COMMAND = /\b(vitest|jest|tsc|eslint|playwright)\b|\b(npm|pnpm|yarn|bun)\s+(run\s+)?(test|lint|typecheck|check)\b/;
-
-export function isCheckCommand(text: string | undefined): boolean {
-  return !!text && CHECK_COMMAND.test(text);
-}
-
-export function codingState(task: Pick<Task, "busy" | "activity" | "waitingForTeammates">, live: LiveStatus | null): CodingState {
-  const running = task.busy === true || task.activity === "working";
-  if (running && live?.activity === "command" && (isCheckCommand(live.detail) || isCheckCommand(live.target))) return "testing";
-  if (running) return "coding";
-  if (task.waitingForTeammates) return "review";
+export function codingState(task: Pick<Task, "busy" | "activity" | "waitingForTeammates">): CodingState {
+  if (task.busy === true || task.activity === "working") return "working";
+  if (task.waitingForTeammates) return null;
   return "done";
 }
 
@@ -34,39 +26,37 @@ export function codingTasks(bot: Pick<Bot, "tasks">, now = Date.now()): Task[] {
 }
 
 const STATE_LABEL = {
-  coding: "botPanel.coding.state.coding",
-  testing: "botPanel.coding.state.testing",
-  review: "botPanel.coding.state.review",
+  working: "botPanel.coding.state.working",
   done: "botPanel.coding.state.done",
-} as const satisfies Record<CodingState, string>;
+} as const satisfies Record<NonNullable<CodingState>, string>;
 
 const repoName = (root: string): string => root.split(/[\\/]/).filter(Boolean).at(-1) ?? root;
+/** The branch only when it says something: not the usual main line, and not a detached checkout. */
+const shownBranch = (branch: string | null): string | null => branch && branch !== "main" && branch !== "master" ? branch : null;
 
 function CodingRow({ bot, task }: { bot: Bot; task: Task }) {
   const { dispatch } = useStore();
-  const live = useTurnLive(task.threadId);
-  const state = codingState(task, live.ended ? null : live.status);
+  const state = codingState(task);
   const repo = task.codeRepo!;
   const title = localizedTaskTitle(task.title);
-  const where = [repoName(repo.root), repo.branch ?? t("botPanel.coding.detached"), repo.worktree ? t("botPanel.coding.worktree") : null]
-    .filter(Boolean).join(" · ");
+  const where = [repo.project ?? repoName(repo.root), shownBranch(repo.branch)].filter(Boolean).join(" · ");
   return (
     <button
       type="button"
       data-panel-coding={task.threadId}
-      data-coding-state={state}
+      data-coding-state={state ?? undefined}
       onClick={() => dispatch({ type: "switchTask", botId: bot.id, threadId: task.threadId })}
       title={t("chat.openThread", { title })}
       className={cn(rowCls, "w-full cursor-pointer text-left outline-none hover:bg-ink/4 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus")}
     >
       <RowText title={<span className="block truncate">{title}</span>} hint={<span title={repo.root}>{where}</span>} />
-      <span className={cn("shrink-0 text-[12px] leading-[18px] text-ink-secondary", state !== "done" && "status-shimmer")}>{t(STATE_LABEL[state])}</span>
+      {state && <span className={cn("shrink-0 text-[12px] leading-[18px] text-ink-secondary", state === "working" && "status-shimmer")}>{t(STATE_LABEL[state])}</span>}
       <ChevronRight size={14} className="shrink-0 text-ink-tertiary" aria-hidden="true" />
     </button>
   );
 }
 
-/** What the bot is programming: one row per thread working in a git repo. Nothing when there is none. */
+/** The code projects the bot works on: one row per thread that edited code in a git repo. Nothing when there is none. */
 export function CodingTasks({ bot }: { bot: Bot }) {
   const tasks = codingTasks(bot);
   if (!tasks.length) return null;

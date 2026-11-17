@@ -1,26 +1,17 @@
 import { describe, expect, it } from "vitest";
 
-import { CODING_DONE_FOR_MS, codingState, codingTasks, isCheckCommand } from "./CodingTasks";
+import { CODING_DONE_FOR_MS, codingState, codingTasks } from "./CodingTasks";
 import type { Task } from "@/state/store";
 
 const repo = { root: "/r", branch: "main" };
 const task = (over: Partial<Task>): Task => ({ threadId: over.threadId ?? "t", title: "T", createdAt: 0, ...over }) as Task;
 
-describe("isCheckCommand", () => {
-  it("knows tests, typechecks and lint", () => {
-    for (const command of ["vitest run a.test.ts", "npx tsc --noEmit", "eslint src", "pnpm test", "npm run lint", "pnpm typecheck"]) expect(isCheckCommand(command)).toBe(true);
-    for (const command of ["git status", "pnpm install", "ls tests"]) expect(isCheckCommand(command)).toBe(false);
-    expect(isCheckCommand(undefined)).toBe(false);
-  });
-});
-
 describe("codingState", () => {
-  it("reads running, checking, handed off and finished", () => {
-    expect(codingState(task({ busy: true }), { activity: "edit" } as never)).toBe("coding");
-    expect(codingState(task({ busy: true }), { activity: "command", target: "pnpm test" } as never)).toBe("testing");
-    expect(codingState(task({ busy: true }), { activity: "command", target: "node", detail: "npx vitest run x" } as never)).toBe("testing");
-    expect(codingState(task({ waitingForTeammates: true }), null)).toBe("review");
-    expect(codingState(task({}), null)).toBe("done");
+  it("says working or done, and nothing while it waits on teammates", () => {
+    expect(codingState(task({ busy: true }))).toBe("working");
+    expect(codingState(task({ activity: "working" } as Partial<Task>))).toBe("working");
+    expect(codingState(task({ waitingForTeammates: true }))).toBeNull();
+    expect(codingState(task({}))).toBe("done");
   });
 });
 

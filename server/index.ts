@@ -3076,7 +3076,7 @@ const wireTask = (task: TaskRecord, botModel: ModelSelection, awaiting = threads
   // Snoozes heal on read against the server clock; the 0 sentinel ("until new activity") survives reads.
   const { snoozedUntil, ...base } = toWireTask(task, botModel);
   const keepWarm = cacheKeepWarmStatus(task.threadId);
-  const codeRepo = codeRepos.of(task.threadId, () => store.messagesFor(task.threadId), task.cwd, task.updatedAt, { live: task.busy || awaiting.has(task.threadId), archived: task.archivedAt !== undefined });
+  const codeRepo = codeRepos.of(task.threadId, () => store.messagesFor(task.threadId), task.updatedAt, { live: task.busy || awaiting.has(task.threadId), archived: task.archivedAt !== undefined });
   const backup = threadBackup(task, base.modelSelection ?? botModel);
   const coordinated = { ...base, ...waitingOnTeammates(task.threadId, awaiting, Boolean(task.busy)), ...(keepWarm ? { cacheKeepWarm: keepWarm } : {}), ...(codeRepo ? { codeRepo } : {}), ...(backup ? { backup } : {}), ...(teamHost.ownTurn(task.threadId) ? { private: true as const } : {}), ...teamMessages.inbox.wire(task.threadId) };
   const asleep = snoozedUntil === 0 || (snoozedUntil !== undefined && snoozedUntil > Date.now());

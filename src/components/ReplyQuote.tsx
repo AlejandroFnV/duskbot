@@ -6,14 +6,20 @@ import { replyAuthor, replySnippet } from "@/lib/replies";
 import { t } from "@/lib/i18n";
 import type { Message } from "@/state/store";
 
+function replyExcerptOf(message: Message, quote?: string): string {
+  return quote ? `“${replySnippet(quote)}”` : replySnippet(peerLine(message)?.body ?? message.text ?? "");
+}
+
 export function ReplyQuote({
   message,
+  quote,
   fallbackName,
   onJump,
   onClear,
   compact = false,
 }: {
   message: Message;
+  quote?: string;
   fallbackName?: string;
   onJump?: () => void;
   onClear?: () => void;
@@ -25,7 +31,7 @@ export function ReplyQuote({
       <Reply size={compact ? 14 : 15} strokeWidth={1.5} aria-hidden="true" className="shrink-0 rtl:-scale-x-100" />
       <span className="sr-only">{t("chat.reply.replyingTo", { name })}: </span>
       <span aria-hidden="true" className="shrink-0 font-medium text-ink">{name}</span>
-      <span dir="auto" className="min-w-0 flex-1 truncate">{replySnippet(peerLine(message)?.body ?? message.text ?? "")}</span>
+      <span dir="auto" className="min-w-0 flex-1 truncate">{replyExcerptOf(message, quote)}</span>
     </>
   );
   return (
@@ -51,15 +57,17 @@ export function ReplyQuote({
 
 export function ComposerReplyStrip({
   message,
+  quote,
   fallbackName,
   onClear,
 }: {
   message: Message;
+  quote?: string;
   fallbackName?: string;
   onClear?: () => void;
 }) {
   const who = t("chat.reply.replyingTo", { name: replyAuthor(message, fallbackName) });
-  const excerpt = replySnippet(peerLine(message)?.body ?? message.text ?? "");
+  const excerpt = replyExcerptOf(message, quote);
   return (
     <div
       role="group"

@@ -11,6 +11,7 @@ export interface ChannelQueueItem {
   id: string;
   text: string;
   replyToId?: string;
+  replyQuote?: string;
   sendId?: string;
   mode: "chat" | "goal";
   via?: "api";
@@ -58,6 +59,7 @@ export function queueChannelMessage(
   text: string,
   options: {
     replyToId?: string;
+    replyQuote?: string;
     sendId?: string;
     mode?: "chat" | "goal";
     via?: "api";
@@ -73,6 +75,7 @@ export function queueChannelMessage(
     id: newId(),
     text,
     replyToId: options.replyToId,
+    ...(options.replyQuote ? { replyQuote: options.replyQuote } : {}),
     sendId: options.sendId,
     mode: options.mode ?? "chat",
     via: options.via,

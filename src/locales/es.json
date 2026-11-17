@@ -1694,6 +1694,7 @@
   "chat.reply.cancel": "Cancelar la respuesta",
   "chat.reply.image": "[Imagen]",
   "chat.reply.file": "[Archivo]",
+  "chat.reply.selection": "Responder a la selección",
   "chat.speak.needsKey": "Añade una clave de ElevenLabs en el perfil de un agente para leer los mensajes en voz alta",
   "chat.speak.needsSetup": "Configura un proveedor de voz en el perfil de este agente para leer los mensajes en voz alta",
   "chat.speak.needsVoice": "Elige una voz en el perfil de este agente para leer los mensajes en voz alta",

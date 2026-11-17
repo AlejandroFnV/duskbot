@@ -8,6 +8,7 @@ const CHANNEL_MODES_KEY = "dusk-draft-channel-modes";
 // Outside React, so a late failure from an unmounted composer cannot overwrite a newer draft.
 const draftRevisions = new Map<string, number>();
 const replyDrafts = new Map<string, string>();
+const replyQuotes = new Map<string, string>();
 type ChannelMode = "chat" | "goal";
 type DraftRestore = { text: string; attachments: Attachment[]; channelMode?: ChannelMode };
 type DraftRestoreListener = (draft: DraftRestore) => void;
@@ -175,8 +176,14 @@ export function setDraftAttachments(store: Store, id: string, attachments: Attac
   }
 }
 
-export function rememberReplyDraft(threadId: string, messageId: string): void {
+export function rememberReplyDraft(threadId: string, messageId: string, quote?: string): void {
+  if (replyDrafts.get(threadId) !== messageId || quote) replyQuotes.delete(threadId);
   replyDrafts.set(threadId, messageId);
+  if (quote) replyQuotes.set(threadId, quote);
+}
+
+export function replyDraftQuote(threadId: string): string | undefined {
+  return replyQuotes.get(threadId);
 }
 
 export function replyDraft(threadId: string): string | undefined {
@@ -185,11 +192,13 @@ export function replyDraft(threadId: string): string | undefined {
 
 export function clearReplyDraft(threadId: string): void {
   replyDrafts.delete(threadId);
+  replyQuotes.delete(threadId);
 }
 
-export function selectReplyDraft(draftId: string, threadId: string, messageId: string): void {
+export function selectReplyDraft(draftId: string, threadId: string, messageId: string, quote?: string): void {
   markDraftEdited(draftId);
-  rememberReplyDraft(threadId, messageId);
+  replyQuotes.delete(threadId);
+  rememberReplyDraft(threadId, messageId, quote);
 }
 
 export function discardReplyDraft(draftId: string, threadId: string): void {
@@ -223,8 +232,8 @@ export function useReplyDraft<T extends { id: string }>(
     });
   }, [messages, threadId]);
 
-  const selectReply = useCallback((message: T) => {
-    selectReplyDraft(draftId, threadId, message.id);
+  const selectReply = useCallback((message: T, quote?: string) => {
+    selectReplyDraft(draftId, threadId, message.id, quote);
     setReplyState({ threadId, message });
   }, [draftId, threadId]);
 
@@ -238,11 +247,11 @@ export function useReplyDraft<T extends { id: string }>(
     setReplyState({ threadId, message: null });
   }, [threadId]);
 
-  const restoreReply = useCallback((message: T, targetThreadId: string) => {
+  const restoreReply = useCallback((message: T, targetThreadId: string, quote?: string) => {
     const currentId = replyDraft(targetThreadId);
     if (currentId && currentId !== message.id) return;
     // Persist before touching React state: this view may have unmounted mid-request.
-    rememberReplyDraft(targetThreadId, message.id);
+    rememberReplyDraft(targetThreadId, message.id, quote ?? (currentId ? replyDraftQuote(targetThreadId) : undefined));
     if (threadId === targetThreadId) {
       setReplyState((current) =>
         current.threadId === targetThreadId && current.message
@@ -252,7 +261,8 @@ export function useReplyDraft<T extends { id: string }>(
     }
   }, [threadId]);
 
-  return { replyTo, selectReply, clearReply, consumeReply, restoreReply };
+  const replyQuote = replyTo ? replyDraftQuote(threadId) : undefined;
+  return { replyTo, replyQuote, selectReply, clearReply, consumeReply, restoreReply };
 }
 
 export function draftRevision(draftId: string): number {

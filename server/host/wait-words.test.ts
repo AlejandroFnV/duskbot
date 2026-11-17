@@ -44,7 +44,8 @@ describe("a hand-off held a while", () => {
   const node = { id: "h", threadId: "t", botId: "b", lastProgressAt: 0, status: "queued" } as HandoffView;
   const notes = (over: Partial<QueuedNotesDeps> = {}, now = QUEUED_NOTE_AFTER_MS) => {
     const posted: string[] = [];
-    const note = createQueuedNotes({ now: () => now, language: () => undefined, botName: () => "Ops", parent: () => ({ threadId: "p" }) as HandoffView, post: (_p, _n, line) => posted.push(line), live: () => true,
+    const note = createQueuedNotes({ now: () => now, language: () => undefined, botName: () => "Ops", parent: () => ({ threadId: "p" }) as HandoffView,
+      post: (_p, _n, line) => String(posted.push(line) - 1), regroup: (_p, id, _n, line) => { posted[Number(id)] = line; }, live: () => true,
       threadBusy: () => false, slots: () => ({ busy: [], limit: 16 }), groupTurn: () => false, waitsForComputer: () => false, behindPerson: () => undefined, ...over });
     return { note, posted };
   };
@@ -54,6 +55,24 @@ describe("a hand-off held a while", () => {
     note(node);
     note(node);
     expect(posted).toEqual(["Ops hasn't started this yet: it's already running 2 of 2 threads at once."]);
+  });
+
+  it("folds three held hand-offs for the same teammate into one line, and starts a new one once they have all started", () => {
+    const live = new Set(["h1", "h2", "h3"]);
+    const { note, posted } = notes({ threadBusy: () => true, live: (id) => live.has(id) });
+    for (const id of ["h1", "h2", "h3"]) note({ ...node, id } as HandoffView);
+    expect(posted).toEqual(["3 handoffs waiting for Ops"]);
+    live.clear();
+    live.add("h4");
+    note({ ...node, id: "h4" } as HandoffView);
+    expect(posted).toEqual(["3 handoffs waiting for Ops", "Ops hasn't started this yet: an earlier turn in that thread is still running."]);
+  });
+
+  it("keeps one line per teammate", () => {
+    const { note, posted } = notes({ threadBusy: () => true, botName: (id) => id === "b" ? "Ops" : "Ada" });
+    note({ ...node, id: "h1" } as HandoffView);
+    note({ ...node, id: "h2", botId: "a" } as HandoffView);
+    expect(posted).toEqual(["Ops hasn't started this yet: an earlier turn in that thread is still running.", "Ada hasn't started this yet: an earlier turn in that thread is still running."]);
   });
 
   it("names an earlier turn in its thread, and a room turn", () => {

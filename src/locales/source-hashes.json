@@ -3593,7 +3593,8 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "server.outside.preferenceTitle": "7f55fcc3bf70e8b880f68ec0cf802b69727bc3360bfb3aa68f4efc937533386a",
-      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273"
+      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "es": {
       "settings.sidebarRoles.title": "8bf74476d372a4efadb9fbcb87602ad535fcc5af186b66d47b395ff76c32f473",
@@ -9439,7 +9440,10 @@
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
       "server.outside.save": "1509f561f2416598629b886ad7d3c05a7e221e4e0675c84bbff4ee6d9e03913d",
       "server.outside.preferenceTitle": "7f55fcc3bf70e8b880f68ec0cf802b69727bc3360bfb3aa68f4efc937533386a",
-      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273"
+      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.event.handoffsWaiting.one": "c73c2c6fd46f81d27a99c9a06a4852fbb74113977f5beba2bbb4b8b7a541cf4f",
+      "chat.event.handoffsWaiting.many": "3aa0e108ce066c33acff6e26adce14284aefecd66a46a422c773894d9b812205"
     },
     "fr": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -12955,7 +12959,8 @@
       "models.place.cloud": "256bce3dc914a749b55369f9e9adad9be2e7cac464093ae03a95db5bfe39ae9c",
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
-      "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da"
+      "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "hi": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -16468,7 +16473,8 @@
       "models.place.cloud": "256bce3dc914a749b55369f9e9adad9be2e7cac464093ae03a95db5bfe39ae9c",
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
-      "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da"
+      "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "it": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -22698,7 +22704,8 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "ja": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -29117,7 +29124,8 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "ko": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -35919,7 +35927,8 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "composer.dictation.permission": "1be9cbb919211c6d42d40471f2b53fbb47c25cb7d10d36745ab74e973a808f94"
+      "composer.dictation.permission": "1be9cbb919211c6d42d40471f2b53fbb47c25cb7d10d36745ab74e973a808f94",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "pl": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -42312,7 +42321,8 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "pt-br": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -48578,7 +48588,8 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "ru": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -54978,7 +54989,8 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "tr": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -60347,7 +60359,8 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "uk": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -64164,7 +64177,8 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "vi": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -69533,7 +69547,8 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "zh": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -76503,7 +76518,8 @@
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
       "composer.dictation.permission": "1be9cbb919211c6d42d40471f2b53fbb47c25cb7d10d36745ab74e973a808f94",
-      "keys.row.engineMissing": "5c0ac920b4fd7b754d696536bd006bc700846b41ade0975a99a6c761b0b997b0"
+      "keys.row.engineMissing": "5c0ac920b4fd7b754d696536bd006bc700846b41ade0975a99a6c761b0b997b0",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     },
     "zh-tw": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -81443,7 +81459,8 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
     }
   }
 }

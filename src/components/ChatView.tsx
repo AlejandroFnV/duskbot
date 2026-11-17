@@ -138,6 +138,7 @@ import { NewMessagesDivider } from "./NewMessagesDivider";
 import { PeerExchangeLine } from "./PeerExchangeLine";
 import { PeerExchangeView } from "./PeerExchangeView";
 import { exchangeEntries, peerConversation, type PeerRef } from "@/lib/peer-exchange";
+import { QueuedHandoffsLine } from "./QueuedHandoffsLine";
 import { useExchangeRows } from "@/hooks/use-exchange-runs";
 import { unreadMessageIds } from "@/lib/unread-divider";
 import { useReplyDraft } from "@/lib/drafts";
@@ -665,9 +666,10 @@ function PeerLabel({ peer }: { peer: PeerLine }) {
 }
 
 const ActivityChip = memo(function ActivityChip({ message, place = "auto" }: { message: Message; place?: EffectivePlace }) {
-  const { bots, dispatch, threadId } = useChatRows(), liveTools = use(LiveToolsContext);
+  const { bots, dispatch, threadId } = useChatRows(), liveTools = use(LiveToolsContext), store = useStoreRef();
   const tool = message.tool;
   if (!tool) return null;
+  if (message.queuedHandoffs && message.queuedHandoffs.count > 1) return <QueuedHandoffsLine message={message} bots={bots} onOpen={() => message.threadRef && openThread(dispatch, message.threadRef, store.state())} />;
   if (message.threadRef) return <ThreadChip message={message} />; if (message.relay) return <TeammateChip message={message} />;
   const comm = message.comm;
   if (comm) return <RoomHandoffChip message={message} comm={comm} bots={bots} dispatch={dispatch} />;
@@ -950,7 +952,7 @@ const MessagesList = memo(function MessagesList({
                   />
                 );
               }
-              if (!showToolCalls && !m.comm && !m.threadRef && !m.relay && !m.dataResult) return null;
+              if (!showToolCalls && !m.comm && !m.threadRef && !m.queuedHandoffs && !m.relay && !m.dataResult) return null;
               return <ActivityChip message={m} place={place} />;
             }
             case "digest":

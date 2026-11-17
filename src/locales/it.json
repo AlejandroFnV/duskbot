@@ -219,6 +219,7 @@
   "server.teammates.queued.thread": "{bot} non ha ancora iniziato: un turno precedente in quel thread è ancora in corso.",
   "server.teammates.queued.slots": "{bot} non ha ancora iniziato: sta già eseguendo {busy} thread su {limit} insieme.",
   "server.teammates.queued.room": "{bot} non ha ancora iniziato: sta finendo un turno in una stanza.",
+  "server.teammates.queued.grouped": "{count} incarichi in attesa di {bot}",
   "server.queued.capacity": "In coda — parte quando questo bot ha un posto libero per una discussione.",
   "server.queued.capacityStarter": "In coda. Starter esegue un thread alla volta per bot, quindi questo parte quando finisce quello in corso. Un piano più grande ne esegue di più.",
   "server.queued.groupTurn": "In coda — il turno di questo bot nel gruppo va uno alla volta; parte quando quello finisce.",

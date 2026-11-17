@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { looksLikeInstruction, readOutsideContent } from "./memory-trust.ts";
+import { heardAnotherBot, looksLikeInstruction, readOutsideContent } from "./memory-trust.ts";
 
 describe("what memory refuses to keep", () => {
   it("catches planted instructions and leaves ordinary facts alone", () => {
@@ -27,5 +27,18 @@ describe("whether a turn read outside content", () => {
     expect(readOutsideContent([ask, { role: "bot", kind: "activity", tool: { name: "agent_browser_snapshot" } }])).toBe(true);
     expect(readOutsideContent([ask, { role: "bot", kind: "activity", tool: { name: "session_search" } }])).toBe(false);
     expect(readOutsideContent([{ role: "bot", kind: "activity", tool: { name: "web_fetch" } }, ask])).toBe(false);
+  });
+});
+
+describe("whether a turn acts on another bot's words", () => {
+  const ask = { role: "user", kind: "text" };
+  const said = (botId?: string) => ({ role: "bot", kind: "text", ...(botId ? { from: { botId } } : {}) });
+  it("counts another bot's reply since the person's last message, never this bot's own or an older one", () => {
+    expect(heardAnotherBot([ask, said("rook")], "wren")).toBe(true);
+    expect(heardAnotherBot([ask, said("wren"), said("rook")], "wren")).toBe(true);
+    expect(heardAnotherBot([ask, said("wren")], "wren")).toBe(false);
+    expect(heardAnotherBot([ask, said()], "wren")).toBe(false);
+    expect(heardAnotherBot([said("rook"), ask], "wren")).toBe(false);
+    expect(heardAnotherBot([ask, { role: "bot", kind: "activity", from: { botId: "rook" } }], "wren")).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Message } from "@/state/store";
-import { exchangeEntries, exchangeRuns, exchangeSummary, peerConversation } from "./peer-exchange";
+import { exchangeEntries, exchangeRuns, exchangeSummary, peerConversation, sendsOnly } from "./peer-exchange";
 
 const msg = (id: string, fields: Partial<Message>): Message => ({ id, role: "bot", kind: "text", at: 1, ...fields } as Message);
 const ghosty = { id: "ghosty", name: "Ghosty" };
@@ -133,5 +133,29 @@ describe("peerConversation", () => {
     const blank = [...rows, msg("empty", { kind: "activity", at: 8 })];
     steps.set("empty", { direction: "outbound", peer: ghosty });
     expect(peerConversation(blank, steps, [ghosty]).map((line) => line.id)).toEqual(["asked"]);
+  });
+});
+
+describe("sendsOnly", () => {
+  const ref = { botId: "ghosty", threadId: "t", title: "x" };
+  const me = { botId: "me", name: "Me", color: "blue" as const };
+  const runsOf = (rows: Message[]) =>
+    exchangeRuns(rows.map((row) => ({ rows: [row] })), (item: { rows: Message[] }) => item.rows, exchangeEntries(rows, "me"));
+  const rowsOf = (item: { rows: Message[] }) => item.rows;
+
+  it("draws no line for work handed to other bots, but keeps the line when their result comes back", () => {
+    const rows = [
+      msg("sent", { kind: "activity", tool: { name: "Sent to Ghosty", ok: true }, from: me, threadRef: ref }),
+      msg("back", { kind: "activity", tool: { name: "Ghosty replied", ok: true }, roomRequest: { id: "r", phase: "result" }, from: { botId: "ghosty", name: "Ghosty", color: "green" }, threadRef: ref }),
+    ];
+    expect(runsOf(rows).map((run) => sendsOnly(run, rowsOf))).toEqual([true, false]);
+  });
+
+  it("keeps the line over an answer this bot wrote to another bot, since that is what it said", () => {
+    const rows = [
+      msg("asked", { role: "user", text: "[From @Ghosty (bot) · message · reply expected] status?", peerAsk: { botId: "ghosty", name: "Ghosty" } }),
+      msg("reply", { text: "all good", requestMessageId: "asked" }),
+    ];
+    expect(runsOf(rows).map((run) => sendsOnly(run, rowsOf))).toEqual([false, false]);
   });
 });

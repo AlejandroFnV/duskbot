@@ -137,7 +137,7 @@ import { useUnreadDivider } from "@/hooks/use-unread-divider";
 import { NewMessagesDivider } from "./NewMessagesDivider";
 import { PeerExchangeLine } from "./PeerExchangeLine";
 import { PeerExchangeView } from "./PeerExchangeView";
-import { exchangeEntries, peerConversation, type PeerRef } from "@/lib/peer-exchange";
+import { exchangeEntries, peerConversation, sendsOnly, type PeerRef } from "@/lib/peer-exchange";
 import { useExchangeRows } from "@/hooks/use-exchange-runs";
 import { useLingering } from "@/hooks/use-lingering";
 import { unreadMessageIds } from "@/lib/unread-divider";
@@ -879,7 +879,9 @@ const MessagesList = memo(function MessagesList({
           <>
             {divider}
             {newDay && <DaySeparator at={first.at} today={today} prev={prev} next={first} />}
-            <PeerExchangeLine summary={run.summary} bots={bots} expanded={!collapsed} onToggle={() => exchanges.toggle(run)} onOpen={setExchangePeers} />
+            {!sendsOnly(run, transcriptRows) && (
+              <PeerExchangeLine summary={run.summary} bots={bots} expanded={!collapsed} onToggle={() => exchanges.toggle(run)} onOpen={setExchangePeers} />
+            )}
           </>
         );
         if (lead && collapsed) return <div key={run.id} className="contents" data-mid={first.id}>{lead}</div>;

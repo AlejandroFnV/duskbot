@@ -154,6 +154,7 @@ export interface Message extends Pick<import("../../shared/wire").WireMessage, "
   at: number;
   parentId?: string | null;
   replyToId?: string;
+  replyQuote?: string;
   sendId?: string;
   from?: { botId: string; name: string; color: MausColor };
   peerAsk?: { botId: string; name: string; unattended?: boolean };
@@ -695,6 +696,7 @@ export type Action =
       text: string;
       sendId?: string;
       replyToId?: string;
+      replyQuote?: string;
       threadId?: string;
       mode?: "chat" | "goal"; mentions?: string[];
       onError?: () => void;
@@ -729,6 +731,7 @@ export type Action =
       text: string;
       sendId?: string;
       replyToId?: string;
+      replyQuote?: string;
       threadId?: string;
       dataContext?: import("../../shared/data-context").DataContext; pointed?: import("../../shared/app-frame/point").PointedElement[]; mode?: "chat" | "goal";
       followUp?: import("../../shared/follow-up").FollowUp; mentions?: string[]; onError?: () => void;
@@ -1695,6 +1698,7 @@ export function reducer(state: AppState, action: Action): AppState {
         action.replyToId,
         leaf,
       );
+      if (action.replyQuote) message.replyQuote = action.replyQuote;
       message.optimisticThreadOrderAt = bot.tasks?.find((task) => task.threadId === threadId)?.lastThreadOrderAt;
       return bumpThreadUpdatedAt(updateBot(animated, bot.id, (current) => ({
         ...current,
@@ -1829,6 +1833,7 @@ export function reducer(state: AppState, action: Action): AppState {
         null,
         action.mode ?? "chat",
       );
+      if (action.replyQuote) message.replyQuote = action.replyQuote;
       message.optimisticThreadOrderAt = group.tasks?.find((task) => task.threadId === threadId)?.lastThreadOrderAt;
       const stamped = bumpThreadUpdatedAt(state, threadId, message.at, threadId === group.threadId);
       if (threadId !== group.threadId) return stamped;
@@ -2482,7 +2487,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
           void waitForExecutionSettings(botBeforeSend ? [botBeforeSend] : [], threadId)
             .then(() => sendReconciled((signal) => api(`/api/bots/${action.botId}/messages`, {
                 method: "POST", signal,
-                body: JSON.stringify({ text: action.text, replyToId: action.replyToId, threadId, sendId, ...(action.dataContext ? { dataContext: action.dataContext } : {}), ...(action.pointed?.length ? { pointed: action.pointed } : {}), ...(action.mode === "goal" ? { mode: "goal" } : {}), ...(action.followUp ? { followUp: action.followUp } : {}), ...(action.mentions?.length ? { mentions: action.mentions } : {}) }),
+                body: JSON.stringify({ text: action.text, replyToId: action.replyToId, ...(action.replyQuote ? { replyQuote: action.replyQuote } : {}), threadId, sendId, ...(action.dataContext ? { dataContext: action.dataContext } : {}), ...(action.pointed?.length ? { pointed: action.pointed } : {}), ...(action.mode === "goal" ? { mode: "goal" } : {}), ...(action.followUp ? { followUp: action.followUp } : {}), ...(action.mentions?.length ? { mentions: action.mentions } : {}) }),
               }), arrived, undefined, threadId ? { threadId, sendId, text: action.text, replyToId: action.replyToId, channelMode: action.mode } : undefined))
             .then((sent) => {
               outbox?.release(sendId);
@@ -2723,7 +2728,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
               method: "POST", signal,
               body: JSON.stringify({
                 text: action.text,
-                replyToId: action.replyToId,
+                replyToId: action.replyToId, ...(action.replyQuote ? { replyQuote: action.replyQuote } : {}),
                 threadId,
                 sendId,
                 mode: action.mode ?? "chat", ...(action.mentions?.length ? { mentions: action.mentions } : {}),

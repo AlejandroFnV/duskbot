@@ -13,6 +13,11 @@ import {
   appendComposerDraft,
   appendDraftAttachments,
   changeDraftAttachmentPending,
+  clearReplyDraft,
+  rememberReplyDraft,
+  replyDraft,
+  replyDraftQuote,
+  selectReplyDraft,
   draftRevision,
   editFailedComposerSend,
   failedComposerSends,
@@ -590,5 +595,23 @@ describe("saving typed drafts", () => {
     leavePage();
     expect(writes).toHaveLength(1);
     expect(JSON.parse(writes[0])).toEqual({ "bot:other-window:thread": "theirs" });
+  });
+});
+
+describe("a reply draft to selected words", () => {
+  it("keeps the quote with its message, and drops it on a new pick or a clear", () => {
+    selectReplyDraft("draft-q", "thread-q", "m1", "two words");
+    expect(replyDraftQuote("thread-q")).toBe("two words");
+    rememberReplyDraft("thread-q", "m1");
+    expect(replyDraftQuote("thread-q")).toBe("two words");
+    selectReplyDraft("draft-q", "thread-q", "m1");
+    expect(replyDraftQuote("thread-q")).toBeUndefined();
+    selectReplyDraft("draft-q", "thread-q", "m1", "two words");
+    rememberReplyDraft("thread-q", "m2");
+    expect(replyDraftQuote("thread-q")).toBeUndefined();
+    selectReplyDraft("draft-q", "thread-q", "m2", "other");
+    clearReplyDraft("thread-q");
+    expect(replyDraft("thread-q")).toBeUndefined();
+    expect(replyDraftQuote("thread-q")).toBeUndefined();
   });
 });

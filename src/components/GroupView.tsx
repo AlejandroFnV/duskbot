@@ -90,6 +90,8 @@ import { NewMessagesDivider } from "./NewMessagesDivider";
 import { PeerExchangeLine } from "./PeerExchangeLine";
 import { useExchangeRows } from "@/hooks/use-exchange-runs";
 import { useReplyDraft } from "@/lib/drafts";
+import { REPLY_SOURCE } from "@/lib/replies";
+import { SelectionReply } from "./SelectionReply";
 import { withoutCitationMarkers } from "@/lib/citations";
 import { latestFailure, latestReply, type TranscriptSnapshot } from "@/lib/transcript-announcer";
 import { pendingApprovals } from "./PendingApproval";
@@ -222,6 +224,7 @@ function RoomTextMessage({
         )}
         <div
           data-chat-bubble="simple"
+          {...(display.trim() && !m.id.startsWith("optimistic-") ? { [REPLY_SOURCE]: m.id } : {})}
           className={cn(
             tabled ? "w-full" : "w-fit",
             !tabled && SIMPLE_BUBBLE_MAX, SIMPLE_BUBBLE_TEXT,
@@ -243,6 +246,7 @@ function RoomTextMessage({
               <div className="mb-2">
                 <ReplyQuote
                   message={target}
+                  quote={m.replyQuote}
                   fallbackName={t("room.fallbackBot")}
                   compact
                   onJump={() =>
@@ -858,11 +862,15 @@ export function GroupView({ group: room }: { group: Group }) {
   const [folderOpen, setFolderOpen] = useState(false);
   const [membersOpen, setMembersOpen] = useState(false);
   const [findOpen, setFindOpen] = useState(false);
-  const { replyTo, selectReply, clearReply, consumeReply, restoreReply } = useReplyDraft(
+  const { replyTo, replyQuote, selectReply, clearReply, consumeReply, restoreReply } = useReplyDraft(
     group.threadId,
     `group:${group.id}:${group.threadId}`,
     group.messages,
   );
+  const replyToSelection = (messageId: string, quote: string) => {
+    const message = group.messages.find((candidate) => candidate.id === messageId);
+    if (message) selectReply(message, quote);
+  };
   const membersTriggerRef = useRef<HTMLButtonElement>(null);
   const closeMembers = useCallback(() => setMembersOpen(false), []);
   useEffect(() => setFindOpen(false), [group.threadId]);
@@ -1134,12 +1142,14 @@ export function GroupView({ group: room }: { group: Group }) {
       <div className="pointer-events-auto">{trailing?.failures.length || trailing?.notices.length || setupPending || group.dm
         ? <FailedReplyCard rows={trailing} group threadId={group.threadId} onRetry={retry} />
         : <RoomHoldsBanner group={group} members={members} />}</div>
+      <SelectionReply onReply={replyToSelection} />
       {!(phone && setupPending) && <RoomComposer
         key={group.threadId}
         group={group}
         members={members}
         locked={setupPending}
         replyTo={replyTo}
+        replyQuote={replyQuote}
         onClearReply={clearReply}
         onConsumeReply={consumeReply}
         onRestoreReply={restoreReply}

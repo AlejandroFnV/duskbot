@@ -139,6 +139,8 @@ import { exchangeEntries, peerConversation, type PeerRef } from "@/lib/peer-exch
 import { useExchangeRows } from "@/hooks/use-exchange-runs";
 import { unreadMessageIds } from "@/lib/unread-divider";
 import { useReplyDraft } from "@/lib/drafts";
+import { REPLY_SOURCE } from "@/lib/replies";
+import { SelectionReply } from "./SelectionReply";
 import { localDay, transcriptLookups, type TranscriptLookups } from "@/lib/transcript-derivations"; import { DaySeparator } from "./DaySeparator";
 import { withoutCitationMarkers } from "@/lib/citations";
 import { EmptyChat } from "./ChatEmptyState";
@@ -492,6 +494,7 @@ const Bubble = memo(function Bubble({
         <div
           ref={(el) => { own.current.bubble = el; }}
           data-chat-bubble="simple"
+          {...(text.trim() && !message.id.startsWith("optimistic-") ? { [REPLY_SOURCE]: message.id } : {})}
           className={cn(
             filling && "bubble-morph",
             tabled ? "w-full" : "w-fit",
@@ -521,6 +524,7 @@ const Bubble = memo(function Bubble({
             <div className="mb-2">
               <ReplyQuote
                 message={replyTarget}
+                quote={message.replyQuote}
                 fallbackName={botName}
                 compact
                 onJump={() =>
@@ -1014,11 +1018,15 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
   const computerStarting = computerStartLine(state.computerStarts[bot.id], bot.name); useScreensWhile(Boolean(computerStarting));
   const mascotMotion = state.mascotMotion?.botId === bot.id ? state.mascotMotion : null;
   const [findOpen, setFindOpen] = useState(false);
-  const { replyTo, selectReply, clearReply, consumeReply, restoreReply } = useReplyDraft(
+  const { replyTo, replyQuote, selectReply, clearReply, consumeReply, restoreReply } = useReplyDraft(
     bot.threadId,
     `bot:${bot.id}:${bot.threadId}`,
     bot.messages,
   );
+  const replyToSelection = (messageId: string, quote: string) => {
+    const message = bot.messages.find((candidate) => candidate.id === messageId);
+    if (message) selectReply(message, quote);
+  };
   useEffect(() => setFindOpen(false), [bot.threadId]);
   useChatFindRequests(bot.threadId, findOpen, setFindOpen);
   useEffect(() => {
@@ -1498,6 +1506,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
       <div className="pointer-events-auto"><FailedReplyCard rows={rescuing ? null : trailing} botId={bot.id} threadId={bot.threadId} onRetry={lastUserMessage ? regenerate : undefined} /></div>
       {canWrite !== false && !trailing?.failures.length && !trailing?.notices.length && <div className="pointer-events-auto"><ComposerSignInNotice bot={bot} /></div>}
       {liveCallEnabled() && <LiveCallBar bot={bot} />}
+      {canWrite !== false && <SelectionReply onReply={replyToSelection} />}
       {canWrite === false ? (
         <NewConversationInstead bot={bot} onNew={() => dispatch({ type: "newTask", botId: bot.id })} />
       ) : (
@@ -1505,6 +1514,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
         key={bot.threadId}
         bot={profile}
         replyTo={replyTo}
+        replyQuote={replyQuote}
         onClearReply={clearReply}
         onConsumeReply={consumeReply}
         onRestoreReply={restoreReply}

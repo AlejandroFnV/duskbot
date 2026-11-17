@@ -598,6 +598,8 @@ export interface WireMessage extends HelperIntroField, SetupCardFields, WaitLine
   parentId?: string | null;
   /** Optional flat reply reference for an inline quote. */
   replyToId?: string;
+  /** The words of `replyToId` the person selected and answered, when they answered only part of it. */
+  replyQuote?: string;
   /** Stable client identity for at-most-once chat POST retries. */
   sendId?: string;
   /** Per-send channel behavior. Absent is legacy quick chat. */

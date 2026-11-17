@@ -22,7 +22,7 @@ import { spokenLineFields } from "../live-call-record.ts";
 import { messageTextRefusal } from "../message-text.ts";
 import { stopReachesLiveTurn } from "../person-stops.ts";
 import type { PhoneSecretSubmissionRegistry } from "../phone-secret.ts";
-import type { ReplyTarget } from "../replies.ts";
+import { withReplyQuote, type ReplyTarget } from "../replies.ts";
 import type { RequestAuth } from "../request-auth.ts";
 import type { RoutineManager } from "../routines.ts";
 import { acceptedSendMatch, parseSendId } from "../send-idempotency.ts";
@@ -278,7 +278,7 @@ export function createBotMessageRoutes(deps: BotMessageRouteDeps): RouteHandler 
       const records = press && target ? pressRecords(bot, press.action) : null;
       const replyTo: ReplyTarget | undefined = press && target ? { ...target, widgetPress: { label: press.label, action: press.action, ...(records ? { records } : {}) } }
         : appSent && target ? { ...target, appMessage: { title: appSent.title, origin: appSent.origin } }
-          : relayed && target ? { ...target, reactedWith: relayed } : target;
+          : relayed && target ? { ...target, reactedWith: relayed } : withReplyQuote(target, body.replyQuote);
       const pressKey = press?.settles ? `${threadId}:${press.messageId}` : undefined;
       if (pressKey && pressesInFlight.has(pressKey) && !(sendId && pressesInFlight.get(pressKey) === sendId)) {
         return json(res, 409, { error: "That answer is already on its way." });

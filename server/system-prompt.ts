@@ -69,7 +69,7 @@ export function buildSystemPrompt(
   soul: string,
   parts: PromptPart[],
   agents?: { env?: Record<string, string | undefined> },
-  opts?: { replyStyle?: ReplyStyle; talkingStyle?: TalkingStyle; quickUpdates?: boolean },
+  opts?: { replyStyle?: ReplyStyle; talkingStyle?: TalkingStyle; quickUpdates?: boolean; language?: string },
 ): { text: string; sections: PromptSection[]; stable: string; volatile: string } {
   const ordered: PromptPart[] = [
     { id: "persona", label: "Identity", text: persona },
@@ -80,7 +80,7 @@ export function buildSystemPrompt(
     ...parts,
     // the chosen guide, then the habits it does not cover; both in the stable half
     { id: "talking-style", label: "Talking style", text: talkingStylePrompt(opts?.talkingStyle) },
-    { id: "reply-habits", label: "How to reply", text: replyHabitsPrompt(opts?.quickUpdates === true) },
+    { id: "reply-habits", label: "How to reply", text: replyHabitsPrompt(opts?.quickUpdates === true, opts?.language) },
   ];
   const sections = ordered
     .filter((part) => part.text.length > 0)

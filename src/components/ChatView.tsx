@@ -51,6 +51,7 @@ import { turnMarkState } from "./mascot-presence";
 import type { LiveStatus } from "@/state/turn-status";
 import { TurnPresence, TYPING_PHASE } from "./TurnPresence";
 import { OtherThreadsWork } from "./OtherThreadsWork";
+import { TeammateWorkNote, teammateWorkSummary } from "./TeammateWorkNote";
 import { BrowserPartLine } from "./BrowserPartLine";
 import { browserPartFor } from "@/lib/browser-part";
 import { MarkCrossfade } from "./MarkCrossfade";
@@ -1168,7 +1169,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
   const mountDue = useReached(!turnBusy ? null : turnStartedAt && messages.length > 0 ? turnStartedAt + mountDelay : 0);
   // notes from another AI being brought in: the import's own steps are this bot's working row until its summary lands
   const importing = useNotesWork(bot.id);
-  const presenceVisible = !stopCut && (hold.typing || (waiting && mountDue) || teammatesWorking || Boolean(importing));
+  const presenceVisible = !stopCut && (hold.typing || (waiting && mountDue) || Boolean(importing));
   // the bubble the line hangs under keeps its pinched corner until the line has finished leaving, as grok's does
   const presenceShown = useLingering(presenceVisible, 140);
   const paintedMessages = useFirstPaintRows(transcriptKey, windowedMessages, Boolean(focus && !focus.consumed) || laterCount > 0, scrollRef, following);
@@ -1206,7 +1207,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
     ? turnStartedAt + mountDelay + lifeSpan(presenceSeed, 0) + lifeSpan(presenceSeed, 1)
     : null;
   const opening = !useReached(openingEnd) && openingEnd !== null && presence === "working";
-  const lifeBeat = useReplyLife(presenceVisible && !teammatesWorking && (presence === "waiting" || opening) ? [{ key: bot.id, seed: presenceSeed, typing: writing }] : NO_LIFE).get(bot.id);
+  const lifeBeat = useReplyLife(presenceVisible && (presence === "waiting" || opening) ? [{ key: bot.id, seed: presenceSeed, typing: writing }] : NO_LIFE).get(bot.id);
   const presenceMarkState = presence === "typing" || writing ? TYPING_MARK
     : opening ? lifeMarkState("thinking", lifeBeat)
     : presence === "working" ? workingMark(live.status?.activity) : lifeMarkState(statusMarkState, lifeBeat);
@@ -1288,7 +1289,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
             </button>
           )}
           {!phone && !simpleHead && <ChatHeadRole bot={bot} />}<span role="status" className="sr-only" data-chathead-status>{bot.busy ? t("sidebar.preview.working") : ""}</span>{!simpleHead && privateChat && <TeamPrivateHeader />}{!simpleHead && ownHelper && <TeamOwnHelperHeader />}{!simpleHead && sharedChat && team && <TeamSharedHeader team={team} onlyPeopleAdded={bot.onlyPeopleAdded} />}
-          {!simpleHead && !bot.busy && bot.waitingForTeammates && <span className="truncate text-[12px] text-ink-secondary" role="status">{t("chat.teammatesWorking")}</span>}
+          {!simpleHead && teammatesWorking && <span className="truncate text-[12px] text-ink-secondary">{teammateWorkSummary(bot.teammateWork, state.bots)}</span>}
           {remoteClient && awayFromMainThread(profile) && (
             <button
               type="button"
@@ -1464,12 +1465,12 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
             }
             simple
             className={cn(!statusSlot && presenceUnderBubble && SIMPLE_STACKED)}
-            label={teammatesWorking ? t("chat.teammatesWorking") : importing && !turnBusy ? importing : undefined}
+            label={importing && !turnBusy ? importing : undefined}
             visible={presenceVisible}
             {...now}
             // grok shows no steps in the chat: the list under the line only with tool calls shown
             card={showToolCalls ? now.card : undefined}
-            phrases={teammatesWorking || (importing && !turnBusy) ? undefined : writing ? typingPhrases : opening ? undefined : turnLabel ? [turnLabel] : now.phrases}
+            phrases={importing && !turnBusy ? undefined : writing ? typingPhrases : opening ? undefined : turnLabel ? [turnLabel] : now.phrases}
             phase={writing ? TYPING_PHASE : turnLabel ? `label:${turnLabel}` : now.phase}
             seed={presenceSeed}
             since={busySince}
@@ -1480,6 +1481,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
             </div>
           )}
           </div>
+          {teammatesWorking && !stopCut && <TeammateWorkNote work={bot.teammateWork} bots={state.bots} dispatch={dispatch} />}
           <OtherThreadsWork bot={bot} dispatch={dispatch} />
         </div>
         </div>

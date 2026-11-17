@@ -227,7 +227,7 @@ export interface ModelSelection {
   variant?: string;
 }
 
-export interface Task extends Pick<WireTask, "private" | "setupRequest" | "inbox" | "openAsks" | "backup"> {
+export interface Task extends Pick<WireTask, "private" | "setupRequest" | "inbox" | "openAsks" | "backup" | "teammateWork"> {
   waitingForTeammates?: boolean; sharedChat?: true;
   threadId: string;
   routineRunId?: string;
@@ -283,7 +283,7 @@ export interface TaskUsage {
   context?: { tokens: number; window?: number };
 }
 
-export interface Bot extends DefaultBotFields, Pick<WireBot, "mascotFaceColor" | "access" | "yourAccess" | "onlyPeopleAdded"> {
+export interface Bot extends DefaultBotFields, Pick<WireBot, "mascotFaceColor" | "access" | "yourAccess" | "onlyPeopleAdded" | "teammateWork"> {
   toolScope?: ToolScope;
   waitingForTeammates?: boolean;
   id: string;
@@ -388,6 +388,7 @@ export function currentTaskBot(bot: Bot, threadId = bot.threadId): Bot {
     pinnedMessageId: task.pinnedMessageId,
     turnStartedAt: task.turnStartedAt ?? null,
     waitingForTeammates: task.waitingForTeammates ?? false,
+    teammateWork: task.teammateWork,
   };
 }
 

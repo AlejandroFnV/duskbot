@@ -405,7 +405,7 @@ function withLevel<T extends object>(bot: T, visible: VisibleSet): T {
 }
 
 /** What only the bot's selected conversation carries, dropped when that conversation is someone else's. */
-const SELECTED_THREAD_FIELDS = ["messages", "hasMore", "activeLeafId", "pinnedMessageId", "rewound", "waitingForTeammates"] as const;
+const SELECTED_THREAD_FIELDS = ["messages", "hasMore", "activeLeafId", "pinnedMessageId", "rewound", "waitingForTeammates", "teammateWork"] as const;
 
 /** On a Team Cloud a person is sent only their own conversations with a bot and the team's (an admin too). The bot's
  * selected conversation and main chat are the server's one choice for everyone; when either is someone else's private

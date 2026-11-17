@@ -131,11 +131,23 @@ export interface BotMovedTo {
   at: number;
 }
 
+/** A teammate's open assignment from the thread waiting on it; threadId is the teammate's own thread. */
+export interface WireTeammateWork {
+  botId: string;
+  threadId: string;
+  /** First line of the brief. */
+  summary: string;
+  /** waiting: parked on a question. */
+  status: "queued" | "running" | "waiting";
+}
+
 /** One task = one conversation with its own context, thread and provider
  * session. */
 export interface WireTask extends InboxTask {
   /** Outstanding handoffs, not an active provider turn. */
   waitingForTeammates?: boolean;
+  /** While waitingForTeammates: the teammates' open assignments from this thread. */
+  teammateWork?: WireTeammateWork[];
   threadId: string;
   title: string;
   createdAt: number;
@@ -279,6 +291,7 @@ export const helperModelAllowed = (bot: { helperModel?: unknown }): boolean => b
  * bot has none). */
 export interface WireBot extends DefaultBotFields, BotAccessFields {
   waitingForTeammates?: boolean;
+  teammateWork?: WireTeammateWork[];
   id: string;
   /** The task selected in the UI; running turns keep their own thread id. */
   threadId: string;

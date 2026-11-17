@@ -15,10 +15,11 @@ import { TYPING_MIN_MS } from "@/hooks/use-typing-hold";
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 const dispatch = vi.hoisted(() => vi.fn());
+const teammates = vi.hoisted((): Array<Record<string, unknown>> => []);
 vi.mock("@/state/store", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/state/store")>();
   return { ...original, useStore: () => ({
-    state: { ...original.initialState, config: null, instances: [{ instanceId: "test", driverKind: "claudeAgent", displayName: "Test", snapshot: { state: "available" } } as InstanceInfo] },
+    state: { ...original.initialState, bots: teammates as unknown as Bot[], config: null, instances: [{ instanceId: "test", driverKind: "claudeAgent", displayName: "Test", snapshot: { state: "available" } } as InstanceInfo] },
     dispatch,
   }) };
 });
@@ -272,11 +273,57 @@ describe("each bubble's typing beat", () => {
 });
 
 describe("the line's people", () => {
-  it("says Teammates working while the bot waits on its teammates", () => {
-    const waiting = busyBot([ask, intro], false);
-    render({ ...waiting, waitingForTeammates: true, tasks: waiting.tasks!.map((task) => ({ ...task, waitingForTeammates: true })) });
+  const work = [
+    { botId: "rigel", threadId: "rigel-t", summary: "Run the release checks", status: "running" as const },
+    { botId: "pixel", threadId: "pixel-t", summary: "Polish the composer", status: "queued" as const },
+    { botId: "ada", threadId: "ada-t", summary: "Review the plan", status: "waiting" as const },
+  ];
+  const delegating = (busy: boolean): Bot => {
+    const shown = busyBot([ask, intro], busy);
+    return { ...shown, waitingForTeammates: !busy, tasks: shown.tasks!.map((task) => ({ ...task, waitingForTeammates: !busy, teammateWork: busy ? undefined : work })) };
+  };
+  const note = () => host.querySelector("[data-teammate-work]");
+  const summary = () => host.querySelector<HTMLButtonElement>("[data-teammate-work-summary]")?.closest("button") ?? null;
+
+  beforeEach(() => {
+    teammates.splice(0, teammates.length, ...["rigel:Rigel", "pixel:Pixel", "ada:Ada"].map((pair) => {
+      const [id, name] = pair.split(":");
+      return { id, name, threadId: `${id}-main`, title: "", description: "", color: "blue", notifications: true, unread: false, busy: false, messages: [] };
+    }));
+  });
+  afterEach(() => void teammates.splice(0));
+
+  it("while it only waits on its teammates, says how many assignments and whose, standing still", () => {
+    render(delegating(false));
     act(() => void vi.advanceTimersByTime(STATUS_QUIET_MS.max));
-    expect(statusLine()).toBe("Teammates working");
+    expect(note()?.querySelector("[data-teammate-work-summary]")?.textContent).toBe("3 assignments under way: Rigel, Pixel, and Ada");
+    expect(mascot(), "no working mark or thinking line without a turn of its own").toBeNull();
+    expect(host.querySelector("[data-turn-status]")).toBeNull();
+    expect(note()!.querySelector(".status-shimmer")).toBeNull();
+    expect(note()!.querySelector("[data-teammate-work-hint]")?.textContent).toBe("You can write to it meanwhile");
+    expect(summary()?.getAttribute("aria-expanded")).toBe("false");
+    expect(host.querySelector("[data-teammate-work-thread]")).toBeNull();
+  });
+
+  it("keeps the working mark for a turn of its own, without the teammates' note", () => {
+    engine({ type: "turn.started" });
+    render(delegating(true));
+    expect(mascot()).not.toBeNull();
+    expect(note()).toBeNull();
+  });
+
+  it("opens to what each teammate is doing, each row opening that teammate's thread", () => {
+    render(delegating(false));
+    act(() => summary()!.click());
+    expect(summary()!.getAttribute("aria-expanded")).toBe("true");
+    const rows = [...host.querySelectorAll<HTMLButtonElement>("[data-teammate-work-thread]")];
+    expect(rows.map((row) => row.dataset.teammateWorkThread)).toEqual(["rigel-t", "pixel-t", "ada-t"]);
+    expect(rows.map((row) => row.querySelector("[data-teammate-work-phrase]")?.textContent)).toEqual(["Working", "Queued", "Waiting on an answer"]);
+    expect(rows[0]!.textContent).toContain("Run the release checks");
+    expect(rows[0]!.title).toBe("Open #Run the release checks");
+    dispatch.mockClear();
+    act(() => rows[1]!.click());
+    expect(dispatch).toHaveBeenCalledWith({ type: "switchTask", botId: "pixel", threadId: "pixel-t" });
   });
 });
 

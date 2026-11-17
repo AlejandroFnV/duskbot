@@ -209,6 +209,7 @@ export function ModelPicker({
   threadId,
   className,
   contained = false,
+  containedThinking = false,
   label,
   size = "md",
 }: {
@@ -216,6 +217,8 @@ export function ModelPicker({
   threadId?: string;
   className?: string;
   contained?: boolean;
+  /** Offers the reasoning levels in a contained menu, where no Reasoning row sits beside it. */
+  containedThinking?: boolean;
   label?: ReactNode;
   size?: "sm" | "md";
 }) {
@@ -513,7 +516,8 @@ export function ModelPicker({
     dispatch({ type: "setModel", botId: bot.id, threadId, ...(threadId && updatesBotDefault ? { updateBotDefault: true } : {}),
       selection: effort ? { ...model, effort } : model, ...(working && threadId ? { nextTurn: true } : {}) });
   };
-  const thinking: SimpleThinking | null = variantChoices(state, selection, threadId ?? bot.threadId) ? contained ? null : {
+  const thinking: SimpleThinking | null = contained && !containedThinking ? null
+    : variantChoices(state, selection, threadId ?? bot.threadId) ? contained ? null : {
       variants: (
         <ModelVariantRow compact quiet bot={shown} threadId={threadId} updateBotDefault={Boolean(threadId) && updatesBotDefault} className="px-2 py-1"
           label={<span className="shrink-0 text-[12px] font-medium leading-4 text-ink-tertiary">{t("botSettings.simple.thinking")}</span>} />

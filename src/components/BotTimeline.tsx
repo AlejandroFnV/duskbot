@@ -10,7 +10,7 @@ import { isArchived, threadRecency } from "./SidebarThreadRow";
 
 export const TIMELINE_THREADS = 6;
 export const TIMELINE_PAGE = 40;
-const REFRESH_MS = 1_500;
+export const REFRESH_MS = 1_500;
 
 type Page = { messages?: Message[]; activeLeafId?: string | null };
 
@@ -25,10 +25,12 @@ export function timelineThreads(bot: Pick<Bot, "threadId" | "mainThreadId" | "ta
 
 const fetched = new Map<string, { at: number; messages: readonly Message[] }>();
 const loading = new Set<string>();
+/** The change each conversation last failed to load at, so a failure waits for the next change instead of retrying on its own. */
+const failed = new Map<string, number>();
 
 const splitKey = (key: string) => ({ threadId: key.slice(0, key.lastIndexOf("@")), at: Number(key.slice(key.lastIndexOf("@") + 1)) });
 const staleKeys = (signature: string) => signature.split(",").filter(Boolean).map(splitKey)
-  .filter(({ threadId, at }) => (fetched.get(threadId)?.at ?? -1) < at);
+  .filter(({ threadId, at }) => (fetched.get(threadId)?.at ?? -1) < at && (failed.get(threadId) ?? -1) < at);
 
 /** Each listed conversation's newest rows: fetched at once the first time, then again a moment after it changes. */
 function useThreadTranscripts(threads: readonly Task[]): ThreadTranscript[] {
@@ -37,9 +39,11 @@ function useThreadTranscripts(threads: readonly Task[]): ThreadTranscript[] {
   const latest = useRef(signature);
   latest.current = signature;
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const mounted = useRef(true);
   useEffect(() => {
     const load = () => {
       timer.current = null;
+      if (!mounted.current) return;
       for (const { threadId, at } of staleKeys(latest.current)) {
         if (loading.has(threadId)) continue;
         loading.add(threadId);
@@ -48,10 +52,10 @@ function useThreadTranscripts(threads: readonly Task[]): ThreadTranscript[] {
             fetched.set(threadId, { at, messages: visibleMessages({ messages: page.messages ?? [], activeLeafId: page.activeLeafId ?? undefined }) });
             settle((count) => count + 1);
           })
-          .catch(() => {})
+          .catch(() => { failed.set(threadId, at); })
           .finally(() => {
             loading.delete(threadId);
-            if (staleKeys(latest.current).some((key) => key.threadId === threadId) && !timer.current) timer.current = setTimeout(load, REFRESH_MS);
+            if (mounted.current && staleKeys(latest.current).some((key) => key.threadId === threadId) && !timer.current) timer.current = setTimeout(load, REFRESH_MS);
           });
       }
     };
@@ -60,7 +64,10 @@ function useThreadTranscripts(threads: readonly Task[]): ThreadTranscript[] {
     if (stale.some(({ threadId }) => !fetched.has(threadId))) load();
     else timer.current = setTimeout(load, REFRESH_MS);
   }, [signature]);
-  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => { mounted.current = false; if (timer.current) clearTimeout(timer.current); timer.current = null; };
+  }, []);
   const names = threads.map((task) => `${task.threadId}\u0001${task.title}`).join("\u0002");
   return useMemo(() => names.split("\u0002").filter(Boolean).flatMap((entry) => {
     const [threadId = "", title = ""] = entry.split("\u0001");
@@ -73,6 +80,7 @@ function useThreadTranscripts(threads: readonly Task[]): ThreadTranscript[] {
 export function forgetTimelineThreads(): void {
   fetched.clear();
   loading.clear();
+  failed.clear();
 }
 
 export type TimelineRun = TimelinePart & { lookups?: TranscriptLookups };

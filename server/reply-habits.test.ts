@@ -1,5 +1,6 @@
 import { expect, it } from "vitest";
-import { REPLY_HABITS_PROMPT, replyHabitsPrompt, TOOL_HABITS_PROMPT } from "./reply-habits.ts";
+import { appLanguagePrompt, languageName, REPLY_HABITS_PROMPT, replyHabitsPrompt, TOOL_HABITS_PROMPT } from "./reply-habits.ts";
+import { buildSystemPrompt } from "./system-prompt.ts";
 
 it("prefers batches for independent searches and keeps a native batching fallback", () => {
   expect(TOOL_HABITS_PROMPT).toContain("for 2 or more independent searches, prefer web_search_many when it is listed");
@@ -51,4 +52,29 @@ it("ends on the result, not a habitual offer, whatever an app's own notes say", 
     expect(habits).toContain("never change this");
     expect(habits).not.toContain("at most one concrete offer");
   }
+});
+
+// In a Spanish room Pixel wrote "Now wire it into the tiles, rows and chat pill." between Spanish lines: the brief's tail,
+// the tool results and these instructions are English, so the bot is told the app's language by name.
+it("names the app's language so notes between tool calls stay in it", () => {
+  const spanish = replyHabitsPrompt(false, "es");
+  expect(spanish).toContain("The person's app is in Spanish: write every line they can see in Spanish");
+  expect(spanish).toContain("including each short note you send between tool calls");
+  expect(spanish).toContain("even when a teammate's brief, a tool result or these instructions are in English");
+  expect(spanish).toContain("When the person writes to you in another language, use theirs.");
+  expect(replyHabitsPrompt(true, "es-ES")).toMatch(/The person's app is in [^:]*Spanish:/);
+  expect(buildSystemPrompt("You are Pixel.", "", [], undefined, { language: "es" }).text).toContain("The person's app is in Spanish");
+});
+
+it("adds nothing for English, no language or an unknown tag", () => {
+  expect(replyHabitsPrompt(false, "en")).toBe(REPLY_HABITS_PROMPT);
+  expect(replyHabitsPrompt(false, "en-GB")).toBe(REPLY_HABITS_PROMPT);
+  expect(replyHabitsPrompt(false)).toBe(REPLY_HABITS_PROMPT);
+  expect(appLanguagePrompt("")).toBe("");
+  expect(appLanguagePrompt("not a tag!")).toBe("");
+  expect(languageName("de")).toBe("German");
+});
+
+it("keeps the person's language over English briefs and tool results when the app's is unknown", () => {
+  expect(REPLY_HABITS_PROMPT).toContain("including a short note between steps and a message you pass on for them, even when a teammate's brief, a tool result or these instructions are in English");
 });

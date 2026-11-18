@@ -5,6 +5,7 @@
 import type { TalkingStyle } from "../shared/talking-style.ts";
 import type { Message } from "./store.ts";
 import { serverLine } from "./server-lines.ts";
+import { languageName } from "./reply-habits.ts";
 import { partOfDay, turnClockLine } from "./turn-clock.ts";
 
 /** Only a conversation nobody has spoken in yet gets the intro, so a retry, a second window or a late call never adds a
@@ -101,16 +102,6 @@ function originLine(origin: IntroFacts["origin"], template: IntroFacts["template
   if (origin.kind === "import") return "The person just brought you in with a set of bots they imported.";
   if (template) return `The person just picked you from the ready-made bots: "${template.title}" (${template.category}).`;
   return "The person just made you from scratch, so your name, role and standing instructions are all there is to go on.";
-}
-
-function languageName(code: string | undefined): string | null {
-  const tag = code?.trim();
-  if (!tag || /^en(?:-|$)/i.test(tag)) return null;
-  try {
-    return new Intl.DisplayNames(["en"], { type: "language" }).of(tag) ?? null;
-  } catch {
-    return null;
-  }
 }
 
 const list = (items: readonly string[], max: number) => items.slice(0, max).map((item) => item.trim()).filter(Boolean).join("; ");

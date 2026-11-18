@@ -9433,10 +9433,7 @@
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
       "server.outside.save": "1509f561f2416598629b886ad7d3c05a7e221e4e0675c84bbff4ee6d9e03913d",
       "server.outside.preferenceTitle": "7f55fcc3bf70e8b880f68ec0cf802b69727bc3360bfb3aa68f4efc937533386a",
-      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273",
-      "chat.teammateWork.queuedSummary.one": "b045d6738466f92c26b40bfe506c8c76cd2fb1ea6a07259b250387e86b6db165",
-      "chat.teammateWork.queuedSummary.many": "b00b1b27bb6dc5b2f7f476448ffc12a29f48023b33d4cf14c997d7c191e3493b",
-      "chat.teammateWork.mixedSummary": "b039149b96bd708f23316fee7f42a9d9650adfbda2570d962329cdc0be216628"
+      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273"
     },
     "fr": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",

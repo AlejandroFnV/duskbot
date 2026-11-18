@@ -296,7 +296,7 @@ describe("the line's people", () => {
   it("while it only waits on its teammates, says how many assignments and whose, standing still", () => {
     render(delegating(false));
     act(() => void vi.advanceTimersByTime(STATUS_QUIET_MS.max));
-    expect(note()?.querySelector("[data-teammate-work-summary]")?.textContent).toBe("3 assignments (2 under way, 1 queued): Rigel, Pixel, and Ada");
+    expect(note()?.querySelector("[data-teammate-work-summary]")?.textContent).toBe("3 assignments under way: Rigel, Pixel, and Ada");
     expect(mascot(), "no working mark or thinking line without a turn of its own").toBeNull();
     expect(host.querySelector("[data-turn-status]")).toBeNull();
     expect(note()!.querySelector(".status-shimmer")).toBeNull();

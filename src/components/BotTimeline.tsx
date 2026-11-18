@@ -16,14 +16,15 @@ type Page = { messages?: Message[]; activeLeafId?: string | null };
 
 /** The bot's other conversations its own chat also shows, newest first; none while one of them is the open one. */
 export function timelineThreads(bot: Pick<Bot, "threadId" | "mainThreadId" | "tasks">): Task[] {
-  if (bot.mainThreadId && bot.threadId !== bot.mainThreadId) return [];
+  if (!bot.mainThreadId || bot.threadId !== bot.mainThreadId) return [];
   return (bot.tasks ?? [])
-    .filter((task) => task.threadId !== bot.threadId && !isArchived(task))
+    .filter((task) => task.threadId !== bot.threadId && !task.routineRunId && !isArchived(task))
     .sort((a, b) => threadRecency(b) - threadRecency(a))
     .slice(0, TIMELINE_THREADS);
 }
 
 const fetched = new Map<string, { at: number; messages: readonly Message[] }>();
+const loading = new Set<string>();
 
 const splitKey = (key: string) => ({ threadId: key.slice(0, key.lastIndexOf("@")), at: Number(key.slice(key.lastIndexOf("@") + 1)) });
 const staleKeys = (signature: string) => signature.split(",").filter(Boolean).map(splitKey)
@@ -40,12 +41,18 @@ function useThreadTranscripts(threads: readonly Task[]): ThreadTranscript[] {
     const load = () => {
       timer.current = null;
       for (const { threadId, at } of staleKeys(latest.current)) {
+        if (loading.has(threadId)) continue;
+        loading.add(threadId);
         void api<Page>(`/api/threads/${encodeURIComponent(threadId)}/messages?limit=${TIMELINE_PAGE}`, { background: true })
           .then((page) => {
             fetched.set(threadId, { at, messages: visibleMessages({ messages: page.messages ?? [], activeLeafId: page.activeLeafId ?? undefined }) });
             settle((count) => count + 1);
           })
-          .catch(() => {});
+          .catch(() => {})
+          .finally(() => {
+            loading.delete(threadId);
+            if (staleKeys(latest.current).some((key) => key.threadId === threadId) && !timer.current) timer.current = setTimeout(load, REFRESH_MS);
+          });
       }
     };
     const stale = staleKeys(signature);
@@ -65,6 +72,7 @@ function useThreadTranscripts(threads: readonly Task[]): ThreadTranscript[] {
 /** Tests only. */
 export function forgetTimelineThreads(): void {
   fetched.clear();
+  loading.clear();
 }
 
 export type TimelineRun = TimelinePart & { lookups?: TranscriptLookups };
@@ -81,7 +89,7 @@ export function useBotTimeline(bot: Bot, open: Message[], complete: boolean): Ti
 /** A run from another conversation: labelled with it, read here, answered there. */
 export function ThreadStretch({ thread, dispatch, children }: { thread: NonNullable<TimelinePart["thread"]>; dispatch: Dispatch<Action>; children: ReactNode }) {
   const rows = useChatRows();
-  const own = useMemo(() => ({ ...rows, threadId: thread.threadId, hasMore: false, focus: null, canReact: false }), [rows, thread.threadId]);
+  const own = useMemo(() => ({ ...rows, threadId: thread.threadId, hasMore: false, focus: null, canReact: false, elsewhere: { title: thread.title } }), [rows, thread.threadId, thread.title]);
   return (
     <div data-timeline-thread={thread.threadId} className="contents">
       <div className="flex justify-start">
@@ -96,6 +104,23 @@ export function ThreadStretch({ thread, dispatch, children }: { thread: NonNulla
         </button>
       </div>
       <ChatRowsContext.Provider value={own}>{children}</ChatRowsContext.Provider>
+    </div>
+  );
+}
+
+/** In place of a card or widget from another conversation: it is answered in that conversation, so it opens it. */
+export function AnswerElsewhere() {
+  const { botId, threadId, elsewhere, dispatch } = useChatRows();
+  return (
+    <div className="flex justify-start" data-answer-elsewhere={threadId}>
+      <button
+        type="button"
+        onClick={() => dispatch({ type: "switchTask", botId, threadId })}
+        className="flex items-center gap-1 rounded-full px-2 py-0.5 text-[12px] text-ink-secondary underline-offset-2 outline-none hover:underline focus-visible:ring-1 focus-visible:ring-focus"
+      >
+        {t("chat.openThread", { title: elsewhere?.title ?? "" })}
+        <ChevronRight size={12} aria-hidden="true" />
+      </button>
     </div>
   );
 }

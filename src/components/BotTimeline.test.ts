@@ -2,7 +2,7 @@ import { createElement, useContext } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { Bot } from "@/state/store";
-import { ThreadStretch, TIMELINE_THREADS, timelineThreads, WritingToOpenChat } from "./BotTimeline";
+import { AnswerElsewhere, ThreadStretch, TIMELINE_THREADS, timelineThreads, WritingToOpenChat } from "./BotTimeline";
 import { ChatRowsContext, type ChatRows } from "./chat-rows";
 
 const task = (threadId: string, updatedAt: number, extra: Record<string, unknown> = {}) => ({ threadId, title: threadId, createdAt: 1, updatedAt, ...extra });
@@ -20,8 +20,13 @@ describe("which other conversations a bot's chat shows", () => {
     expect(timelineThreads({ ...bot, threadId: "qa" })).toEqual([]);
   });
 
-  it("still lists them for a bot whose main conversation is not known yet", () => {
-    expect(timelineThreads({ ...bot, mainThreadId: undefined }).map((one) => one.threadId)).toEqual(["seo", "qa"]);
+  it("shows none while it is not known which conversation is the main one", () => {
+    expect(timelineThreads({ ...bot, mainThreadId: undefined })).toEqual([]);
+  });
+
+  it("leaves out routine runs, which the chat already shows as cards", () => {
+    const tasks = [...bot.tasks!, task("routine", 99, { routineRunId: "r1" })];
+    expect(timelineThreads({ ...bot, tasks } as unknown as Bot).map((one) => one.threadId)).toEqual(["seo", "qa"]);
   });
 
   it("keeps to the newest few", () => {
@@ -46,6 +51,14 @@ describe("the rows from another conversation in the bot's chat", () => {
     expect(html).toContain('data-timeline-thread="qa"');
     expect(html).toContain("In #QA cleanup");
     expect(seen).toEqual(["qa:false:false"]);
+  });
+
+  it("show a card to answer as a way into its conversation, which is where it is answered", () => {
+    const dispatch = vi.fn();
+    const rows = { botId: "lyra", threadId: "qa", elsewhere: { title: "QA cleanup" }, dispatch } as unknown as ChatRows;
+    const html = renderToStaticMarkup(createElement(ChatRowsContext.Provider, { value: rows }, createElement(AnswerElsewhere)));
+    expect(html).toContain('data-answer-elsewhere="qa"');
+    expect(html).toContain("Open #QA cleanup");
   });
 });
 

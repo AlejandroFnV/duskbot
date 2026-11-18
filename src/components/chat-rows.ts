@@ -17,6 +17,8 @@ export interface ChatRows {
   dispatch: Dispatch<Action>;
   conversational: boolean; simple?: boolean; canReact: boolean;
   openedAt: number;
+  /** Set on rows shown here from another of the bot's conversations: anything to answer is answered there. */
+  elsewhere?: { title: string };
 }
 
 export const ChatRowsContext = createContext<ChatRows | null>(null);

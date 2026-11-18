@@ -163,7 +163,7 @@ import { useTimestampPeek } from "./chat-timestamp-peek";
 import { emojiOnly, EMOJI_ONLY_TEXT, grokUserBubbleFill, isBotTextRow, joinedCorners, needsStamp, quietRow, simpleRowLayout, SIMPLE_BOT_BUBBLE, SIMPLE_BUBBLE_MAX, SIMPLE_BUBBLE_TEXT, SIMPLE_STACKED, SIMPLE_USER_BUBBLE, type BubbleJoin } from "./chat-bubble";
 
 import { ChatRowsContext, useChatRows, useDrawnBots, type ChatRows } from "./chat-rows";
-import { ThreadStretch, useBotTimeline, WritingToOpenChat } from "./BotTimeline";
+import { AnswerElsewhere, ThreadStretch, useBotTimeline, WritingToOpenChat } from "./BotTimeline";
 
 const USER_COLLAPSE_CHARS = 600;
 const USER_COLLAPSE_LINES = 8;
@@ -755,6 +755,7 @@ export function useFirstPaintRows(key: string, rows: Message[], hold: boolean, s
 const transcriptRows = (item: TranscriptItem): readonly Message[] => item.kind === "message" ? [item.message] : item.messages;
 const noneTransparent = () => false;
 const ignore = () => {};
+const ANSWERED_THERE = new Set<Message["kind"]>(["secret", "signin", "connector", "options", "widget", "app"]);
 const hiddenSteps = (item: TranscriptItem) => item.kind !== "message";
 
 const MessagesList = memo(function MessagesList({
@@ -799,7 +800,7 @@ const MessagesList = memo(function MessagesList({
   /** The bubble the working line hangs under: its bottom corner pinches as if another bubble followed, as grok's does. */
   seamId?: string | null;
 }) {
-  const { botId, threadId, botName, botColor, bots, hasMore, focus, showToolCalls, locale, bubbleStyle } = useChatRows(), busy = use(ChatBusyContext);
+  const { botId, threadId, botName, botColor, bots, hasMore, focus, showToolCalls, locale, bubbleStyle, elsewhere } = useChatRows(), busy = use(ChatBusyContext);
   // A finished turn keeps the bot's progress lines and folds only its tool steps under "Worked for", in both modes.
   const items = useMemo(() => groupTranscript(messages), [messages, locale]);
   const newestMessageId = messages.at(-1)?.id;
@@ -874,6 +875,7 @@ const MessagesList = memo(function MessagesList({
         const row = (() => {
           // the chat talks in bubbles: stops, finished steps and settled cards leave no technical rows behind
           if (isCancelledTranscriptRow(m)) return null;
+          if (elsewhere && ANSWERED_THERE.has(richRowKind(m)) && !(m.card && settledCardGoes(m))) return <AnswerElsewhere />;
           switch (richRowKind(m)) {
             case "secret":
               return m.secret ? <SecretRequestCard botId={botId} color={botColor} threadId={threadId} message={m} /> : null;
@@ -988,6 +990,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
   const replyToSelection = (messageId: string, quote: string) => {
     const message = bot.messages.find((candidate) => candidate.id === messageId);
     if (message) selectReply(message, quote);
+    else replyElsewhere(timeline.flatMap((part) => part.thread ? part.messages : []).find((one) => one.id === messageId));
   };
   useEffect(() => setFindOpen(false), [bot.threadId]);
   useChatFindRequests(bot.threadId, findOpen, setFindOpen);
@@ -1134,8 +1137,8 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
   const presenceShown = useLingering(presenceVisible, 140, `${bot.id}:${bot.threadId ?? ""}`);
   const paintedMessages = useFirstPaintRows(transcriptKey, windowedMessages, Boolean(focus && !focus.consumed) || laterCount > 0, scrollRef, following);
   const timeline = useBotTimeline(bot, paintedMessages, hiddenCount === 0 && !bot.hasMore && paintedMessages.length === windowedMessages.length);
-  const replyElsewhere = useCallback((message: Message) => {
-    const part = timeline.find((one) => one.thread && one.messages.includes(message));
+  const replyElsewhere = useCallback((message: Message | undefined) => {
+    const part = message && timeline.find((one) => one.thread && one.messages.includes(message));
     if (part?.thread) dispatch({ type: "switchTask", botId: bot.id, threadId: part.thread.threadId });
   }, [timeline, bot.id, dispatch]);
   const lastShownRow = windowedMessages.findLast((message) => !quietRow(message, showToolCalls));

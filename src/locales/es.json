@@ -5829,7 +5829,6 @@
   "mobile.home.loadFailedBody": "Tu ordenador no ha respondido esta vez. Sigue intentándolo solo, o puedes reintentarlo ahora.",
   "mobile.home.loadFailedOffline": "Este teléfono no tiene conexión. Tus chats se cargan en cuanto vuelva a tenerla.",
   "mobile.settings.workspacesHint": "Donde viven tus bots. Cambia entre ellos o añade otro.",
-  "mobile.notifications.more": "+{count} anteriores",
   "mobile.search.noResultsHint": "La búsqueda mira los nombres de bots y grupos y todos los mensajes. Prueba con una palabra más corta.",
   "mobile.pair.unknown": "No hemos encontrado ese código. Usa el código de Ajustes › Aplicación móvil en tu ordenador; dusk cloud no necesita código, inicia sesión.",
   "mobile.pair.sign-in": "Esto es dusk cloud. El teléfono lo abre iniciando sesión con tu cuenta, sin código.",

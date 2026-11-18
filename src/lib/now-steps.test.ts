@@ -24,7 +24,7 @@ describe("the Now card's steps", () => {
       { label: "Searched the web for “Acme construction leads”", state: "done", hover: undefined },
       { label: "Read linkedin.com", state: "done", hover: "linkedin.com/company/acme" },
       { label: "Ran a command", state: "failed", hover: undefined },
-      { label: "Running scrape.py", state: "now", hover: "python3 scrape.py --pages 40" },
+      { label: "Running a command", state: "now", hover: undefined },
     ]);
   });
 

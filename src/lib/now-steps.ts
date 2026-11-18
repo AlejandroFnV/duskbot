@@ -16,7 +16,6 @@ export interface NowStep {
 }
 
 const DONE_NAMED: Partial<Record<string, LocaleKey>> = {
-  command: "chat.now.ranNamed",
   web: "chat.now.searchedWebFor",
   fetch: "chat.now.readSite",
   read: "chat.now.readNamed",
@@ -60,7 +59,7 @@ export function nowSteps(messages: readonly Message[], status: LiveStatus | null
   const steps: NowStep[] = calls.map((message) => {
     const tool = message.tool!;
     const state: NowStepState = tool.ok === undefined ? "now" : tool.ok ? "done" : "failed";
-    return { id: message.id, label: stepLabel(tool, state), state, ...(tool.step?.detail ? { hover: tool.step.detail } : {}) };
+    return { id: message.id, label: stepLabel(tool, state), state, ...(tool.step?.detail && tool.step.activity !== "command" ? { hover: tool.step.detail } : {}) };
   });
   const itemId = status?.itemId;
   const live = itemId && !calls.some((message) => message.tool?.itemId === itemId) ? turnNowPhrases(status) : null;

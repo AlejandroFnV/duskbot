@@ -134,7 +134,7 @@ function QuietPart({ quiet }: { quiet: StepQuiet }) {
   return <><Dot /><span data-turn-quiet="" className="text-[12px] text-ink-tertiary">{quietText(quiet, now)}</span></>;
 }
 
-/** The turn's live status line: "Working · 1m 12s · Running scrape.py · busy, no output yet". The lead word and the
+/** The turn's live status line: "Working · 1m 12s · Running a command · busy, no output yet". The lead word and the
  * timer stay for the whole turn; `phrases` say what is happening now and rotate through their alternates; `size` is how
  * much of the file is written; `quiet` is how a long step is doing. With nothing to say the line is the lead and the timer
  * alone. The part that is live shimmers. `simple` draws Simple mode's quiet line instead: the avatar and one phrase for

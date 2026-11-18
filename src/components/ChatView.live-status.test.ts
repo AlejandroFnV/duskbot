@@ -354,7 +354,7 @@ describe("what the bot is doing right now", () => {
     engine({ type: "item.started", itemType: "tool", itemId: "b1", title: "Bash" } as Partial<RuntimeEvent>);
     engine({ type: "turn.progress", activity: "command", itemId: "b1", target: "scrape.py", quiet: { kind: "idle" } } as Partial<RuntimeEvent>);
     render(busyBot([ask, search, bash]));
-    expect(statusLine()).toBe("Running a few commands · Idle, no output yet");
+    expect(statusLine()).toBe("Running a command · Idle, no output yet");
     expect(toggle(), "the step list unfolds only with tool calls shown").toBeNull();
     expect(steps()).toEqual([]);
   });

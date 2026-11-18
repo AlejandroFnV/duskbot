@@ -223,9 +223,10 @@ pnpm exec vitest run src/state/store.test.ts src/components/ChatView.follow.test
 
 ## What a bot is doing right now
 
-While a step runs, the working line names it ("Running scrape.py", "Searching the
-web for “Acme construction leads”", "Reading linkedin.com"), with the whole command on
-hover. Once the step has run past the quiet notice it adds how it is doing: the
+While a step runs, the working line names it in plain words ("Uploading
+changes" for `git push`, "Running a command" for `python3 scrape.py`, "Searching
+the web for “Acme construction leads”", "Reading linkedin.com"); a command's text
+never shows, `shared/command-phrase.ts` decides its phrase. Once the step has run past the quiet notice it adds how it is doing: the
 time since its last output, or what its own processes show ("waiting on the
 network", "busy, no output yet", "idle, no output yet"). A click on the line,
 or Enter on it, unfolds the **Now** card: the current ask's steps and a running
@@ -245,10 +246,10 @@ node --experimental-strip-types scripts/control-dusk.ts ui launch --tool-calls \
     {"name":"Bash","input":{"command":"cd ~/acme && python3 scrape.py --pages 40"},"hold":"busy"}]'
 ```
 
-Expected after a sent message: `Working · 15s · Running scrape.py · busy, no
+Expected after a sent message: `Working · 15s · Running a command · busy, no
 output yet`, the button `What Pepper is doing` with `aria-expanded="false"`,
 and, once clicked, a card listing `Searched the web for “Acme construction leads”` and
-`Running scrape.py`. Claude Code prints a command's output only when it ends,
+`Running a command`. Claude Code prints a command's output only when it ends,
 so streamed output needs an engine that sends it: `--engine codex` adds the
 fake Codex app-server, and `FAKE_CODEX_COMMAND`, `FAKE_CODEX_COMMAND_OUTPUT`
 (JSON chunks), `FAKE_CODEX_COMMAND_OUTPUT_MS` and `FAKE_CODEX_COMMAND_GATE`

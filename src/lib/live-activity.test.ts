@@ -168,16 +168,19 @@ describe("turnNowPhrases: what the status line says is happening now", () => {
     expect(turnNowPhrases(null)).toBeNull();
   });
 
-  it("names the command, the search and the page the server read from the call, with the whole command for the hover", () => {
+  it("says what a command is for, never the command, and names the search and the page the server read from the call", () => {
     const command = turnNowPhrases({ activity: "command", itemId: "c", target: "scrape.py", detail: "cd ~/acme && python3 scrape.py --pages 40" });
-    expect(command).toEqual({ phase: "step:command:scrape.py", phrases: ["Running scrape.py"], hover: "cd ~/acme && python3 scrape.py --pages 40" });
+    expect(command).toEqual({ phase: "step:command:other", phrases: ["Running a command"] });
+    expect(turnNowPhrases({ activity: "command", itemId: "c", target: "git push", detail: "git push origin main" })).toEqual({ phase: "step:command:upload", phrases: ["Uploading changes"] });
+    expect(turnNowPhrases({ activity: "command", itemId: "c", target: "kill $(cat" })?.phrases).toEqual(["Stopping processes"]);
+    expect(turnNowPhrases({ activity: "command", itemId: "c", target: "-" })?.phrases).toEqual(["Running a command"]);
     expect(turnNowPhrases({ activity: "web", target: "Acme construction leads" })?.phrases).toEqual(["Searching the web for “Acme construction leads”"]);
     expect(turnNowPhrases({ activity: "fetch", target: "linkedin.com" })?.phrases).toEqual(["Reading linkedin.com"]);
   });
 
   it("names a running chip by the step stored with it, before the server's English narration", () => {
     const chip = activity("Bash", { spoken: "Running a command", step: { activity: "command", target: "pnpm test", detail: "cd web && pnpm test" } });
-    expect(turnNowPhrases(null, chip)).toMatchObject({ phrases: ["Running pnpm test"], hover: "cd web && pnpm test" });
+    expect(turnNowPhrases(null, chip)).toEqual({ phase: "step:command:tests", phrases: ["Running the tests"] });
     expect(activityStepLabel({ name: "Write", step: { activity: "write", target: "report.md" } })).toBe("Writing report.md");
     expect(turnNowPhrases(null, activity("Bash", { ok: true, step: { activity: "command", target: "pnpm test" } }))).toBeNull();
   });

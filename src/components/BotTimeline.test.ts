@@ -1,4 +1,4 @@
-import { createElement } from "react";
+import { createElement, useContext } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { Bot } from "@/state/store";
@@ -35,13 +35,14 @@ describe("which other conversations a bot's chat shows", () => {
 describe("the rows from another conversation in the bot's chat", () => {
   it("are labelled with that conversation and give their rows its id", () => {
     const seen: string[] = [];
-    const Probe = () => createElement(ChatRowsContext.Consumer, null, (rows: ChatRows | null) => {
+    const Probe = () => {
+      const rows = useContext(ChatRowsContext);
       seen.push(`${rows?.threadId}:${rows?.canReact}:${rows?.hasMore}`);
       return null;
-    });
+    };
     const rows = { botId: "lyra", threadId: "main", canReact: true, hasMore: true, focus: null } as unknown as ChatRows;
     const html = renderToStaticMarkup(createElement(ChatRowsContext.Provider, { value: rows },
-      createElement(ThreadStretch, { thread: { threadId: "qa", title: "QA cleanup" }, dispatch: vi.fn() }, createElement(Probe))));
+      createElement(ThreadStretch, { thread: { threadId: "qa", title: "QA cleanup" }, dispatch: vi.fn(), children: createElement(Probe) })));
     expect(html).toContain('data-timeline-thread="qa"');
     expect(html).toContain("In #QA cleanup");
     expect(seen).toEqual(["qa:false:false"]);

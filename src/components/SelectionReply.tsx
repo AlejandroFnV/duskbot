@@ -43,7 +43,7 @@ export function SelectionReply({ onReply }: { onReply: (messageId: string, quote
       onPointerDown={(event) => event.preventDefault()}
       onClick={reply}
       style={{ left: spot.x, top: spot.y }}
-      className={`fixed z-50 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-[13px] font-medium text-ink shadow-lg ring-1 ring-ink/10 hover:bg-ink/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${spot.below ? "" : "-translate-y-full"}`}
+      className={`fixed z-50 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-[13px] font-medium text-ink shadow-lg ring-1 ring-ink/10 hover:bg-[color-mix(in_srgb,var(--color-ink)_6%,var(--color-card))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus ${spot.below ? "" : "-translate-y-full"}`}
     >
       <Reply size={14} strokeWidth={1.5} aria-hidden="true" className="shrink-0 rtl:-scale-x-100" />
       {t("chat.reply.selection")}

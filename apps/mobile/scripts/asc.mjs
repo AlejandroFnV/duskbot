@@ -10,14 +10,14 @@
 //   node apps/mobile/scripts/asc.mjs submit [--yes]          check everything App Review needs; --yes attaches the newest
 //                                                            valid build to the version and submits it
 //
-// Reads APPLE_API_KEY_ID, APPLE_API_ISSUER, APPLE_API_KEY_PATH from the environment, else ~/.config/duskbot/dusk.env.
+// Reads APPLE_API_KEY_ID, APPLE_API_ISSUER, APPLE_API_KEY_PATH from the environment, else ~/.config/duskbot/dusk.env,
+// and the same way DUSK_IOS_BUNDLE_ID (default bot.dusk.mobile) and DUSK_IOS_PROFILE_NAME (default "dusk bot App Store").
 // Never prints the key or the token.
 import { createHash, createPrivateKey, sign } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 
-const BUNDLE_ID = "bot.dusk.mobile";
 const GROUP = "dusk team";
 const API = "https://api.appstoreconnect.apple.com";
 
@@ -40,6 +40,11 @@ function token() {
   const sig = sign("sha256", Buffer.from(head), { key: createPrivateKey(readFileSync(path)), dsaEncoding: "ieee-p1363" });
   return `${head}.${sig.toString("base64url")}`;
 }
+
+const BUNDLE_ID = env("DUSK_IOS_BUNDLE_ID") || "bot.dusk.mobile";
+if (!/^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(BUNDLE_ID)) throw new Error(`DUSK_IOS_BUNDLE_ID is not a reverse-DNS bundle id: ${BUNDLE_ID}`);
+// storeProfile deletes every profile with this name before making it again
+const PROFILE_NAME = env("DUSK_IOS_PROFILE_NAME") || "dusk bot App Store";
 
 let bearer;
 async function call(method, path, body) {
@@ -97,7 +102,7 @@ async function distCert(csrPath, outPath) {
 }
 
 /** makes (or remakes) the App Store profile for the app with one certificate and writes it */
-async function storeProfile(certId, outPath, name = "dusk bot App Store") {
+async function storeProfile(certId, outPath, name = PROFILE_NAME) {
   const bundle = await bundleIdRecord();
   const { data: existing } = await call("GET", `/v1/profiles?filter[name]=${encodeURIComponent(name)}&limit=10`);
   for (const old of existing) await call("DELETE", `/v1/profiles/${old.id}`).then(() => console.log(`removed the old profile ${old.id}`));

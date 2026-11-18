@@ -84,7 +84,7 @@ elsewhere. That is what the iPhone app already is, so it is not worth a second M
 
 | Setting | Value |
 |---|---|
-| Bundle ID | `bot.dusk.mobile` |
+| Bundle ID | `bot.dusk.mobile`, or `DUSK_IOS_BUNDLE_ID` for a build signed in another team (an App ID and App Store profile of its own; `build-ios-release.sh` and `asc.mjs` both read it, and the Xcode project takes it as the `DUSK_IOS_BUNDLE_ID` build setting) |
 | Team | `APPLE_TEAM_ID` in dusk.env (Individual account) |
 | Version | 1.0 (`MARKETING_VERSION`) |
 | Build | `DUSK_IOS_BUILD_NUMBER`, default a UTC timestamp `yymmddHHMM`, so every upload is higher |

@@ -15,6 +15,8 @@
 #   APPLE_DISTRIBUTION_CERT_PATH      default ~/.config/duskbot/apple/apple-distribution.cer (DER, from Apple)
 #   APPLE_APPSTORE_PROFILE_PATH       default ~/.config/duskbot/apple/dusk-bot-app-store.mobileprovision
 #   APPLE_API_KEY_ID, APPLE_API_ISSUER, APPLE_API_KEY_PATH   the App Store Connect API key, for --upload
+#   DUSK_IOS_BUNDLE_ID                default bot.dusk.mobile; an App ID registered in APPLE_TEAM_ID's account, and the one
+#                                     the App Store profile was made for
 # The build number is DUSK_IOS_BUILD_NUMBER, default a UTC timestamp (every upload needs a higher one).
 set -euo pipefail
 here=$(cd "$(dirname "$0")" && pwd)
@@ -31,7 +33,8 @@ esac
 
 . "$here/release-env.sh"
 dusk_env_load APPLE_TEAM_ID APPLE_API_KEY_ID APPLE_API_ISSUER APPLE_API_KEY_PATH \
-  APPLE_DISTRIBUTION_KEY_PATH APPLE_DISTRIBUTION_CERT_PATH APPLE_APPSTORE_PROFILE_PATH
+  APPLE_DISTRIBUTION_KEY_PATH APPLE_DISTRIBUTION_CERT_PATH APPLE_APPSTORE_PROFILE_PATH DUSK_IOS_BUNDLE_ID
+bundle_id="${DUSK_IOS_BUNDLE_ID:-bot.dusk.mobile}"
 key_file="${APPLE_DISTRIBUTION_KEY_PATH:-$apple/apple-distribution.key}"
 cer_file="${APPLE_DISTRIBUTION_CERT_PATH:-$apple/apple-distribution.cer}"
 profile_file="${APPLE_APPSTORE_PROFILE_PATH:-$apple/dusk-bot-app-store.mobileprovision}"
@@ -43,8 +46,16 @@ problems=()
 [ -f "$profile_file" ] || problems+=("no App Store profile at $profile_file (node apps/mobile/scripts/asc.mjs store-profile <certId> <out>)")
 api_key=no
 if [ -n "${APPLE_API_KEY_ID:-}" ] && [ -n "${APPLE_API_ISSUER:-}" ] && [ -n "${APPLE_API_KEY_PATH:-}" ] && [ -f "${APPLE_API_KEY_PATH:-}" ]; then api_key=yes; fi
+[[ "$bundle_id" =~ ^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$ ]] || problems+=("DUSK_IOS_BUNDLE_ID is not a reverse-DNS bundle id: $bundle_id")
+profile_app_id=""
+if [ -f "$profile_file" ]; then
+  profile_app_id=$(security cms -D -i "$profile_file" 2>/dev/null | plutil -extract Entitlements.application-identifier raw - 2>/dev/null || true)
+  [ "$profile_app_id" = "${APPLE_TEAM_ID:-}.$bundle_id" ] \
+    || problems+=("the App Store profile is for ${profile_app_id:-an unreadable app id}, not ${APPLE_TEAM_ID:-<team>}.$bundle_id (DUSK_IOS_BUNDLE_ID, APPLE_TEAM_ID)")
+fi
 [ "$mode" = upload ] && [ "$api_key" = no ] && problems+=("--upload needs APPLE_API_KEY_ID, APPLE_API_ISSUER and APPLE_API_KEY_PATH")
 
+echo "bundle id:            $bundle_id"
 echo "team id:              $([ -n "${APPLE_TEAM_ID:-}" ] && echo present || echo missing)"
 echo "distribution key:     $([ -f "$key_file" ] && echo present || echo missing)"
 echo "distribution cert:    $([ -f "$cer_file" ] && echo present || echo missing)"
@@ -54,7 +65,9 @@ if [ "$mode" = check ]; then
   if [ ${#problems[@]} -eq 0 ]; then echo "ready to archive"; exit 0; fi
   printf 'missing: %s\n' "${problems[@]}" >&2; exit 1
 fi
-if [ "$mode" != unsigned ] && [ ${#problems[@]} -gt 0 ]; then
+if [ "$mode" = unsigned ]; then
+  [[ "$bundle_id" =~ ^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$ ]] || { echo "error: DUSK_IOS_BUNDLE_ID is not a reverse-DNS bundle id: $bundle_id" >&2; exit 1; }
+elif [ ${#problems[@]} -gt 0 ]; then
   printf 'error: %s\n' "${problems[@]}" >&2
   echo "nothing was built; see docs/store-launch.md, iOS signing" >&2
   exit 1
@@ -75,7 +88,7 @@ rm -rf "$archive"
 echo "== archive (build $build_number)"
 if [ "$mode" = unsigned ]; then
   xcodebuild -quiet -project "$project" -scheme App -configuration Release -destination 'generic/platform=iOS' \
-    -archivePath "$archive" CURRENT_PROJECT_VERSION="$build_number" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO archive
+    -archivePath "$archive" DUSK_IOS_BUNDLE_ID="$bundle_id" CURRENT_PROJECT_VERSION="$build_number" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO archive
   echo "unsigned archive (cannot be uploaded): $archive"
   exit 0
 fi
@@ -109,6 +122,7 @@ security set-keychain-settings -lut 21600 "$keychain"
 security unlock-keychain -p "$kc_password" "$keychain"
 security import "$work/dist.p12" -k "$keychain" -f pkcs12 -P "$p12_password" -T /usr/bin/codesign -T /usr/bin/security >/dev/null
 # the Apple WWDR intermediate (G3 signs current distribution certificates), so codesign can build the chain
+mkdir -p "$apple"
 for ca in AppleWWDRCAG3; do
   [ -f "$apple/$ca.cer" ] || curl -fsSL --max-time 30 -o "$apple/$ca.cer" "https://www.apple.com/certificateauthority/$ca.cer" || true
   [ -f "$apple/$ca.cer" ] && security import "$apple/$ca.cer" -k "$keychain" >/dev/null 2>&1 || true
@@ -129,7 +143,7 @@ done
 xcodebuild -quiet -project "$project" -scheme App -configuration Release -destination 'generic/platform=iOS' \
   -archivePath "$archive" DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Manual \
   CODE_SIGN_IDENTITY="Apple Distribution" PROVISIONING_PROFILE_SPECIFIER="$profile_name" \
-  OTHER_CODE_SIGN_FLAGS="--keychain $keychain" CURRENT_PROJECT_VERSION="$build_number" archive
+  OTHER_CODE_SIGN_FLAGS="--keychain $keychain" DUSK_IOS_BUNDLE_ID="$bundle_id" CURRENT_PROJECT_VERSION="$build_number" archive
 
 options="$out/ExportOptions.plist"
 destination=export
@@ -143,7 +157,7 @@ cat > "$options" <<PLIST
   <key>teamID</key><string>$APPLE_TEAM_ID</string>
   <key>signingStyle</key><string>manual</string>
   <key>signingCertificate</key><string>Apple Distribution</string>
-  <key>provisioningProfiles</key><dict><key>bot.dusk.mobile</key><string>$profile_name</string></dict>
+  <key>provisioningProfiles</key><dict><key>$bundle_id</key><string>$profile_name</string></dict>
   <key>destination</key><string>$destination</string>
   <key>uploadSymbols</key><true/>
   <key>manageAppVersionAndBuildNumber</key><false/>
@@ -152,6 +166,8 @@ cat > "$options" <<PLIST
 </plist>
 PLIST
 
+archived_id=$(plutil -extract CFBundleIdentifier raw "$archive/Products/Applications/App.app/Info.plist")
+[ "$archived_id" = "$bundle_id" ] || { echo "error: the archived app is $archived_id, not $bundle_id" >&2; exit 1; }
 # the archived app must carry the store entitlements before anything leaves this machine
 ents=$(codesign -d --entitlements :- "$archive/Products/Applications/App.app" 2>/dev/null || true)
 echo "$ents" | grep -A1 aps-environment | grep -q production || { echo "error: the signed app's aps-environment is not production" >&2; exit 1; }
@@ -162,7 +178,7 @@ auth=()
 [ "$api_key" = yes ] && auth=(-authenticationKeyPath "$APPLE_API_KEY_PATH" -authenticationKeyID "$APPLE_API_KEY_ID" -authenticationKeyIssuerID "$APPLE_API_ISSUER")
 echo "== export ($destination)"
 rm -rf "$out/export"
-xcodebuild -quiet -exportArchive -archivePath "$archive" -exportOptionsPlist "$options" -exportPath "$out/export" "${auth[@]}"
+xcodebuild -quiet -exportArchive -archivePath "$archive" -exportOptionsPlist "$options" -exportPath "$out/export" ${auth[@]+"${auth[@]}"}
 if [ "$mode" = upload ]; then
   echo "uploaded build $build_number; it shows in App Store Connect, TestFlight once processing ends (5 to 30 minutes)"
   echo "then: node apps/mobile/scripts/asc.mjs status"

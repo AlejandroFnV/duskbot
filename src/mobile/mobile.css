@@ -287,11 +287,15 @@ html[data-native-glass-composer] .dusk-mobile [data-mobile-chat] [data-tour="com
 .dusk-mobile [data-mobile-chat] {
   --m-bubble-max: min(354px, 89%);
 }
-.dusk-mobile [data-mobile-chat] :is(.chat-bubble-bot, .chat-bubble-user) {
+.dusk-mobile [data-mobile-chat] :is(.chat-bubble-bot, .chat-bubble-user, [data-reply-table]) {
   max-width: var(--m-bubble-max);
+}
+.dusk-mobile [data-mobile-chat] :is(.chat-bubble-bot, .chat-bubble-user) {
   font-size: 17px;
   line-height: 22px;
 }
+/* the table's copy key sits on the card in the card's own tone, not the composer's white */
+.dusk-mobile [data-mobile-chat] [data-table-card] .table-plate button:not([role^="menuitem"]) { background-color: var(--chat-card); }
 .dusk-mobile [data-mobile-chat] .chat-bubble-bot {
   padding: 11px 14px;
   border-radius: 22px;

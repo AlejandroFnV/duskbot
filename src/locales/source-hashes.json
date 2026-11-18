@@ -3594,7 +3594,10 @@
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "server.outside.preferenceTitle": "7f55fcc3bf70e8b880f68ec0cf802b69727bc3360bfb3aa68f4efc937533386a",
       "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "es": {
       "settings.sidebarRoles.title": "8bf74476d372a4efadb9fbcb87602ad535fcc5af186b66d47b395ff76c32f473",
@@ -9450,7 +9453,10 @@
       "server.notify.message": "ac155f86f1b8db033330398babcd4dd9f5432437210a2e0de6e71b933eae592a",
       "server.notify.secret": "5d6c45546c1c1975f38b8650e6a86613beda5b3dd6ab040d68cc1f2a600fadca",
       "server.notify.workingFor": "689d2dedd23180907fe51f82dc7923a49152ef683b1006532e2ba1cfda538aab",
-      "mobile.notifications.more": "f2f450ddac7b1a3e8e462a937e6c39dd346b34cda3f5bed5eebc607ca48edc4b"
+      "mobile.notifications.more": "f2f450ddac7b1a3e8e462a937e6c39dd346b34cda3f5bed5eebc607ca48edc4b",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "fr": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -12967,7 +12973,10 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "hi": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -16481,7 +16490,10 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "it": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -22712,7 +22724,10 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "ja": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -29132,7 +29147,10 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "ko": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -35935,7 +35953,10 @@
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
       "composer.dictation.permission": "1be9cbb919211c6d42d40471f2b53fbb47c25cb7d10d36745ab74e973a808f94",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "pl": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -42329,7 +42350,10 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "pt-br": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -48596,7 +48620,10 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "ru": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -54997,7 +55024,10 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "tr": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -60367,7 +60397,10 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "uk": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -64185,7 +64218,10 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "vi": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -69555,7 +69591,10 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "zh": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -76526,7 +76565,10 @@
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
       "composer.dictation.permission": "1be9cbb919211c6d42d40471f2b53fbb47c25cb7d10d36745ab74e973a808f94",
       "keys.row.engineMissing": "5c0ac920b4fd7b754d696536bd006bc700846b41ade0975a99a6c761b0b997b0",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     },
     "zh-tw": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -81467,7 +81509,10 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
+      "chat.otherThread.inThread": "79bff403f9066f8d1dbc1fa092d1a6c03b2e5b10fcd563369a057b24d5409f88",
+      "chat.otherThread.writingHere": "a7086e21633c27aa4c8281834805e8a92243e970b4f86c7396e30c6d4843fb8f",
+      "chat.otherThread.writeInThread": "be9fd0074a697f9d79c7bdd1870cf78254c49249430dbacf4dfdeff820b7b090"
     }
   }
 }

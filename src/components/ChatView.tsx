@@ -1,4 +1,4 @@
-import { createContext, memo, startTransition, use, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentProps, type ComponentType, type Dispatch, type Ref, type RefObject } from "react";
+import { memo, startTransition, use, useCallback, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ComponentProps, type ComponentType, type Dispatch, type Ref, type RefObject } from "react";
 import { PHONE_LAYOUT, useMediaQuery } from "@/lib/use-media-query";
 import { ThreadLinkContext } from "@/components/ThreadLinkMenu";
 import { ChevronLeft, ChevronRight, Copy, Monitor, RefreshCw, Square, Webhook } from "../icons";
@@ -21,10 +21,8 @@ import {
   visibleMessages,
   type Action,
   type Bot,
-  type ConfigStatus,
   type InstanceInfo,
   type Message,
-  type AppState,
   awayFromMainThread,
   openBot,
 } from "@/state/store";
@@ -81,7 +79,7 @@ import { TranscriptStaging } from "./transcript-staging";
 import { LiveToolsContext, useLiveToolIds } from "@/hooks/use-live-tool-ids";
 import { VoiceNoteBubble, type VoiceNoteAttachment } from "./VoiceNoteBubble";
 import { ThreadChip } from "./ThreadChip";
-import { HandoffChip } from "./HandoffReply"; import { TeammateChip } from "./TeammateChip"; import { useTeammates } from "@/state/team-people"; import type { MentionPeer } from "@/lib/mentions";
+import { HandoffChip } from "./HandoffReply"; import { TeammateChip } from "./TeammateChip"; import { useTeammates } from "@/state/team-people";
 import { NewConversationInstead } from "./NewConversationInstead";
 import { useColorUserBubbles } from "@/lib/user-bubble-preference";
 import { grokAccentText, userBubbleStyle } from "@/lib/user-bubble-tone";
@@ -164,42 +162,11 @@ import { openSettings } from "@/lib/open-settings";
 import { useTimestampPeek } from "./chat-timestamp-peek";
 import { emojiOnly, EMOJI_ONLY_TEXT, grokUserBubbleFill, isBotTextRow, joinedCorners, needsStamp, quietRow, simpleRowLayout, SIMPLE_BOT_BUBBLE, SIMPLE_BUBBLE_MAX, SIMPLE_BUBBLE_TEXT, SIMPLE_STACKED, SIMPLE_USER_BUBBLE, type BubbleJoin } from "./chat-bubble";
 
+import { ChatRowsContext, useChatRows, useDrawnBots, type ChatRows } from "./chat-rows";
+import { AnswerElsewhere, ThreadStretch, useBotTimeline, WritingToOpenChat } from "./BotTimeline";
+
 const USER_COLLAPSE_CHARS = 600;
 const USER_COLLAPSE_LINES = 8;
-
-interface ChatRows {
-  botId: string; threadId: string; botName: string; botColor: Bot["color"]; voiceId?: string;
-  tts: ConfigStatus["tts"]; localVoice: boolean;
-  hasMore: boolean; bots: readonly Bot[];
-  mentionPeers: readonly MentionPeer[]; mentionPerson: { profileName?: string };
-  /** On a Team Cloud, the viewer's person key: another person's line carries their name. */
-  speakerViewer?: string | null;
-  focus: AppState["focusMessage"];
-  showToolCalls: boolean;
-  locale: string;
-  bubbleStyle?: ReturnType<typeof userBubbleStyle>;
-  dispatch: Dispatch<Action>;
-  conversational: boolean; simple?: boolean; canReact: boolean;
-  openedAt: number;
-}
-
-const ChatRowsContext = createContext<ChatRows | null>(null);
-
-function useChatRows(): ChatRows {
-  const rows = useContext(ChatRowsContext);
-  if (!rows) throw new Error("a chat row outside ChatView");
-  return rows;
-}
-
-const drawnBot = (bot: Bot) =>
-  [bot.id, bot.name, bot.hidden, bot.color, bot.mascotBody, bot.mascotExpression, bot.mascotFaceColor, bot.avatarUrl, bot.avatarCrop, bot.avatarZoom, bot.avatarFocusX, bot.avatarFocusY].join("\u0001");
-
-function useDrawnBots(bots: readonly Bot[]): readonly Bot[] {
-  const signature = bots.map(drawnBot).join("\u0002");
-  const cache = useRef({ signature, bots });
-  if (cache.current.signature !== signature) cache.current = { signature, bots };
-  return cache.current.bots;
-}
 
 export function ErrorRow({
   message,
@@ -787,6 +754,8 @@ export function useFirstPaintRows(key: string, rows: Message[], hold: boolean, s
 
 const transcriptRows = (item: TranscriptItem): readonly Message[] => item.kind === "message" ? [item.message] : item.messages;
 const noneTransparent = () => false;
+const ignore = () => {};
+const ANSWERED_THERE = new Set<Message["kind"]>(["secret", "signin", "connector", "options", "widget", "app"]);
 const hiddenSteps = (item: TranscriptItem) => item.kind !== "message";
 
 const MessagesList = memo(function MessagesList({
@@ -831,7 +800,7 @@ const MessagesList = memo(function MessagesList({
   /** The bubble the working line hangs under: its bottom corner pinches as if another bubble followed, as grok's does. */
   seamId?: string | null;
 }) {
-  const { botId, threadId, botName, botColor, bots, hasMore, focus, showToolCalls, locale, bubbleStyle } = useChatRows(), busy = use(ChatBusyContext);
+  const { botId, threadId, botName, botColor, bots, hasMore, focus, showToolCalls, locale, bubbleStyle, elsewhere } = useChatRows(), busy = use(ChatBusyContext);
   // A finished turn keeps the bot's progress lines and folds only its tool steps under "Worked for", in both modes.
   const items = useMemo(() => groupTranscript(messages), [messages, locale]);
   const newestMessageId = messages.at(-1)?.id;
@@ -906,6 +875,7 @@ const MessagesList = memo(function MessagesList({
         const row = (() => {
           // the chat talks in bubbles: stops, finished steps and settled cards leave no technical rows behind
           if (isCancelledTranscriptRow(m)) return null;
+          if (elsewhere && ANSWERED_THERE.has(richRowKind(m)) && !(m.card && settledCardGoes(m))) return <AnswerElsewhere />;
           switch (richRowKind(m)) {
             case "secret":
               return m.secret ? <SecretRequestCard botId={botId} color={botColor} threadId={threadId} message={m} /> : null;
@@ -1020,6 +990,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
   const replyToSelection = (messageId: string, quote: string) => {
     const message = bot.messages.find((candidate) => candidate.id === messageId);
     if (message) selectReply(message, quote);
+    else replyElsewhere(timeline.flatMap((part) => part.thread ? part.messages : []).find((one) => one.id === messageId));
   };
   useEffect(() => setFindOpen(false), [bot.threadId]);
   useChatFindRequests(bot.threadId, findOpen, setFindOpen);
@@ -1165,6 +1136,11 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
   // the bubble the line hangs under keeps its pinched corner until the line has finished leaving, as grok's does
   const presenceShown = useLingering(presenceVisible, 140, `${bot.id}:${bot.threadId ?? ""}`);
   const paintedMessages = useFirstPaintRows(transcriptKey, windowedMessages, Boolean(focus && !focus.consumed) || laterCount > 0, scrollRef, following);
+  const timeline = useBotTimeline(bot, paintedMessages, hiddenCount === 0 && !bot.hasMore && paintedMessages.length === windowedMessages.length);
+  const replyElsewhere = useCallback((message: Message | undefined) => {
+    const part = message && timeline.find((one) => one.thread && one.messages.includes(message));
+    if (part?.thread) dispatch({ type: "switchTask", botId: bot.id, threadId: part.thread.threadId });
+  }, [timeline, bot.id, dispatch]);
   const lastShownRow = windowedMessages.findLast((message) => !quietRow(message, showToolCalls));
   const lastRowIsBubble = Boolean(lastShownRow && isBotTextRow(lastShownRow, bot.id));
   const presenceUnderBubble = lastRowIsBubble;
@@ -1389,29 +1365,38 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
           ) : hiddenCount > 0 || bot.hasMore ? (
             <div ref={topSentinelRef} className="h-2 w-full pointer-events-none" aria-hidden="true" />
           ) : null}
-          {windowedMessages.length === 0 && !bot.busy && !transcriptPending && <EmptyChat bot={bot} />}
+          {windowedMessages.length === 0 && !timeline.length && !bot.busy && !transcriptPending && <EmptyChat bot={bot} />}
           <ChatRowsContext.Provider value={rows}><LiveToolsContext value={liveTools}><ChatBusyContext value={busy}><FoldedNoticesContext value={folded}>
-            <MessagesList
-              messages={paintedMessages}
-              transcript={messages}
-              lookups={lookups}
-              place={place}
-              pinnedMessageId={bot.pinnedMessageId}
-              today={localDay(Date.now())}
-              editingId={editingId}
-              lastBotTextId={lastBotTextId}
-              emergingId={null}
-              canRetryLast={!bot.busy && Boolean(lastUserMessage)}
-              engine={state.instances.find((i) => i.instanceId === bot.modelSelection.instanceId)}
-              unreadDividerId={unreadDivider.messageId}
-              unreadDividerFading={unreadDivider.fading}
-              onStartEdit={startEdit}
-              onCancelEdit={cancelEdit}
-              onSubmitEdit={submitEdit}
-              onRegenerate={regenerate}
-              onReply={selectReply}
-              seamId={lastRowIsBubble && presenceShown ? lastShownRow?.id ?? null : null}
-            />
+            {timeline.map((part, index) => part.thread ? (
+              <ThreadStretch key={part.key} thread={part.thread} dispatch={dispatch}>
+                <MessagesList messages={part.messages} transcript={part.messages} lookups={part.lookups!} place={place} today={localDay(Date.now())} editingId={null} lastBotTextId={undefined} canRetryLast={false}
+                  engine={state.instances.find((i) => i.instanceId === bot.modelSelection.instanceId)} unreadDividerId={null} unreadDividerFading={false}
+                  onStartEdit={ignore} onCancelEdit={ignore} onSubmitEdit={ignore} onRegenerate={ignore} onReply={replyElsewhere} />
+              </ThreadStretch>
+            ) : (
+              <MessagesList
+                key={part.key}
+                messages={part.messages}
+                transcript={messages}
+                lookups={lookups}
+                place={place}
+                pinnedMessageId={bot.pinnedMessageId}
+                today={localDay(Date.now())}
+                editingId={editingId}
+                lastBotTextId={lastBotTextId}
+                emergingId={null}
+                canRetryLast={!bot.busy && Boolean(lastUserMessage)}
+                engine={state.instances.find((i) => i.instanceId === bot.modelSelection.instanceId)}
+                unreadDividerId={unreadDivider.messageId}
+                unreadDividerFading={unreadDivider.fading}
+                onStartEdit={startEdit}
+                onCancelEdit={cancelEdit}
+                onSubmitEdit={submitEdit}
+                onRegenerate={regenerate}
+                onReply={selectReply}
+                seamId={index === timeline.length - 1 && lastRowIsBubble && presenceShown ? lastShownRow?.id ?? null : null}
+              />
+            ))}
           </FoldedNoticesContext></ChatBusyContext></LiveToolsContext></ChatRowsContext.Provider>
           {laterCount > 0 && (
             // clear of the jump-to-latest button, which floats over the transcript's last 40px while this shows
@@ -1503,6 +1488,7 @@ export function ChatView({ bot: profile }: { bot: Bot }) {
       {canWrite !== false && !trailing?.failures.length && !trailing?.notices.length && <div className="pointer-events-auto"><ComposerSignInNotice bot={bot} /></div>}
       {liveCallEnabled() && <LiveCallBar bot={bot} />}
       {canWrite !== false && <SelectionReply onReply={replyToSelection} />}
+      {canWrite !== false && <div className="pointer-events-auto"><WritingToOpenChat bot={bot} last={timeline.at(-1)} dispatch={dispatch} /></div>}
       {canWrite === false ? (
         <NewConversationInstead bot={bot} onNew={() => dispatch({ type: "newTask", botId: bot.id })} />
       ) : (

@@ -8921,7 +8921,7 @@
       "mobile.onboarding.openSettings": "ca381c1e76e681b6c18fa984a2e2fda6ed4a9f28e914f539db34a6dcb3737149",
       "mobile.onboarding.codeInstead": "3b6f5b19109d8e136f276fddcfab7da0c24fc6cfc4b85fd0b03c101192844c07",
       "mobile.onboarding.scanTitle": "9e025a4f20f5138e3f9af72f37afb1552013d823a1354663058486d7e789d755",
-      "mobile.onboarding.scanHint": "27d9cd3c5430402ef2319d954f042766cc99df41f5ff7f019b2f2d8abf91c740",
+      "mobile.onboarding.scanHint": "92cc0c0b89cd1a6f465fe7201429fe88307221d1dd7eb28b36f602a633dfcf48",
       "mobile.onboarding.noCamera": "545e0655bcd4be8547c4b4d71352a43581008880c2bd18c0d7f60b4f5d9a99cf",
       "mobile.onboarding.torch": "e2ed3c69bc28081150c2cb58c470f0e0f0cf1684bb0f947d4b9c7e1d71be2859",
       "mobile.onboarding.linking": "bce98527286c8b5cb2de7a7f5aa082e0eda42a9e8f04fed6a0130d53968a66eb",
@@ -8935,7 +8935,7 @@
       "mobile.onboarding.linked": "38c72375a637c8ae9094d75daddf621669776b522ed9e5d750c723b2be93cec3",
       "mobile.onboarding.botsReady": "5d27a26a7dc0eace422df478f7bf6c7fe767ffc811fa57ec9c6af509150f1f45",
       "mobile.onboarding.err.expired.title": "b4f154f67339e89131c333fbc035768e86b99628a92b4f0766e1580a0dea038b",
-      "mobile.onboarding.err.expired.body": "3f90f2e2cc92ea938e2d5bb48c103753ab0a49134f7dab3f2471bc92492ec8b0",
+      "mobile.onboarding.err.expired.body": "9d2e06e48437f593b9bcf32c3646cd7a4179a3856975618d88b9f4eb3ccf2140",
       "mobile.onboarding.err.used.title": "1b5994fba1abd10f00315f01cf74b4a5dbc91b581c693df0972128adafc34d17",
       "mobile.onboarding.err.used.body": "1a485968c761efdda2b79f18a238f912d7f6dedf7661ff425311d65e81376a64",
       "mobile.onboarding.err.unreachable.title": "a798faf9f8dbabaede4a5280da3738ad5179a2f261d7f0ed348a38101ffbe90b",
@@ -9433,7 +9433,14 @@
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
       "server.outside.save": "1509f561f2416598629b886ad7d3c05a7e221e4e0675c84bbff4ee6d9e03913d",
       "server.outside.preferenceTitle": "7f55fcc3bf70e8b880f68ec0cf802b69727bc3360bfb3aa68f4efc937533386a",
-      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273"
+      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273",
+      "server.notify.connect": "69e4a1b2d9ea87bebb2af9b61a9206e56d8cb01b067d7de26015840bdc27a6a7",
+      "server.notify.humanCheck": "5d0f5ae2b2e8e891e93e32ecf81e81e94c37927afa1c68891c4b34d823aa591f",
+      "server.notify.humanCheckBody": "e3c345af6c4b84ae3172d7a75206d10c96668f52510e362c9539f86d1e929fa3",
+      "server.notify.message": "ac155f86f1b8db033330398babcd4dd9f5432437210a2e0de6e71b933eae592a",
+      "server.notify.secret": "5d6c45546c1c1975f38b8650e6a86613beda5b3dd6ab040d68cc1f2a600fadca",
+      "server.notify.workingFor": "689d2dedd23180907fe51f82dc7923a49152ef683b1006532e2ba1cfda538aab",
+      "mobile.notifications.more": "f2f450ddac7b1a3e8e462a937e6c39dd346b34cda3f5bed5eebc607ca48edc4b"
     },
     "fr": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",

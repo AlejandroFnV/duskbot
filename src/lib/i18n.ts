@@ -1,4 +1,5 @@
 import { productName } from "@/lib/brand";
+import type { NotificationLine } from "../../shared/notification";
 import { en, loadLocalePack, localeChoices, localePacks, locales, type LocaleKey, type LocalePack } from "@/locales";
 
 export function resolveLocale(tag: string | undefined, available: ReadonlySet<string>): string {
@@ -70,6 +71,21 @@ let switches = 0;
 
 export function tFromServer(key: string | undefined, fallback: string | undefined): string | undefined {
   return key && Object.hasOwn(en, key) ? t(key as LocaleKey) : fallback;
+}
+
+/** A line the server sent by its key and words, in this app's language; `fallback` when this app has no such key. */
+export function tFromServerLine(line: NotificationLine | undefined, fallback: string): string {
+  const words = (one: NotificationLine): string | undefined => {
+    if (!Object.hasOwn(en, one.key)) return undefined;
+    const params: Record<string, string> = {};
+    for (const [name, value] of Object.entries(one.params ?? {})) {
+      const text = typeof value === "string" ? value : words(value);
+      if (text === undefined) return undefined;
+      params[name] = text;
+    }
+    return t(one.key as LocaleKey, params);
+  };
+  return (line && words(line)) ?? fallback;
 }
 
 /** A newer English wording where the active language has it, else an older key it already translated: new copy never

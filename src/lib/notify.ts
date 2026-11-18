@@ -1,5 +1,6 @@
 import type { Notification } from "../../shared/notification";
 import { chatInFront } from "./chat-in-front";
+import { tFromServerLine } from "./i18n";
 import { finishedNotificationsEnabled } from "./notification-preferences";
 import { play } from "./ui-sounds";
 
@@ -47,7 +48,8 @@ export function showNotification(
   if (!spend && chatInFront() && visibleThreadId === frame.threadId) return;
   if (Notification.permission !== "granted") return;
 
-  const title = placeName ? `${placeName} · ${frame.title}` : frame.title;
+  const own = tFromServerLine(frame.titleLine, frame.title);
+  const title = placeName ? `${placeName} · ${own}` : own;
   const options: NotificationOptions = {
     body: frame.body,
     ...buildNotificationOptions({ id: frame.botId, avatarUrl }),

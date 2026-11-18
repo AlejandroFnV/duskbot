@@ -36,12 +36,22 @@ export type NotifyKind =
    * once: a tool turned off for the bots it doesn't start for. */
   | "notice";
 
+/** A language-pack line by its "server." key, with each `{name}` it holds: plain words, or another line. */
+export interface NotificationLine {
+  key: string;
+  params?: Record<string, string | NotificationLine>;
+}
+
 export interface Notification {
   kind: NotifyKind;
   botId: string;
   botName: string;
   threadId: string;
+  /** In the language the server knew for this person when it was made. */
   title: string;
+  /** `title` as a language-pack line, so each app shows it in its own language whenever it reads it. Absent on a title
+   * that is the bot's own name or words. */
+  titleLine?: NotificationLine;
   body: string;
   /** The bot's stored profile image, when it has one; clients show it as
    * the OS notification's icon so every banner carries its bot's face. */

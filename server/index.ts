@@ -206,7 +206,7 @@ import type { RequestAuth } from "./request-auth.ts";
 import { adminAuditPlan, type AuditPlan } from "./admin-audit-plan.ts";
 import { onKeyRejectionChange } from "./key-rejections.ts";
 import { cliProbeEnvironment, testCliBinary } from "./cli-probe.ts";
-import { buildMentionNotification, buildNoticeNotification, buildNotification, type Notification } from "./notify.ts";
+import { buildMentionNotification, buildNoticeNotification, buildNotification, notificationTitle, type Notification } from "./notify.ts";
 import {
   isModelVariant,
   TurnNotStartedError, TurnAuthenticationRefusedError, TurnUsageLimitRefusedError,
@@ -10452,7 +10452,7 @@ if (homeEgressLink) {
   runHomeEgress({ link: homeEgressLink, report: (value) => computerEgress.report(value), log: (line) => console.warn(line) });
   browserEgress.routeThrough((target) => (homeEgressLink.online() && computerEgress.routesHome(target.host) ? homeEgressLink.open(target.host, target.port) : null));
 }
-ROUTES.push(createHomeEgressLinkRoutes({ link: homeEgressLink, upgrades })); const mobileLink = createMobileLink({ dataDir: DATA_DIR, sessions, workspace: () => ({ name: cfg.computerName || environmentDescriptor({ environmentId: ENVIRONMENT_ID, ...TEAM_LABEL, desktopManaged: DESKTOP_MANAGED }).label, environmentId: ENVIRONMENT_ID, kind: DESKTOP_MANAGED ? "mac" : "server" }), publicOrigin: () => (publicUrl()?.startsWith("https://") ? publicUrl() : null), refusal: () => (CLOUD_HOME ? "Phones sign in to this workspace through its own sign-in." : null), lookupRelay: mobileLookupRelay(process.env, DESKTOP_MANAGED), isRead: (id) => recentNotificationLog(200).some((entry) => entry.id === id && entry.read) }); ROUTES.push(async (ctx) => ((await mobileLink.route(ctx)) ? undefined : PASS));
+ROUTES.push(createHomeEgressLinkRoutes({ link: homeEgressLink, upgrades })); const mobileLink = createMobileLink({ dataDir: DATA_DIR, sessions, workspace: () => ({ name: cfg.computerName || environmentDescriptor({ environmentId: ENVIRONMENT_ID, ...TEAM_LABEL, desktopManaged: DESKTOP_MANAGED }).label, environmentId: ENVIRONMENT_ID, kind: DESKTOP_MANAGED ? "mac" : "server" }), publicOrigin: () => (publicUrl()?.startsWith("https://") ? publicUrl() : null), refusal: () => (CLOUD_HOME ? "Phones sign in to this workspace through its own sign-in." : null), lookupRelay: mobileLookupRelay(process.env, DESKTOP_MANAGED), isRead: (id) => recentNotificationLog(200).some((entry) => entry.id === id && entry.read), titleFor: (notification, session) => notificationTitle(notification, personLanguages.forLine(CLOUD_OWNER_KEY && session.scopes.includes("admin") ? CLOUD_OWNER_KEY : personKey(session))) }); ROUTES.push(async (ctx) => ((await mobileLink.route(ctx)) ? undefined : PASS));
 
 let webhookIngress: WebhookIngress | null = null;
 let webhookIngressError: string | null = null;

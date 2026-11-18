@@ -5,6 +5,7 @@ import { loadPageLanguage } from "@/lib/language-preference";
 import { setColorUserBubblesDefault } from "@/lib/user-bubble-preference";
 import { applySkinChoice, readSkinChoice, THEME_SKINS, type SkinChoice } from "@/lib/skins";
 import { applyFont, readFont } from "@/lib/fonts";
+import { setAppLocaleClock } from "@/lib/format-time";
 import { PageBoundary } from "@/components/PageBoundary";
 import { watchStaleChunks } from "@/lib/stale-chunks";
 import "./styles.css";
@@ -37,6 +38,7 @@ export function mountMobile(platform: MobilePlatform): void {
   if (!platform.native) watchStaleChunks();
   followSystemTextSize(platform);
   setColorUserBubblesDefault(false);
+  setAppLocaleClock(true);
   document.documentElement.dataset.mobileApp = platform.kind;
   // the app never zooms: webkit's pinch gestures are stopped, a double tap never scales
   for (const type of ["gesturestart", "gesturechange", "gestureend"]) document.addEventListener(type, (event) => event.preventDefault(), { passive: false });

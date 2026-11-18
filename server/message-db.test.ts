@@ -529,6 +529,15 @@ describe("notification_log", () => {
     expect(rows.find((r) => r.id === "n2")?.groupId).toBe("room-1");
   });
 
+  it("keeps a title's line, so each app can show it in its own language", () => {
+    const titleLine = { key: "server.notify.question", params: { who: { key: "server.notify.inRoom", params: { bot: "Scout", room: "Launch" } } } };
+    insertNotificationLog(entry("n1", 1000, { titleLine }));
+    insertNotificationLog(entry("n2", 2000));
+    const rows = recentNotificationLog();
+    expect(rows.find((r) => r.id === "n1")?.titleLine).toEqual(titleLine);
+    expect(rows.find((r) => r.id === "n2")).not.toHaveProperty("titleLine");
+  });
+
   it("stamps a notification once and returns the stored entry", () => {
     const logged = logNotification({ kind: "question", botId: "bot-1", botName: "Scout", threadId: "thread-1", title: "Scout asks", body: "Which?" });
     expect(logged).toMatchObject({ kind: "question", read: false });

@@ -32,7 +32,13 @@ describe("derivedLabel", () => {
     expect(derivedLabel(call("agent_browser_click", { ref: "e12" }), undefined)?.label).toBe("Using the browser");
     expect(derivedLabel(call("Write", { file_path: "/tmp/w/report.md", content: "x" }), undefined)?.label).toBe("Writing report.md");
     expect(derivedLabel({ title: "Bash", step: toolStep({ title: "Bash", summary: "python3 scrape.py --all" }) }, undefined)?.label)
-      .toBe("Running scrape.py");
+      .toBe("Running a command");
+    expect(derivedLabel({ title: "Bash", step: toolStep({ title: "Bash", summary: "cd ~/repo && git push origin main" }) }, undefined)?.label)
+      .toBe("Uploading changes");
+    expect(derivedLabel({ title: "Bash", step: toolStep({ title: "Bash", summary: "kill $(cat /tmp/dev.pid)" }) }, undefined)?.label)
+      .toBe("Stopping processes");
+    expect(derivedLabel({ title: "Bash", step: { activity: "command", target: "-" } }, undefined)?.label).toBe("Running a command");
+    expect(derivedLabel({ title: "Bash", step: { activity: "command", target: "" } }, undefined)?.label).toBe("Running a command");
     expect(derivedLabel(call("computer", { action: "screenshot" }), undefined)?.label).toBe("Using the computer");
     expect(derivedLabel(call("mcp__agents__memory_update", { text: "x" }), undefined)?.label).toBe("Checking my notes");
   });

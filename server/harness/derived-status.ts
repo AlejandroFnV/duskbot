@@ -1,5 +1,6 @@
 // The status line's label while the bot sets none of its own: what its tool calls are doing, in a few words of the
 // person's language ("Searching for keyboard reviews", "Reading theverge.com", "Using the computer").
+import { commandKind, commandPhraseKey } from "../../shared/command-phrase.ts";
 import { STATUS_LABEL_MAX, type LiveStep } from "../../shared/turn-progress.ts";
 import { USE_TOOL } from "../drivers/agents-bridge.ts";
 import { redactSecretsInText } from "../redact.ts";
@@ -93,8 +94,6 @@ const BROWSER = /browser|navigate|playwright|open_url|goto|new_tab|tab_new/i;
 const COMPUTER = /computer|screenshot|screen|click|type_text|press_key|keypress|scroll|mouse|keyboard/i;
 const MEMORY = /memory|session_search|session_read|recall|notes?_search|knowledge/i;
 const SEARCH = /search|lookup|look_up|query/i;
-/** Commands that only read files: what they read is the bot's business, not a step worth naming. */
-const READING_COMMAND = /^(?:sed|cat|head|tail|less|rg|grep|ls|find|nl|wc|jq|tree|stat|file)\b/;
 const FILES_SEARCH = /^(?:grep|glob|find|search_files|list_files|ls)$/i;
 const PUBLISH = /publish_page|deploy/i;
 /** An engine looking up its own tools: machinery, never a step. */
@@ -126,10 +125,7 @@ export function derivedLabel(call: DerivedCall, language: string | undefined, la
   if (step?.activity === "write") return withLabel(filled(language, "server.status.writing", "file", step.target, max));
   if (step?.activity === "edit") return withLabel(filled(language, "server.status.editing", "file", step.target, max));
   if (step?.activity === "read") return withLabel(filled(language, "server.status.reading", "target", step.target, max));
-  if (step?.activity === "command") {
-    if (READING_COMMAND.test(step.target)) return { label: serverLine(language, "server.status.lookingThroughFiles") };
-    return withLabel(filled(language, "server.status.running", "target", step.target, max));
-  }
+  if (step?.activity === "command") return { label: serverLine(language, commandPhraseKey(commandKind(step.target, step.detail))) };
   if (COMPUTER.test(name)) return { label: serverLine(language, "server.status.usingComputer") };
   if (MEMORY.test(name)) return { label: serverLine(language, "server.status.checkingNotes") };
   if (SEARCH.test(name)) {

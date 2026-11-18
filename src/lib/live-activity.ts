@@ -2,6 +2,7 @@ import type { Message } from "@/state/store";
 import type { LiveStatus } from "@/state/turn-status";
 import { activeLocale, t } from "./i18n";
 import type { LocaleKey } from "@/locales";
+import { commandKind, commandPhraseKey } from "../../shared/command-phrase";
 import { progressSize, type LiveStep } from "../../shared/turn-progress";
 
 // Keys, not labels: this array is built at import time, and t() reads the active pack when called.
@@ -94,7 +95,7 @@ export function activityStepLabel(tool: ActivityTool): string {
   return toolActivityPhrases(tool).phrases[0];
 }
 
-const STEP_KEYS = { command: "chat.activity.runningNamed", web: "chat.activity.searchingWebFor", fetch: "chat.activity.readingSite" } as const;
+const STEP_KEYS = { command: "server.status.command.other", web: "chat.activity.searchingWebFor", fetch: "chat.activity.readingSite" } as const;
 
 /** A step as the status line reads it: a command, search or page by its words, a file by its name. */
 export function stepStatus(step: LiveStep): LiveStatus {
@@ -150,12 +151,16 @@ function liveStatusPhrases(status: LiveStatus): LiveActivityPhrases | null {
       const file = status.file ?? status.target;
       return file ? { phase: `live:read:${file}`, phrases: [t("chat.activity.readingNamed", { file })] } : phaseOf("chat.activity.readFile");
     }
-    case "command":
+    case "command": {
+      if (!status.target && !status.detail) return phaseOf("chat.activity.runCommand");
+      const kind = commandKind(status.target, status.detail);
+      return { phase: `step:command:${kind}`, phrases: [t(commandPhraseKey(kind))] };
+    }
     case "web":
     case "fetch":
       return status.target
         ? { phase: `step:${status.activity}:${status.target}`, phrases: [t(STEP_KEYS[status.activity], { target: status.target })], ...(status.detail ? { hover: status.detail } : {}) }
-        : phaseOf(status.activity === "command" ? "chat.activity.runCommand" : status.activity === "web" ? "chat.activity.searchWeb" : "chat.activity.readPage");
+        : phaseOf(status.activity === "web" ? "chat.activity.searchWeb" : "chat.activity.readPage");
     case "search":
       return phaseOf("chat.activity.searching");
     default: {

@@ -124,20 +124,20 @@ describe("a long step's quiet part", () => {
 
   it("follows the step with how it is doing, and counts the time since its last output on its own", () => {
     vi.setSystemTime(1_000_000);
-    render({ label: "Working", since: 1_000_000 - 72_000, phrases: ["Running scrape.py"], phase: "step", hover: "python3 scrape.py --pages 40", quiet: { kind: "busy" } });
-    expect(line()).toBe("Working · 1m 12s · Running scrape.py · Busy, no output yet");
+    render({ label: "Working", since: 1_000_000 - 72_000, phrases: ["Running a command"], phase: "step", hover: "python3 scrape.py --pages 40", quiet: { kind: "busy" } });
+    expect(line()).toBe("Working · 1m 12s · Running a command · Busy, no output yet");
     expect(host.querySelector("[data-turn-now]")?.getAttribute("title")).toBe("python3 scrape.py --pages 40");
-    render({ label: "Working", since: 1_000_000 - 72_000, phrases: ["Running scrape.py"], phase: "step", quiet: { kind: "output", at: 1_000_000 - 30_000 } });
+    render({ label: "Working", since: 1_000_000 - 72_000, phrases: ["Running a command"], phase: "step", quiet: { kind: "output", at: 1_000_000 - 30_000 } });
     expect(host.querySelector("[data-turn-quiet]")?.textContent).toBe("Last output just now");
     act(() => void vi.advanceTimersByTime(45_000));
     expect(host.querySelector("[data-turn-quiet]")?.textContent).toBe("Last output 1 min ago");
   });
 
   it("says it in Simple mode too, after the one phrase", () => {
-    render({ simple: true, phrases: ["Running scrape.py"], phase: "step", quiet: { kind: "network" } });
+    render({ simple: true, phrases: ["Running a command"], phase: "step", quiet: { kind: "network" } });
     expect(line() ?? "", "the mark comes alone first, as grok's does").toBe("");
     act(() => void vi.advanceTimersByTime(STATUS_QUIET_MS.max));
-    expect(line()).toBe("Running scrape.py · Waiting on the network");
+    expect(line()).toBe("Running a command · Waiting on the network");
   });
 });
 
@@ -145,7 +145,7 @@ describe("the Now card", () => {
   const toggle = () => host.querySelector<HTMLButtonElement>("button[aria-expanded]");
   const card = () => host.querySelector("[role=region]");
   const open = (extra: Record<string, unknown> = {}) =>
-    render({ label: "Working", since: Date.now(), phrases: ["Running scrape.py"], phase: "step", card: createElement("p", null, "steps"), cardLabel: "What Ledger is doing", ...extra });
+    render({ label: "Working", since: Date.now(), phrases: ["Running a command"], phase: "step", card: createElement("p", null, "steps"), cardLabel: "What Ledger is doing", ...extra });
 
   it("is one calm line by default; a click unfolds the card under it and another folds it", () => {
     open();

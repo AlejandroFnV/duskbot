@@ -27,7 +27,8 @@ describe("Simple mode's working line", () => {
   });
 
   it("never says the command, search or address itself, as grok's line does not", () => {
-    expect(friendlyNowPhrases({ activity: "command", itemId: "x", target: "scrape.py" }).phrases).toEqual(["Running a few commands"]);
+    expect(friendlyNowPhrases({ activity: "command", itemId: "x", target: "scrape.py" }).phrases).toEqual(["Running a command"]);
+    expect(friendlyNowPhrases({ activity: "command", itemId: "x", target: "git push" }).phrases).toEqual(["Uploading changes"]);
     expect(friendlyNowPhrases({ activity: "web", itemId: "s", target: "Acme construction leads" }).phrases).toEqual(["Digging around"]);
     expect(friendlyNowPhrases(null, running("WebFetch", { step: { activity: "fetch", target: "linkedin.com" } })).phrases).toEqual(["Digging around"]);
     expect(friendlyNowPhrases(null, running("Write", { step: { activity: "write", target: "report.md" } })).phrases).toEqual(["Writing some code"]);

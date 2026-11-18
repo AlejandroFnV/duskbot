@@ -171,6 +171,18 @@ describe("mobile link", () => {
     expect(sent).toHaveLength(1);
   });
 
+  it("titles a push in the language of the person the phone is signed in as", async () => {
+    const seen: string[] = [];
+    const mobile = link({ titleFor: (notification, session) => { seen.push(session.id); return notification.titleLine ? "Basil terminó" : notification.title; } });
+    const answer = (await call(mobile, owner, "POST", "/api/mobile/pairing")).body as MobilePairingResponse;
+    const phone = (await redeem(mobile, { secret: answer.payload.grant.secret, attemptId: "attempt-0005", device: { name: "p", platform: "ios" } })).body as MobileRedeemResponse;
+    const auth: RequestAuth = { kind: "session", session: sessions.authenticate(phone.token)!, via: "bearer", scopes: phone.scopes };
+    await call(mobile, auth, "PUT", "/api/mobile/push", { service: "apns", token: "abcdef0123456789" });
+    await mobile.notify({ id: "n1", at: 1, read: false, kind: "done", botId: "b1", botName: "Basil", threadId: "t1", title: "Basil finished", titleLine: { key: "server.notify.done", params: { who: "Basil" } }, body: "Found 3 flats." });
+    expect(sent.map((one) => one.message.title)).toEqual(["Basil terminó"]);
+    expect(seen).toEqual([auth.session.id]);
+  });
+
   describe("away phones", () => {
     afterEach(() => { vi.useRealTimers(); });
     async function pushPhone(mobile: ReturnType<typeof link>, attempt: string) {

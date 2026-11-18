@@ -6,6 +6,7 @@ import { BotAvatar } from "@/components/Avatar";
 import { GroupAvatar } from "@/components/GroupAvatar";
 import { t } from "@/lib/i18n";
 import { RoundButton } from "./RoundButton";
+import { botRole, NameRole } from "./bot-role";
 import { ConnectionPill, useLiveConnection } from "./connection/ConnectionProblem";
 
 /** The shared chat, with floating glass nav in place of its header row: back, the bot's pill (its profile) centred,
@@ -47,7 +48,7 @@ export function ChatScreen({ bot, group, members, onBack, onProfile, onComputer 
                 ? <GroupAvatar members={members} size={30} />
                 : bot && <BotAvatar bot={bot} size={30} state="idle" animated={false} />}
             </span>
-            <span data-glass-name="" className="min-w-0 truncate text-[15px] font-semibold">{name}</span>
+            <span data-glass-name="" className="flex min-w-0"><NameRole name={name} role={!group && bot ? botRole(bot) : ""} className="text-[15px] font-semibold" /></span>
           </button>
           <ConnectionPill notice={link.notice === "reconnecting" ? null : link.notice} trying={link.trying} onRetry={link.retry} testId="mobile-chat-cloud-status" className="absolute top-[calc(100%+8px)] h-8 px-3" />
         </div>

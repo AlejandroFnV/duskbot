@@ -298,6 +298,7 @@ describe("a reply that tags the person", () => {
         threadId: room.threadId,
         groupId: room.id,
         title: "Tagger in Spec Review mentioned you",
+        titleLine: { key: "server.notify.mention", params: { who: { key: "server.notify.inRoom", params: { bot: "Tagger", room: "Spec Review" } } } },
         // the "@you" tag lands as plain words, and still reaches the person
         body: "Three open questions are blocking Section 2 & 3.",
         id: expect.any(String),

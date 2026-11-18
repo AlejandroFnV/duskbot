@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 
-import { buildNotification, summarize } from "./notify.ts";
+import { buildNoticeNotification, buildNotification, notificationTitle, summarize } from "./notify.ts";
 import { conversationLanguage, setConversationLanguage } from "./server-lines.ts";
 import "./server-line-packs.ts";
 
@@ -50,6 +50,7 @@ describe("buildNotification", () => {
       threadId: "room-thread",
       groupId: "group-1",
       title: "Scout in Launch mentioned you",
+      titleLine: { key: "server.notify.mention", params: { who: { key: "server.notify.inRoom", params: { bot: "Scout", room: "Launch" } } } },
       body: "@you three open questions are blocking Section 2",
     });
     expect(buildNotification("mention", { ...bot, notifications: undefined }, "room-thread", "@you", { group })).not.toBeNull();
@@ -86,7 +87,8 @@ describe("buildNotification", () => {
   });
   it("titles a finished wait and keeps its line as the body", () => {
     expect(buildNotification("wait", { id: "b", name: "Pepper" }, "t", "the build: done. ci passed.")).toEqual({
-      kind: "wait", botId: "b", botName: "Pepper", threadId: "t", title: "Pepper's wait is over", body: "the build: done. ci passed.",
+      kind: "wait", botId: "b", botName: "Pepper", threadId: "t", title: "Pepper's wait is over",
+      titleLine: { key: "server.notify.wait", params: { who: "Pepper" } }, body: "the build: done. ci passed.",
     });
   });
 });
@@ -136,5 +138,29 @@ describe("a notification's title", () => {
     expect(buildNotification("sign-in", bot, "beaver-main", "")?.title).toBe("Biber braucht deine Anmeldung bei einer Website");
     expect(buildNotification("done", bot, "beaver-main", "Done.")?.title).toBe("Biber ist fertig");
     expect(buildNotification("routine-failed", bot, "other", "x")?.title).toBe("Biber's routine failed");
+  });
+
+  it("carries its line, so one made before the app said its language still reads in Spanish", () => {
+    const basil = { id: "basil", name: "Basil", threadId: "basil-main" };
+    const done = buildNotification("done", basil, "basil-main", "Found 3 flats under budget.");
+    expect(done?.title).toBe("Basil finished");
+    expect(done?.titleLine).toEqual({ key: "server.notify.done", params: { who: "Basil" } });
+    expect(notificationTitle(done!, "es")).toBe("Basil terminó");
+
+    const inRoom = buildNotification("question", basil, "room-thread", "Send it?", { group: { id: "launch", name: "Launch" } });
+    expect(inRoom?.titleLine).toEqual({ key: "server.notify.question", params: { who: { key: "server.notify.inRoom", params: { bot: "Basil", room: "Launch" } } } });
+    expect(notificationTitle(inRoom!, "es")).toBe("Basil en Launch tiene una pregunta");
+    expect(notificationTitle(inRoom!, undefined)).toBe("Basil in Launch has a question");
+  });
+
+  it("is made in Spanish when the conversation's person reads Spanish", () => {
+    setConversationLanguage(() => "es");
+    expect(buildNotification("done", { id: "basil", name: "Basil", threadId: "t" }, "t", "Done.")?.title).toBe("Basil terminó");
+  });
+
+  it("stays as written when it is the bot's own name", () => {
+    const notice = buildNoticeNotification({ id: "basil", name: "Basil" }, "t", "Turned off the browser.");
+    expect(notice.titleLine).toBeUndefined();
+    expect(notificationTitle(notice, "es")).toBe("Basil");
   });
 });

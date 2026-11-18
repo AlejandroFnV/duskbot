@@ -2320,9 +2320,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -3593,8 +3590,7 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "server.outside.preferenceTitle": "7f55fcc3bf70e8b880f68ec0cf802b69727bc3360bfb3aa68f4efc937533386a",
-      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273"
     },
     "es": {
       "settings.sidebarRoles.title": "8bf74476d372a4efadb9fbcb87602ad535fcc5af186b66d47b395ff76c32f473",
@@ -8199,9 +8195,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -9441,9 +9434,6 @@
       "server.outside.save": "1509f561f2416598629b886ad7d3c05a7e221e4e0675c84bbff4ee6d9e03913d",
       "server.outside.preferenceTitle": "7f55fcc3bf70e8b880f68ec0cf802b69727bc3360bfb3aa68f4efc937533386a",
       "server.outside.discard": "eb1a70e39274bb762b5d7c1adb5debeea2b05e12af28207f21a375b596853273",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838",
-      "chat.event.handoffsWaiting.one": "c73c2c6fd46f81d27a99c9a06a4852fbb74113977f5beba2bbb4b8b7a541cf4f",
-      "chat.event.handoffsWaiting.many": "3aa0e108ce066c33acff6e26adce14284aefecd66a46a422c773894d9b812205",
       "server.notify.connect": "69e4a1b2d9ea87bebb2af9b61a9206e56d8cb01b067d7de26015840bdc27a6a7",
       "server.notify.humanCheck": "5d0f5ae2b2e8e891e93e32ecf81e81e94c37927afa1c68891c4b34d823aa591f",
       "server.notify.humanCheckBody": "e3c345af6c4b84ae3172d7a75206d10c96668f52510e362c9539f86d1e929fa3",
@@ -11718,9 +11708,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.runs.handoffApart": "559250758aa3a0348544255885797836815f2677183919db2461cf8d6c901c03",
       "server.runs.handoffNotListed": "e92fde8ce1aaea2eefca6481e9171265c299c9231bf65fed72bbfbecea635033",
@@ -12966,8 +12953,7 @@
       "models.place.cloud": "256bce3dc914a749b55369f9e9adad9be2e7cac464093ae03a95db5bfe39ae9c",
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
-      "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da"
     },
     "hi": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -15232,9 +15218,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.runs.handoffApart": "559250758aa3a0348544255885797836815f2677183919db2461cf8d6c901c03",
       "server.runs.handoffNotListed": "e92fde8ce1aaea2eefca6481e9171265c299c9231bf65fed72bbfbecea635033",
@@ -16480,8 +16463,7 @@
       "models.place.cloud": "256bce3dc914a749b55369f9e9adad9be2e7cac464093ae03a95db5bfe39ae9c",
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
-      "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da"
     },
     "it": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -21474,9 +21456,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -22711,8 +22690,7 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
     },
     "ja": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -27894,9 +27872,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -29131,8 +29106,7 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
     },
     "ko": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -34697,9 +34671,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -35934,8 +35905,7 @@
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "composer.dictation.permission": "1be9cbb919211c6d42d40471f2b53fbb47c25cb7d10d36745ab74e973a808f94",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "composer.dictation.permission": "1be9cbb919211c6d42d40471f2b53fbb47c25cb7d10d36745ab74e973a808f94"
     },
     "pl": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -41090,9 +41060,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -42328,8 +42295,7 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
     },
     "pt-br": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -47358,9 +47324,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -48595,8 +48558,7 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
     },
     "ru": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -53759,9 +53721,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -54996,8 +54955,7 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
     },
     "tr": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -59125,9 +59083,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -60366,8 +60321,7 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
     },
     "uk": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -62934,9 +62888,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.runs.handoffApart": "559250758aa3a0348544255885797836815f2677183919db2461cf8d6c901c03",
@@ -64184,8 +64135,7 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
     },
     "vi": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -68313,9 +68263,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -69554,8 +69501,7 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
     },
     "zh": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -75270,9 +75216,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -76525,8 +76468,7 @@
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
       "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
       "composer.dictation.permission": "1be9cbb919211c6d42d40471f2b53fbb47c25cb7d10d36745ab74e973a808f94",
-      "keys.row.engineMissing": "5c0ac920b4fd7b754d696536bd006bc700846b41ade0975a99a6c761b0b997b0",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "keys.row.engineMissing": "5c0ac920b4fd7b754d696536bd006bc700846b41ade0975a99a6c761b0b997b0"
     },
     "zh-tw": {
       "settings.talkingStyle.title": "b1f52e3d447b7f2c73e754991ee9eeb710a8a24af163d861ebdf33e22b87fe50",
@@ -80225,9 +80167,6 @@
       "server.memory.wait": "5c1c9d8aa6e687529c1a20a9531fcd9b0f827aea437484a04fed712d3f6be7c7",
       "server.memory.still": "625014d9b0b289c26cf7144a9bca85151ef9bfccf4ae87f2c7c2cb43b2cac98c",
       "server.memory.starter": "edbec2242e449822dc3c7bd220bd3eadcd6b355de511714c872f945b848ab24a",
-      "server.teammates.queued.thread": "7d4802edac8e162df6544bcd3a2a0f543c7dd881cf2f272941c3473142da0d81",
-      "server.teammates.queued.slots": "7e0e179a02f4c91f4de63459274edc1eb66235b575ca250bab6e634f20cc652e",
-      "server.teammates.queued.room": "db3ebc646dcf65d4d79ef6639d8c7c65eb46a9bfefe3b70b0258ed19c7401d8d",
       "server.queued.capacity": "5067f08fc0a464b92135c6e3137b08a93335b7c4d704e873b701ae162167ca91",
       "server.queued.capacityStarter": "b04ed386a880964a1438f12746471df1a3f2dd4894ca97dcb3fbd22b1834da88",
       "server.queued.groupTurn": "335e0a92b0e4ce091c947241c44146fe84734464ecee92bbf32b1d3fdf206e2e",
@@ -81466,8 +81405,7 @@
       "models.place.server": "1b188194b80e61b67a3451a88a51a768929f17a7e052e71b8b08cf152bf47acc",
       "slack.notReady": "d020042f5eb3f6e14502e1e480c94118968df257aa4228848c19efe3ac75b8ae",
       "server.freeModel.tryingNext": "581a2d4a1d20a6165e8f0c08fe1f09ab0292d51bcc1b309c281ff8ab9b09d0da",
-      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06",
-      "server.teammates.queued.grouped": "4cae9a6c3437fbe96ea74af2547c27b780d5c391099a4a0bf7b889a3311c5838"
+      "engineSetup.serverInstallDesc": "78df2477837544b92cda9527d5af76e76602a82ecc549594a3d3faa9a986de06"
     }
   }
 }

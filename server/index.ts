@@ -81,7 +81,7 @@ import { groupTurnCwd } from "./room-cwd.ts";
 import { RoomTurnDeadline, RoomTurnStallRegistry, effectiveRoomTurnTimeoutMinutes, parseConversationTurnTimeout, roomTurnTimeoutMessage } from "./room-turn-timeout.ts";
 import { roomTurnEnd, type RoomClaimEnd } from "./room-turn-end.ts";
 import { applyHoldDirective, classifyHoldDirective, heldMemberLine, rememberHeldMessage, stopWordPlacement } from "./room-holds.ts";
-import { createPersonStop } from "./host/person-stop.ts"; import { createTurnOrder } from "./host/turn-order.ts"; import { createQueuedNotes, createWaitWords } from "./host/wait-words.ts"; import { settleParkedFiles, type ParkedTurnAttachment } from "./host/turn-attachments.ts"; import type { DirectSendInput, DirectSendReceipt } from "./direct-send.ts";
+import { createPersonStop } from "./host/person-stop.ts"; import { createTurnOrder } from "./host/turn-order.ts"; import { createWaitWords } from "./host/wait-words.ts"; import { settleParkedFiles, type ParkedTurnAttachment } from "./host/turn-attachments.ts"; import type { DirectSendInput, DirectSendReceipt } from "./direct-send.ts";
 import { finishedWithoutSummaryLine, isPassText, ROOM_SUMMARY_REASK, roomTurnNarrationIds, roomTurnReply } from "./room-reply.ts"; import { answeredAboveNote, cleanBotVoice, mentionCueNote, roomTalkRules, roomTurnVoiceNote } from "./group-voice.ts"; import { MentionChain } from "./room-mention-chain.ts"; import { teammatesNote, workInProgressNote, type InHand } from "./room-team-context.ts"; import { createRoomEarlier, ROOM_EARLIER_LABEL } from "./host/room-earlier.ts"; import { replyBubbles } from "./reply-bubbles.ts";
 import { pickComputer } from "./computer-selection.ts";
 import { keyHint, keyStatus, nestedKeyStatus, withoutKeyHints } from "./key-hint.ts";
@@ -3973,8 +3973,7 @@ function coordinationSystemInstructions(): string {
 const threadReadableFrom = (threadId: string) => (other: string): boolean => !proactive.fence.confines(other) && !botApiThread(other) && (CLOUD_TEAM ? teamHost.readableFrom(threadId)(other) : !CLOUD_HOME || cloudOwnerOnlyThread(other));
 const queuedDeps = { botName: (id: string) => store.bot(id)?.name, threadBusy, groupTurn: (id: string) => Boolean(activeGroupTurnForBot(id)), behindPerson: queuedBehindPerson,
   waitsForComputer: (node: HandoffView) => { const seat = parkedSeats.get(node.id); return Boolean(seat && !turnResources.free(seat)); },
-  slots: (id: string) => ({ busy: store.tasks(id).filter((task) => threadBusy(id, task.threadId)).map(({ threadId, title }) => ({ threadId, title })), limit: maxConcurrentChildThreads(cfg, botThreadsHost(cloudPlanTier.starter())) }) }; const queuedStatus = createQueuedReason(queuedDeps), queuedNotes = createQueuedNotes({ ...queuedDeps, now: Date.now, language: (threadId) => threadLanguage(threadId), parent: (node) => node.parentId ? coordinator.node(node.parentId) : undefined, live: (id) => coordinator.node(id)?.status === "queued", post: (parent, node, line) => { const bot = store.bot(node.botId), title = store.taskByThread(node.botId, node.threadId)?.title; return store.appendMessage(parent.threadId, { role: "bot", kind: "activity", ...(bot ? { from: { botId: bot.id, name: bot.name, color: bot.color } } : {}), tool: { name: line, ok: true }, ...(title ? { threadRef: { botId: node.botId, threadId: node.threadId, title } } : {}), queuedHandoffs: { botId: node.botId, count: 1 } }).id; },
-    regroup: (parent, messageId, node, line, count) => { store.patchMessage(parent.threadId, messageId, { tool: { name: line, ok: true }, queuedHandoffs: { botId: node.botId, count } }); } });
+  slots: (id: string) => ({ busy: store.tasks(id).filter((task) => threadBusy(id, task.threadId)).map(({ threadId, title }) => ({ threadId, title })), limit: maxConcurrentChildThreads(cfg, botThreadsHost(cloudPlanTier.starter())) }) }; const queuedStatus = createQueuedReason(queuedDeps);
 const teammatePrompts = createTeammatePrompts({ store, outstandingDirect: (threadId) => coordinator.outstandingDirect(threadId), openPersonCard, queuedStatus, isUnattended, fullAccess: fullAccessForSource, startedOutside, guestDriven: cloudGuestDriven, confined: (threadId) => proactive.fence.confines(threadId), readableFrom: threadReadableFrom, waitingForPerson: (chief, teammates, readable) => questionRouting.waitingForPerson(chief, teammates, readable) });
 
 function queuedBehindPerson(node: HandoffView): { threadId: string; kind: PersonWaitKind; title: string } | undefined {
@@ -4124,7 +4123,7 @@ const handoffTicks = createHandoffTicks(), coordinator: Coordinator = createCoor
       if (seat && !turnResources.free(seat)) return true;
       if (n.groupId) return Boolean(store.bot(n.botId)?.busy || groupThreadIsWorking(n.groupId, n.threadId));
       if (canAdmitDirectTurn(n.botId, n.threadId)) return false;
-      noteQueuedBehindPerson(n); queuedNotes(n);
+      noteQueuedBehindPerson(n);
       return true;
     },
     changed: (groupIds, directThreadIds) => {
